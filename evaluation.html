@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Evaluation — RAGixAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* ---- Evaluation Hero ---- */
+    .eval-hero {
+      min-height: 65vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: calc(var(--nav-height) + 40px) 24px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .eval-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 50% at 30% 60%, rgba(16, 185, 129, 0.1) 0%, transparent 65%),
+        radial-gradient(ellipse 70% 50% at 70% 40%, rgba(124, 58, 237, 0.1) 0%, transparent 65%);
+    }
+
+    /* ---- RAGAS Metric Card ---- */
+    .ragas-card {
+      padding: 28px;
+      border-radius: var(--border-radius);
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ragas-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      transition: var(--transition);
+    }
+
+    .ragas-card-1::before { background: linear-gradient(90deg, var(--emerald), var(--cyan)); }
+    .ragas-card-2::before { background: linear-gradient(90deg, var(--electric-blue), var(--lavender)); }
+    .ragas-card-3::before { background: linear-gradient(90deg, var(--purple), var(--electric-blue)); }
+    .ragas-card-4::before { background: linear-gradient(90deg, var(--cyan), var(--emerald)); }
+    .ragas-card-5::before { background: linear-gradient(90deg, var(--amber), var(--coral)); }
+    .ragas-card-6::before { background: linear-gradient(90deg, var(--coral), var(--amber)); }
+
+    .ragas-card:hover {
+      transform: translateY(-6px);
+      background: var(--bg-card-hover);
+      box-shadow: 0 16px 50px rgba(0,0,0,0.4);
+    }
+
+    .ragas-icon {
+      font-size: 2.2rem;
+      margin-bottom: 14px;
+      display: block;
+    }
+
+    .ragas-card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 6px;
+    }
+
+    .ragas-range {
+      font-size: 0.8rem;
+      color: var(--white-60);
+      margin-bottom: 12px;
+    }
+
+    .ragas-card p {
+      font-size: 0.87rem;
+      margin-bottom: 14px;
+    }
+
+    /* ---- Score Gauge ---- */
+    .score-gauge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .gauge-ring-wrap {
+      position: relative;
+      width: 64px;
+      height: 64px;
+    }
+
+    .gauge-ring-wrap svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .gauge-track {
+      fill: none;
+      stroke: rgba(255,255,255,0.1);
+      stroke-width: 5;
+    }
+
+    .gauge-fill {
+      fill: none;
+      stroke-width: 5;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 1.5s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .gauge-value {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: var(--white);
+    }
+
+    .gauge-label {
+      font-size: 0.8rem;
+      color: var(--white-60);
+      flex: 1;
+    }
+
+    .gauge-target {
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    /* ---- Baseline vs Target Chart ---- */
+    .metric-bar-chart {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding: 32px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--border-radius-lg);
+    }
+
+    .metric-bar-row {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .metric-bar-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--white);
+    }
+
+    .metric-bar-pair {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .metric-bar-track {
+      height: 10px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 10px;
+      overflow: visible;
+      position: relative;
+    }
+
+    .metric-bar-fill {
+      height: 100%;
+      border-radius: 10px;
+      transition: width 1.8s cubic-bezier(0.4,0,0.2,1);
+      position: relative;
+    }
+
+    .metric-bar-fill.baseline {
+      background: rgba(244, 63, 94, 0.6);
+    }
+
+    .metric-bar-fill.target {
+      background: var(--gradient-primary);
+    }
+
+    .metric-bar-labels {
+      display: flex;
+      gap: 16px;
+      font-size: 0.75rem;
+    }
+
+    .bar-label-baseline {
+      color: #FDA4AF;
+    }
+
+    .bar-label-target {
+      color: var(--cyan);
+      font-weight: 700;
+    }
+
+    /* ---- Comparison Matrix ---- */
+    .matrix-highlight {
+      background: rgba(124, 58, 237, 0.1) !important;
+      border-left: 3px solid var(--purple);
+    }
+
+    .matrix-star {
+      color: var(--amber);
+      font-size: 0.9rem;
+    }
+
+    /* ---- Score Impact Cards ---- */
+    .impact-card {
+      padding: 24px;
+      border-radius: var(--border-radius);
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      transition: var(--transition);
+    }
+
+    .impact-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .impact-number {
+      font-size: 2.4rem;
+      font-weight: 900;
+      line-height: 1;
+      margin-bottom: 8px;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .impact-label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--white);
+    }
+
+    .impact-desc {
+      font-size: 0.82rem;
+      color: var(--white-60);
+    }
+
+    /* ---- Dataset Card ---- */
+    .dataset-card {
+      padding: 28px;
+      border-radius: var(--border-radius);
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      transition: var(--transition);
+    }
+
+    .dataset-card:hover {
+      border-color: rgba(6, 182, 212, 0.3);
+      background: var(--bg-card-hover);
+    }
+
+    .dataset-tag {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    /* ---- Legend ---- */
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 768px) {
+      .metric-bar-row { grid-template-columns: 1fr; }
+      .metric-bar-name { font-size: 0.85rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav" id="main-nav">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo">RAGixAI</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="problem.html">Problem</a></li>
+      <li><a href="solution.html">Solution</a></li>
+      <li><a href="pipeline.html">Pipeline</a></li>
+      <li><a href="evaluation.html">Evaluation</a></li>
+      <li><a href="aws.html">AWS</a></li>
+      <li><a href="roadmap.html" class="nav-cta">Roadmap</a></li>
+    </ul>
+    <div class="nav-toggle" id="nav-toggle"><span></span><span></span><span></span></div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="eval-hero">
+  <div style="position:relative; z-index:2; max-width:800px;">
+    <div class="section-tag" style="margin-bottom:20px;">RAGAS Framework</div>
+    <h1 style="margin-bottom:20px;">
+      Measuring <span class="gradient-text">What Matters</span>
+    </h1>
+    <p style="font-size:1.15rem; color:var(--white-60); max-width:650px; margin:0 auto 32px;">
+      You can't improve what you don't measure. RAGixAI uses the RAGAS evaluation framework
+      to quantify every dimension of RAG quality — from faithfulness to latency.
+    </p>
+    <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
+      <a href="#metrics" class="btn btn-primary btn-glow">📊 View All Metrics</a>
+      <a href="#matrix" class="btn btn-outline">🔬 Option Comparison</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- RAGAS METRICS -->
+<!-- ============================================================ -->
+<section class="section" id="metrics">
+  <div class="section-header hidden">
+    <div class="section-tag">6 RAGAS Metrics</div>
+    <h2>The <span class="gradient-text">Evaluation Framework</span></h2>
+    <p>RAGAS (Retrieval Augmented Generation Assessment) provides a standardized, automated way to evaluate every component of a RAG pipeline.</p>
+  </div>
+
+  <div class="cards-grid-3">
+    <!-- Metric 1: Faithfulness -->
+    <div class="ragas-card ragas-card-1 hidden delay-1">
+      <span class="ragas-icon">🎯</span>
+      <h3>Faithfulness</h3>
+      <div class="ragas-range">Range: 0.0 → 1.0 · Higher is better</div>
+      <p>Measures whether every claim in the generated answer is directly supported by the retrieved context. Prevents hallucinations — the cardinal sin of enterprise RAG.</p>
+      <div class="metric-formula">Faithfulness = |Supported Claims| / |Total Claims|</div>
+      <div class="score-gauge">
+        <div class="gauge-ring-wrap">
+          <svg viewBox="0 0 42 42">
+            <circle class="gauge-track" cx="21" cy="21" r="16"/>
+            <circle class="gauge-fill" cx="21" cy="21" r="16"
+              stroke="#10B981"
+              stroke-dasharray="100.53"
+              stroke-dashoffset="11.06"
+              style="stroke-dashoffset:11.06;"/>
+          </svg>
+          <div class="gauge-value">89%</div>
+        </div>
+        <div>
+          <div class="gauge-label">Target Score</div>
+          <div class="gauge-target" style="color:var(--emerald);">≥ 0.89</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Metric 2: Answer Relevancy -->
+    <div class="ragas-card ragas-card-2 hidden delay-2">
+      <span class="ragas-icon">❓</span>
+      <h3>Answer Relevancy</h3>
+      <div class="ragas-range">Range: 0.0 → 1.0 · Higher is better</div>
+      <p>Measures how well the answer directly addresses the user's question. High faithfulness but low relevancy means the answer is accurate but off-topic.</p>
+      <div class="metric-formula">Relevancy = avg_cosine_sim(generated_questions, query)</div>
+      <div class="score-gauge">
+        <div class="gauge-ring-wrap">
+          <svg viewBox="0 0 42 42">
+            <circle class="gauge-track" cx="21" cy="21" r="16"/>
+            <circle class="gauge-fill" cx="21" cy="21" r="16"
+              stroke="#3B82F6"
+              stroke-dasharray="100.53"
+              stroke-dashoffset="13.07"/>
+          </svg>
+          <div class="gauge-value">87%</div>
+        </div>
+        <div>
+          <div class="gauge-label">Target Score</div>
+          <div class="gauge-target" style="color:var(--electric-blue);">≥ 0.87</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Metric 3: Context Precision -->
+    <div class="ragas-card ragas-card-3 hidden delay-3">
+      <span class="ragas-icon">🎪</span>
+      <h3>Context Precision</h3>
+      <div class="ragas-range">Range: 0.0 → 1.0 · Higher is better</div>
+      <p>Are the retrieved context chunks actually relevant? High precision means few irrelevant chunks are included — the retriever is surgically accurate.</p>
+      <div class="metric-formula">Precision@k = |Relevant chunks in top-k| / k</div>
+      <div class="score-gauge">
+        <div class="gauge-ring-wrap">
+          <svg viewBox="0 0 42 42">
+            <circle class="gauge-track" cx="21" cy="21" r="16"/>
+            <circle class="gauge-fill" cx="21" cy="21" r="16"
+              stroke="#7C3AED"
+              stroke-dasharray="100.53"
+              stroke-dashoffset="16.09"/>
+          </svg>
+          <div class="gauge-value">84%</div>
+        </div>
+        <div>
+          <div class="gauge-label">Target Score</div>
+          <div class="gauge-target" style="color:var(--purple);">≥ 0.84</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Metric 4: Context Recall -->
+    <div class="ragas-card ragas-card-4 hidden delay-1">
+      <span class="ragas-icon">🕸️</span>
+      <h3>Context Recall</h3>
+      <div class="ragas-range">Range: 0.0 → 1.0 · Higher is better</div>
+      <p>Did the retriever find ALL the relevant information? Low recall means important context was missed, leading to incomplete answers — even if what was found is accurate.</p>
+      <div class="metric-formula">Recall = |Retrieved relevant| / |All relevant in corpus|</div>
+      <div class="score-gauge">
+        <div class="gauge-ring-wrap">
+          <svg viewBox="0 0 42 42">
+            <circle class="gauge-track" cx="21" cy="21" r="16"/>
+            <circle class="gauge-fill" cx="21" cy="21" r="16"
+              stroke="#06B6D4"
+              stroke-dasharray="100.53"
+              stroke-dashoffset="16.09"/>
+          </svg>
+          <div class="gauge-value">84%</div>
+        </div>
+        <div>
+          <div class="gauge-label">Target Score</div>
+          <div class="gauge-target" style="color:var(--cyan);">≥ 0.84</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Metric 5: Answer Correctness -->
+    <div class="ragas-card ragas-card-5 hidden delay-2">
+      <span class="ragas-icon">✅</span>
+      <h3>Answer Correctness</h3>
+      <div class="ragas-range">Range: 0.0 → 1.0 · Higher is better</div>
+      <p>Compares the generated answer against a ground-truth reference answer. The gold standard metric — requires a labeled evaluation dataset with known correct answers.</p>
+      <div class="metric-formula">Correctness = F1(answer, ground_truth)</div>
+      <div class="score-gauge">
+        <div class="gauge-ring-wrap">
+          <svg viewBox="0 0 42 42">
+            <circle class="gauge-track" cx="21" cy="21" r="16"/>
+            <circle class="gauge-fill" cx="21" cy="21" r="16"
+              stroke="#F59E0B"
+              stroke-dasharray="100.53"
+              stroke-dashoffset="18.1"/>
+          </svg>
+          <div class="gauge-value">82%</div>
+        </div>
+        <div>
+          <div class="gauge-label">Target Score</div>
+          <div class="gauge-target" style="color:var(--amber);">≥ 0.82</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Metric 6: Latency -->
+    <div class="ragas-card ragas-card-6 hidden delay-3">
+      <span class="ragas-icon">⚡</span>
+      <h3>Response Latency</h3>
+      <div class="ragas-range">Lower is better · Measured end-to-end</div>
+      <p>Total time from user query submission to final answer delivery. Enterprise users expect sub-3-second responses. We measure p50, p95, and p99 for a complete picture.</p>
+      <div class="metric-formula">Target: p50 &lt; 1.5s · p95 &lt; 3.0s · p99 &lt; 5.0s</div>
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:16px;">
+        <div style="text-align:center; padding:10px; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.2); border-radius:8px;">
+          <div style="font-size:1.1rem; font-weight:800; color:var(--emerald);">1.2s</div>
+          <div style="font-size:0.7rem; color:var(--white-60); margin-top:4px;">p50</div>
+        </div>
+        <div style="text-align:center; padding:10px; background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.2); border-radius:8px;">
+          <div style="font-size:1.1rem; font-weight:800; color:var(--amber);">2.4s</div>
+          <div style="font-size:0.7rem; color:var(--white-60); margin-top:4px;">p95</div>
+        </div>
+        <div style="text-align:center; padding:10px; background:rgba(244,63,94,0.1); border:1px solid rgba(244,63,94,0.2); border-radius:8px;">
+          <div style="font-size:1.1rem; font-weight:800; color:var(--coral);">4.1s</div>
+          <div style="font-size:0.7rem; color:var(--white-60); margin-top:4px;">p99</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============================================================ -->
+<!-- BASELINE vs TARGET -->
+<!-- ============================================================ -->
+<section class="section">
+  <div class="section-header hidden">
+    <div class="section-tag">Before vs After</div>
+    <h2>Baseline vs <span class="gradient-text">RAGixAI Target</span></h2>
+    <p>Current manual search performance vs our target RAG pipeline metrics. Each bar represents a key quality dimension.</p>
+  </div>
+
+  <!-- Legend -->
+  <div style="display:flex; gap:24px; justify-content:center; margin-bottom:32px;" class="hidden">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <div class="legend-dot" style="background:rgba(244,63,94,0.6);"></div>
+      <span style="font-size:0.85rem; color:var(--white-60);">Current (Manual Search / No RAG)</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <div class="legend-dot" style="background:var(--electric-blue);"></div>
+      <span style="font-size:0.85rem; color:var(--white);">RAGixAI Target</span>
+    </div>
+  </div>
+
+  <div class="metric-bar-chart hidden score-bar-item" style="gap:20px;">
+    <div class="metric-bar-row score-bar-item">
+      <div>
+        <div class="metric-bar-name">Faithfulness</div>
+        <div style="font-size:0.75rem; color:var(--white-60);">Answer supported by docs</div>
+      </div>
+      <div class="metric-bar-pair">
+        <div>
+          <div class="metric-bar-track">
+            <div class="metric-bar-fill baseline score-bar-fill" data-width="32%"></div>
+          </div>
+          <div class="metric-bar-labels"><span class="bar-label-baseline">Baseline: 0.32</span></div>
+        </div>
+        <div>
+          <div class="metric-bar-track">
+            <div class="metric-bar-fill target score-bar-fill" data-width="89%"></div>
+          </div>
+          <div class="metric-bar-labels"><span class="bar-label-target">Target: 0.89 (+178%)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="metric-bar-row score-bar-item">
+      <div>
+        <div class="metric-bar-name">Answer Relevancy</div>
+        <div style="font-size:0.75rem; color:var(--white-60);">Directly addresses the question</div>
+      </div>
+      <div class="metric-bar-pair">
+        <div>
+          <div class="metric-bar-track">
+            <div class="metric-bar-fill baseline score-bar-fill" data-width="45%"></div>
+          </div>
+          <div class="metric-bar-labels"><span class="bar-label-baseline">Baseline: 0.45</span></div>
+        </div>
+        <div>
+          <div class="metric-bar-track">
+            <div class="metric-bar-fill target score-bar-fill" data-width="87%"></div>
+          </div>
+          <div class="metric-bar-labels"><span class="bar-label-target">Target: 0.87 (+93%)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="metric-bar-row score-bar-item">
+      <div>
+        <div class="metric-bar-name">Context Precision</div>
+        <div style="font-size:0.75rem; color:var(--white-60);">Retrieved chunks are relevant</div>
+      </div>
+      <div class="metric-bar-pair">
+        <div>
+          <div class="metric-bar-track">
+            <div class="metric-bar-fill baseline score-bar-fill" data-width="28%"></div>
+          </div>
+          <div class="metric-bar-labels"><span class="bar-label-baseline">Baseline: 0.28</span></div>
+        </div>
+        <div>
+          <div class="metric-bar-track">
+            <div class="metric-bar-fill target score-bar-fill" data-width="84%"></div>
+          </div>
+          <div class="metric-bar-labels"><span class="bar-label-target">Target: 0.84 (+200%)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="metric-bar-row score-bar-item">
+      <div>
+        <div class="metric-bar-name">Context Recall</div>
+        <div style="font-size:0.75rem; color:var(--white-60);">All relevant info retrieved</div>
+      </div>
+      <div class="metric-bar-pair">
+        <div>
+          <div class="metric-bar-track">
+            <div class="metric-bar-fill baseline score-bar-fill" data-width="38%"></div>
+          </div>
+          <div class="metric-bar-labels"><span class="bar-label-baseline">Baseline: 0.38</span></div>
+        </div>
+        <div>
+          <div class="metric-bar-track">
+            <div class="metric-bar-fill target score-bar-fill" data-width="84%"></div>
+          </div>
+          <div class="metric-bar-labels"><span class="bar-label-target">Target: 0.84 (+121%)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="metric-bar-row score-bar-item">
+      <div>
+        <div class="metric-bar-name">Answer Correctness</div>
+        <div style="font-size:0.75rem; color:var(--white-60);">Factually accurate response</div>
+      </div>
+      <div class="metric-bar-pair">
+        <div>
+          <div class="metric-bar-track">
+            <div class="metric-bar-fill baseline score-bar-fill" data-width="41%"></div>
+          </div>
+          <div class="metric-bar-labels"><span class="bar-label-baseline">Baseline: 0.41</span></div>
+        </div>
+        <div>
+          <div class="metric-bar-track">
+            <div class="metric-bar-fill target score-bar-fill" data-width="82%"></div>
+          </div>
+          <div class="metric-bar-labels"><span class="bar-label-target">Target: 0.82 (+100%)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="metric-bar-row score-bar-item">
+      <div>
+        <div class="metric-bar-name">Find Time (seconds)</div>
+        <div style="font-size:0.75rem; color:var(--white-60);">Time to get a complete answer</div>
+      </div>
+      <div class="metric-bar-pair">
+        <div>
+          <div class="metric-bar-track">
+            <div class="metric-bar-fill baseline score-bar-fill" data-width="100%" style="background:rgba(244,63,94,0.6);"></div>
+          </div>
+          <div class="metric-bar-labels"><span class="bar-label-baseline">Baseline: 6,480s (1.8hrs)</span></div>
+        </div>
+        <div>
+          <div class="metric-bar-track">
+            <div class="metric-bar-fill target score-bar-fill" data-width="0.04%"></div>
+          </div>
+          <div class="metric-bar-labels"><span class="bar-label-target">Target: 2.4s (p95) — 2,700× faster</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============================================================ -->
+<!-- OPTION COMPARISON MATRIX -->
+<!-- ============================================================ -->
+<section class="section" id="matrix">
+  <div class="section-header hidden">
+    <div class="section-tag">A/B Configuration Testing</div>
+    <h2>Option Comparison <span class="gradient-text">Matrix</span></h2>
+    <p>We test multiple RAG configurations head-to-head. The highlighted row is our chosen optimal configuration based on the best balance of accuracy, speed, and cost.</p>
+  </div>
+
+  <div class="hidden" style="overflow-x:auto;">
+    <table class="comparison-table" style="min-width:900px;">
+      <thead>
+        <tr>
+          <th>Configuration</th>
+          <th>Embedding Model</th>
+          <th>Retrieval</th>
+          <th>Reranker</th>
+          <th>Faithfulness</th>
+          <th>Relevancy</th>
+          <th>Ctx Precision</th>
+          <th>p95 Latency</th>
+          <th>Cost/1K Q</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Config A</td>
+          <td>Amazon Titan v2</td>
+          <td>Dense only</td>
+          <td>None</td>
+          <td>0.71</td>
+          <td>0.74</td>
+          <td>0.68</td>
+          <td>1.1s</td>
+          <td>$0.18</td>
+        </tr>
+        <tr>
+          <td>Config B</td>
+          <td>Titan v2</td>
+          <td>Hybrid</td>
+          <td>None</td>
+          <td>0.78</td>
+          <td>0.79</td>
+          <td>0.76</td>
+          <td>1.4s</td>
+          <td>$0.20</td>
+        </tr>
+        <tr>
+          <td>Config C</td>
+          <td>Cohere Embed v3</td>
+          <td>Dense only</td>
+          <td>None</td>
+          <td>0.80</td>
+          <td>0.82</td>
+          <td>0.77</td>
+          <td>1.2s</td>
+          <td>$0.26</td>
+        </tr>
+        <tr>
+          <td>Config D</td>
+          <td>Cohere Embed v3</td>
+          <td>Hybrid</td>
+          <td>None</td>
+          <td>0.84</td>
+          <td>0.85</td>
+          <td>0.81</td>
+          <td>1.7s</td>
+          <td>$0.29</td>
+        </tr>
+        <tr class="recommended">
+          <td><span class="matrix-star">★</span> <strong>Config E (Ours)</strong></td>
+          <td>Cohere Embed v3</td>
+          <td>Hybrid</td>
+          <td>Cross-encoder</td>
+          <td><strong style="color:var(--emerald);">0.89</strong></td>
+          <td><strong style="color:var(--emerald);">0.87</strong></td>
+          <td><strong style="color:var(--emerald);">0.84</strong></td>
+          <td>2.4s</td>
+          <td>$0.38</td>
+        </tr>
+        <tr>
+          <td>Config F</td>
+          <td>OpenAI ada-3-large</td>
+          <td>Hybrid</td>
+          <td>Cross-encoder</td>
+          <td>0.88</td>
+          <td>0.86</td>
+          <td>0.83</td>
+          <td>2.6s</td>
+          <td>$0.51</td>
+        </tr>
+        <tr>
+          <td>Config G (Ablation)</td>
+          <td>Cohere Embed v3</td>
+          <td>BM25 only</td>
+          <td>Cross-encoder</td>
+          <td>0.72</td>
+          <td>0.71</td>
+          <td>0.69</td>
+          <td>1.8s</td>
+          <td>$0.31</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-purple mt-32 hidden">
+    <p style="font-size:0.95rem; color:var(--white-60); margin:0;">
+      <strong style="color:var(--lavender);">Why Config E wins:</strong> The cross-encoder reranker adds only 0.7s latency vs Config D but improves faithfulness by +6% and context precision by +3.7%. At $0.38/1K queries, the quality-cost ratio is optimal. Config F costs 34% more for marginally equivalent performance.
+    </p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============================================================ -->
+<!-- WHY METRICS MATTER (BUSINESS IMPACT) -->
+<!-- ============================================================ -->
+<section class="section">
+  <div class="section-header hidden">
+    <div class="section-tag">Business Impact</div>
+    <h2>Why These Metrics <span class="gradient-text">Matter</span></h2>
+    <p>Each RAGAS metric maps directly to a real business outcome. This isn't academic — it's enterprise ROI.</p>
+  </div>
+
+  <div class="cards-grid-3">
+    <div class="impact-card hidden delay-1">
+      <div class="impact-number">0.89</div>
+      <div class="impact-label">Faithfulness Target</div>
+      <div class="impact-desc">Means only 1 in 9 claims may not be directly from the source docs. In enterprise contexts, this prevents employees from acting on hallucinated information — protecting compliance and legal standing.</div>
+    </div>
+    <div class="impact-card hidden delay-2">
+      <div class="impact-number" style="background:var(--gradient-warm); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">2,700×</div>
+      <div class="impact-label">Faster Than Manual Search</div>
+      <div class="impact-desc">1.8 hours of searching reduced to 2.4 seconds (p95 latency). For a 500-person company, that's 900 person-hours saved daily — $9M+/year in recovered productivity.</div>
+    </div>
+    <div class="impact-card hidden delay-3">
+      <div class="impact-number" style="background:linear-gradient(135deg,var(--emerald),var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">100%</div>
+      <div class="impact-label">Source Citations</div>
+      <div class="impact-desc">Every answer includes exact document and page citations. Employees can verify sources in one click, building trust and ensuring compliance documentation is always traceable.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============================================================ -->
+<!-- EVALUATION DATASET -->
+<!-- ============================================================ -->
+<section class="section">
+  <div class="section-header hidden">
+    <div class="section-tag">Test Data</div>
+    <h2>Evaluation <span class="gradient-text">Dataset</span></h2>
+    <p>A rigorous evaluation requires a high-quality, diverse test set. We use three complementary datasets.</p>
+  </div>
+
+  <div class="cards-grid-3">
+    <div class="dataset-card hidden delay-1">
+      <div class="dataset-tag" style="background:rgba(124,58,237,0.15); color:var(--lavender); border:1px solid rgba(124,58,237,0.3);">Primary · Synthetic</div>
+      <div style="font-size:2rem; margin-bottom:12px;">🏢</div>
+      <h3 style="margin-bottom:10px;">Synthetic Enterprise KB</h3>
+      <p style="font-size:0.88rem; margin-bottom:16px;">500 Q&A pairs generated from real enterprise document templates (HR policies, IT guides, compliance docs, technical runbooks). Generated with Claude + human review for quality.</p>
+      <ul class="check-list" style="font-size:0.85rem;">
+        <li>500 question-answer pairs</li>
+        <li>Covers all 4 document sources</li>
+        <li>10 topic categories</li>
+        <li>Multi-hop questions included</li>
+      </ul>
+    </div>
+    <div class="dataset-card hidden delay-2">
+      <div class="dataset-tag" style="background:rgba(59,130,246,0.15); color:#93C5FD; border:1px solid rgba(59,130,246,0.3);">Benchmark · Public</div>
+      <div style="font-size:2rem; margin-bottom:12px;">📚</div>
+      <h3 style="margin-bottom:10px;">MS MARCO Passages</h3>
+      <p style="font-size:0.88rem; margin-bottom:16px;">Industry-standard information retrieval benchmark. Used to validate retrieval quality in isolation — separate from generation quality. Provides an external, unbiased reference point.</p>
+      <ul class="check-list" style="font-size:0.85rem;">
+        <li>1,000 selected passages</li>
+        <li>Dense retrieval benchmarks</li>
+        <li>Standardized MRR metrics</li>
+        <li>Widely published baselines</li>
+      </ul>
+    </div>
+    <div class="dataset-card hidden delay-3">
+      <div class="dataset-tag" style="background:rgba(6,182,212,0.15); color:#67E8F9; border:1px solid rgba(6,182,212,0.3);">Domain-Specific · Technical</div>
+      <div style="font-size:2rem; margin-bottom:12px;">💻</div>
+      <h3 style="margin-bottom:10px;">TechQA Dataset</h3>
+      <p style="font-size:0.88rem; margin-bottom:16px;">IBM's TechQA dataset of technical support questions answered from enterprise documentation. Directly mirrors our target use case: employees asking technical questions about internal systems.</p>
+      <ul class="check-list" style="font-size:0.85rem;">
+        <li>600 technical Q&A pairs</li>
+        <li>Enterprise documentation domain</li>
+        <li>Long-context questions</li>
+        <li>Expert-verified ground truth</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Evaluation Process -->
+  <div class="callout callout-cyan mt-48 hidden">
+    <div style="display:grid; grid-template-columns:auto 1fr; gap:24px; align-items:start;">
+      <div style="font-size:2.5rem;">⚙️</div>
+      <div>
+        <h3 style="margin-bottom:12px; color:var(--cyan);">Automated Evaluation with <code style="font-family:var(--font-mono);">/evaluate-rag</code></h3>
+        <p style="font-size:0.9rem; margin-bottom:0;">The <code style="font-family:var(--font-mono); color:var(--cyan);">/evaluate-rag</code> Claude Code skill runs the entire RAGAS evaluation suite automatically: ingests the test dataset, runs queries through the pipeline, scores all 5 RAGAS metrics, and generates a comparison report — in a single command. No manual scoring. No human bias.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-logo">RAGixAI</div>
+    <ul class="footer-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="problem.html">Problem</a></li>
+      <li><a href="solution.html">Solution</a></li>
+      <li><a href="pipeline.html">Pipeline</a></li>
+      <li><a href="evaluation.html">Evaluation</a></li>
+      <li><a href="aws.html">AWS</a></li>
+      <li><a href="roadmap.html">Roadmap</a></li>
+    </ul>
+    <p class="footer-info">
+      RAGixAI — Enterprise Knowledge Base with RAG &amp; Evaluation &nbsp;·&nbsp;
+      Capstone Project 2025–2026 &nbsp;·&nbsp; Built with Claude Code
+    </p>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

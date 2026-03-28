@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roadmap — RAGixAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* ---- Roadmap Hero ---- */
+    .roadmap-hero {
+      min-height: 65vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: calc(var(--nav-height) + 40px) 24px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .roadmap-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 50% at 50% 100%, rgba(16, 185, 129, 0.12) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 40% at 15% 40%, rgba(124, 58, 237, 0.1) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 85% 40%, rgba(6, 182, 212, 0.08) 0%, transparent 60%);
+    }
+
+    /* ---- Scope Columns ---- */
+    .scope-col {
+      padding: 32px;
+      border-radius: var(--border-radius-lg);
+    }
+
+    .scope-in {
+      background: rgba(16, 185, 129, 0.06);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .scope-out {
+      background: rgba(244, 63, 94, 0.04);
+      border: 1px solid rgba(244, 63, 94, 0.15);
+    }
+
+    .scope-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .scope-in .scope-header { color: var(--emerald); }
+    .scope-out .scope-header { color: var(--coral); }
+
+    .scope-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      font-size: 0.9rem;
+      color: var(--white-60);
+    }
+
+    .scope-item:last-child { border-bottom: none; }
+
+    .scope-check { color: var(--emerald); font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+    .scope-x { color: var(--coral); font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+
+    /* ---- Large Timeline ---- */
+    .big-timeline {
+      position: relative;
+      padding-left: 0;
+    }
+
+    .big-timeline::before {
+      content: '';
+      position: absolute;
+      left: 119px;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: linear-gradient(180deg,
+        var(--purple) 0%,
+        var(--electric-blue) 25%,
+        var(--cyan) 50%,
+        var(--emerald) 75%,
+        var(--amber) 100%
+      );
+      border-radius: 3px;
+    }
+
+    .big-timeline-item {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 32px;
+      margin-bottom: 32px;
+      position: relative;
+    }
+
+    .phase-label {
+      text-align: right;
+      padding-right: 0;
+    }
+
+    .phase-weeks {
+      font-size: 0.75rem;
+      color: var(--white-60);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .phase-name {
+      font-size: 0.85rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      line-height: 1.2;
+    }
+
+    .timeline-dot-big {
+      position: absolute;
+      left: 112px;
+      top: 16px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 3px solid var(--bg-primary);
+      z-index: 2;
+    }
+
+    .phase-card {
+      padding: 24px 28px;
+      border-radius: var(--border-radius);
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      transition: var(--transition);
+    }
+
+    .phase-card:hover {
+      background: var(--bg-card-hover);
+      transform: translateX(4px);
+    }
+
+    .phase-card.highlight-phase {
+      border-color: rgba(245, 158, 11, 0.5);
+      background: rgba(245, 158, 11, 0.06);
+    }
+
+    .phase-card h3 {
+      font-size: 1.05rem;
+      margin-bottom: 12px;
+    }
+
+    .phase-tasks {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .phase-task {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 0.83rem;
+      color: var(--white-60);
+    }
+
+    .phase-task::before {
+      content: '▸';
+      color: var(--cyan);
+      flex-shrink: 0;
+    }
+
+    .phase-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    /* ---- Mid-Sem Highlight Box ---- */
+    .midsem-box {
+      background: linear-gradient(135deg,
+        rgba(245, 158, 11, 0.1) 0%,
+        rgba(244, 63, 94, 0.06) 100%
+      );
+      border: 2px solid rgba(245, 158, 11, 0.4);
+      border-radius: var(--border-radius-lg);
+      padding: 40px 48px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .midsem-box::before {
+      content: '🎓 MID-SEMESTER PRESENTATION';
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: var(--amber);
+      color: var(--bg-primary);
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      padding: 6px 16px;
+      border-radius: 0 var(--border-radius-lg) 0 var(--border-radius);
+    }
+
+    .midsem-checklist {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .midsem-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 16px;
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      border-radius: var(--border-radius-sm);
+      transition: var(--transition);
+    }
+
+    .midsem-item:hover {
+      background: rgba(245, 158, 11, 0.15);
+      border-color: rgba(245, 158, 11, 0.4);
+    }
+
+    .midsem-check {
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .midsem-text {
+      font-size: 0.88rem;
+      color: var(--white-60);
+      line-height: 1.4;
+    }
+
+    /* ---- Final Deliverables ---- */
+    .deliverable-card {
+      padding: 24px;
+      border-radius: var(--border-radius);
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      transition: var(--transition);
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .deliverable-card:hover {
+      border-color: rgba(16, 185, 129, 0.3);
+      background: rgba(16, 185, 129, 0.04);
+      transform: translateX(4px);
+    }
+
+    .deliverable-icon {
+      font-size: 1.6rem;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* ---- Success Metrics ---- */
+    .success-metric {
+      padding: 20px 24px;
+      border-radius: var(--border-radius);
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 16px;
+      align-items: center;
+      transition: var(--transition);
+    }
+
+    .success-metric:hover {
+      border-color: rgba(124, 58, 237, 0.3);
+      background: var(--bg-card-hover);
+    }
+
+    .metric-target {
+      font-size: 1.6rem;
+      font-weight: 900;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .metric-desc {
+      font-size: 0.88rem;
+      color: var(--white-60);
+    }
+
+    /* ---- Team Cards ---- */
+    .team-card {
+      padding: 28px;
+      border-radius: var(--border-radius);
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      text-align: center;
+      transition: var(--transition);
+    }
+
+    .team-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(124, 58, 237, 0.3);
+      box-shadow: var(--shadow-glow-purple);
+    }
+
+    .team-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--gradient-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      margin: 0 auto 16px;
+      animation: morphBlob 8s ease-in-out infinite;
+    }
+
+    @media (max-width: 768px) {
+      .big-timeline::before { left: 0; }
+      .big-timeline-item { grid-template-columns: 1fr; gap: 12px; }
+      .timeline-dot-big { display: none; }
+      .phase-label { text-align: left; }
+      .phase-tasks { grid-template-columns: 1fr; }
+      .midsem-checklist { grid-template-columns: 1fr; }
+      .midsem-box { padding: 32px 20px; }
+      .midsem-box::before { font-size: 0.6rem; padding: 4px 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav" id="main-nav">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo">RAGixAI</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="problem.html">Problem</a></li>
+      <li><a href="solution.html">Solution</a></li>
+      <li><a href="pipeline.html">Pipeline</a></li>
+      <li><a href="evaluation.html">Evaluation</a></li>
+      <li><a href="aws.html">AWS</a></li>
+      <li><a href="roadmap.html" class="nav-cta">Roadmap</a></li>
+    </ul>
+    <div class="nav-toggle" id="nav-toggle"><span></span><span></span><span></span></div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="roadmap-hero">
+  <div style="position:relative; z-index:2; max-width:800px;">
+    <div class="section-tag" style="margin-bottom:20px;">Project Timeline</div>
+    <h1 style="margin-bottom:20px;">
+      From <span class="gradient-text">Concept</span> to <span class="gradient-text-warm">Production</span>
+    </h1>
+    <p style="font-size:1.15rem; color:var(--white-60); max-width:620px; margin:0 auto 32px;">
+      A 14-week journey from problem definition to a production-ready enterprise RAG system.
+      Clear milestones, measurable deliverables, and an honest scope boundary.
+    </p>
+    <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
+      <a href="#timeline" class="btn btn-primary btn-glow">📅 View Timeline</a>
+      <a href="#midsem" class="btn btn-outline">🎓 Mid-Sem Status</a>
+    </div>
+  </div>
+</section>
+
+<!-- Progress stats -->
+<section style="padding:0 24px 60px; max-width:1280px; margin:0 auto;">
+  <div class="stats-row hidden">
+    <div class="stat-item">
+      <div class="stat-number">14</div>
+      <div class="stat-label">Project Weeks</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">5</div>
+      <div class="stat-label">Phases</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">6</div>
+      <div class="stat-label">Mid-Sem Deliverables</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">8</div>
+      <div class="stat-label">Custom Claude Code Skills</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- PROJECT SCOPE -->
+<!-- ============================================================ -->
+<section class="section" style="padding-top:0;">
+  <div class="section-header hidden">
+    <div class="section-tag">Boundaries</div>
+    <h2>Project <span class="gradient-text">Scope</span></h2>
+    <p>Explicit in-scope and out-of-scope boundaries prevent scope creep and keep the project focused on what matters.</p>
+  </div>
+
+  <div class="cards-grid-2">
+    <!-- In Scope -->
+    <div class="scope-col scope-in hidden delay-1">
+      <div class="scope-header">
+        <span style="font-size:1.5rem;">✅</span>
+        <h3 style="font-size:1.2rem;">In Scope</h3>
+      </div>
+      <div class="scope-item">
+        <span class="scope-check">✓</span>
+        <span>RAG pipeline (ingest → chunk → embed → retrieve → rerank → generate)</span>
+      </div>
+      <div class="scope-item">
+        <span class="scope-check">✓</span>
+        <span>Four document sources: Confluence, Google Docs, Notion, PDF</span>
+      </div>
+      <div class="scope-item">
+        <span class="scope-check">✓</span>
+        <span>RAGAS evaluation framework with all 5 core metrics</span>
+      </div>
+      <div class="scope-item">
+        <span class="scope-check">✓</span>
+        <span>A/B comparison of at least 7 RAG configurations</span>
+      </div>
+      <div class="scope-item">
+        <span class="scope-check">✓</span>
+        <span>AWS Bedrock + OpenSearch production deployment</span>
+      </div>
+      <div class="scope-item">
+        <span class="scope-check">✓</span>
+        <span>8 Claude Code custom slash commands (.md skill files)</span>
+      </div>
+      <div class="scope-item">
+        <span class="scope-check">✓</span>
+        <span>Chat UI with citation display</span>
+      </div>
+      <div class="scope-item">
+        <span class="scope-check">✓</span>
+        <span>Automated evaluation report generation</span>
+      </div>
+      <div class="scope-item">
+        <span class="scope-check">✓</span>
+        <span>Security: IAM roles, VPC isolation, encryption at rest</span>
+      </div>
+      <div class="scope-item">
+        <span class="scope-check">✓</span>
+        <span>Cost analysis and ROI calculation</span>
+      </div>
+    </div>
+
+    <!-- Out of Scope -->
+    <div class="scope-col scope-out hidden delay-2">
+      <div class="scope-header">
+        <span style="font-size:1.5rem;">🚫</span>
+        <h3 style="font-size:1.2rem;">Out of Scope</h3>
+      </div>
+      <div class="scope-item">
+        <span class="scope-x">✗</span>
+        <span>Fine-tuning foundation models (using PEFT/LoRA on domain data)</span>
+      </div>
+      <div class="scope-item">
+        <span class="scope-x">✗</span>
+        <span>Multi-tenant / per-user data isolation (single org deployment)</span>
+      </div>
+      <div class="scope-item">
+        <span class="scope-x">✗</span>
+        <span>Real-time document sync (scheduled batch ingestion only)</span>
+      </div>
+      <div class="scope-item">
+        <span class="scope-x">✗</span>
+        <span>Image/video content understanding (text documents only)</span>
+      </div>
+      <div class="scope-item">
+        <span class="scope-x">✗</span>
+        <span>Conversational memory / multi-turn session context</span>
+      </div>
+      <div class="scope-item">
+        <span class="scope-x">✗</span>
+        <span>User authentication & SSO integration (mocked for demo)</span>
+      </div>
+      <div class="scope-item">
+        <span class="scope-x">✗</span>
+        <span>Mobile application (web only)</span>
+      </div>
+      <div class="scope-item">
+        <span class="scope-x">✗</span>
+        <span>Multilingual query support (English only)</span>
+      </div>
+      <div class="scope-item">
+        <span class="scope-x">✗</span>
+        <span>Production SLA / 24-7 on-call operations</span>
+      </div>
+      <div class="scope-item">
+        <span class="scope-x">✗</span>
+        <span>Custom embedding model training from scratch</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============================================================ -->
+<!-- LARGE TIMELINE -->
+<!-- ============================================================ -->
+<section class="section" id="timeline">
+  <div class="section-header hidden">
+    <div class="section-tag">14 Weeks</div>
+    <h2>The <span class="gradient-text">Project Timeline</span></h2>
+    <p>Five phases taking RAGixAI from a problem statement to a production-ready deployed system.</p>
+  </div>
+
+  <div class="big-timeline hidden">
+
+    <!-- Phase 1 -->
+    <div class="big-timeline-item">
+      <div class="phase-label">
+        <div class="phase-weeks">Weeks 1–3</div>
+        <div class="phase-name" style="color:var(--purple);">Phase 1</div>
+        <div style="font-size:0.75rem; color:var(--white-60); margin-top:4px;">Foundation</div>
+      </div>
+      <div class="timeline-dot-big" style="background:var(--purple);"></div>
+      <div class="phase-card">
+        <div class="phase-badge" style="background:rgba(124,58,237,0.15); color:var(--lavender);">Foundation & Research</div>
+        <h3>Problem Definition, Dataset Preparation & Baseline</h3>
+        <div class="phase-tasks">
+          <div class="phase-task">Finalize problem statement & success metrics</div>
+          <div class="phase-task">Enterprise KB dataset collection & curation</div>
+          <div class="phase-task">Literature review: RAG architectures & RAGAS</div>
+          <div class="phase-task">Baseline: naive keyword search performance</div>
+          <div class="phase-task">AWS account setup & IAM configuration</div>
+          <div class="phase-task">Development environment & repo structure</div>
+          <div class="phase-task">Initial /ingest-docs Claude Code skill</div>
+          <div class="phase-task">Dataset: 500 Q&A pairs from synthetic KB</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 2 (highlighted - mid-sem) -->
+    <div class="big-timeline-item">
+      <div class="phase-label">
+        <div class="phase-weeks">Weeks 4–6</div>
+        <div class="phase-name" style="color:var(--electric-blue);">Phase 2</div>
+        <div style="font-size:0.75rem; color:var(--amber); font-weight:700; margin-top:4px;">MID-SEM ★</div>
+      </div>
+      <div class="timeline-dot-big" style="background:var(--amber);"></div>
+      <div class="phase-card highlight-phase">
+        <div class="phase-badge" style="background:rgba(245,158,11,0.15); color:var(--amber);">★ Mid-Semester Milestone</div>
+        <h3>Core RAG Pipeline, AWS Setup & Mid-Semester Presentation</h3>
+        <div class="phase-tasks">
+          <div class="phase-task">S3 + Textract + Lambda ingestion pipeline</div>
+          <div class="phase-task">OpenSearch k-NN index configuration</div>
+          <div class="phase-task">Cohere Embed v3 via Bedrock integration</div>
+          <div class="phase-task">Baseline RAG (dense-only, no reranker)</div>
+          <div class="phase-task">Step Functions workflow orchestration</div>
+          <div class="phase-task">/chunk-optimize & /embed-compare skills</div>
+          <div class="phase-task">Initial RAGAS evaluation run on Config A</div>
+          <div class="phase-task">Mid-Semester Presentation slides + demo</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 3 -->
+    <div class="big-timeline-item">
+      <div class="phase-label">
+        <div class="phase-weeks">Weeks 7–9</div>
+        <div class="phase-name" style="color:var(--cyan);">Phase 3</div>
+        <div style="font-size:0.75rem; color:var(--white-60); margin-top:4px;">Evaluation</div>
+      </div>
+      <div class="timeline-dot-big" style="background:var(--cyan);"></div>
+      <div class="phase-card">
+        <div class="phase-badge" style="background:rgba(6,182,212,0.15); color:var(--cyan);">Evaluation & Comparison</div>
+        <h3>Full Evaluation Framework & A/B Option Comparison</h3>
+        <div class="phase-tasks">
+          <div class="phase-task">Hybrid retrieval (Dense + BM25) implementation</div>
+          <div class="phase-task">Cross-encoder reranker integration</div>
+          <div class="phase-task">Full RAGAS suite on all 7 configurations</div>
+          <div class="phase-task">/evaluate-rag & /compare-options skills</div>
+          <div class="phase-task">Comparison matrix generation (automatic)</div>
+          <div class="phase-task">Latency profiling (p50/p95/p99)</div>
+          <div class="phase-task">Cost-per-query analysis per config</div>
+          <div class="phase-task">Identify optimal configuration (Config E)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 4 -->
+    <div class="big-timeline-item">
+      <div class="phase-label">
+        <div class="phase-weeks">Weeks 10–12</div>
+        <div class="phase-name" style="color:var(--emerald);">Phase 4</div>
+        <div style="font-size:0.75rem; color:var(--white-60); margin-top:4px;">Optimization</div>
+      </div>
+      <div class="timeline-dot-big" style="background:var(--emerald);"></div>
+      <div class="phase-card">
+        <div class="phase-badge" style="background:rgba(16,185,129,0.15); color:var(--emerald);">Optimization & Polish</div>
+        <h3>Optimization, Fine-Tuning & Advanced Features</h3>
+        <div class="phase-tasks">
+          <div class="phase-task">Query expansion implementation & testing</div>
+          <div class="phase-task">Semantic chunking vs fixed-size final verdict</div>
+          <div class="phase-task">Context window optimization</div>
+          <div class="phase-task">Prompt engineering for citation format</div>
+          <div class="phase-task">/monitor-pipeline CloudWatch integration</div>
+          <div class="phase-task">Chat UI development (React + Amplify)</div>
+          <div class="phase-task">End-to-end integration testing</div>
+          <div class="phase-task">Security audit: IAM, VPC, encryption review</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 5 -->
+    <div class="big-timeline-item">
+      <div class="phase-label">
+        <div class="phase-weeks">Weeks 13–14</div>
+        <div class="phase-name" style="color:var(--amber);">Phase 5</div>
+        <div style="font-size:0.75rem; color:var(--white-60); margin-top:4px;">Delivery</div>
+      </div>
+      <div class="timeline-dot-big" style="background:var(--amber);"></div>
+      <div class="phase-card">
+        <div class="phase-badge" style="background:rgba(245,158,11,0.15); color:var(--amber);">Final Delivery</div>
+        <h3>Final Demo, Report, Production Deployment</h3>
+        <div class="phase-tasks">
+          <div class="phase-task">/deploy-aws full production deployment</div>
+          <div class="phase-task">/generate-report automated final report</div>
+          <div class="phase-task">Demo video recording & editing</div>
+          <div class="phase-task">Final capstone presentation preparation</div>
+          <div class="phase-task">Complete project report write-up</div>
+          <div class="phase-task">GitHub repo cleanup & documentation</div>
+          <div class="phase-task">Production smoke testing</div>
+          <div class="phase-task">Final capstone submission</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============================================================ -->
+<!-- MID-SEMESTER DELIVERABLES -->
+<!-- ============================================================ -->
+<section class="section" id="midsem">
+  <div class="section-header hidden">
+    <div class="section-tag">Current Status</div>
+    <h2>Mid-Semester <span class="gradient-text-warm">Deliverables</span></h2>
+    <p>What we're presenting at the mid-semester milestone — concrete evidence of progress, not just plans.</p>
+  </div>
+
+  <div class="midsem-box hidden">
+    <div style="display:grid; grid-template-columns:auto 1fr; gap:24px; align-items:start;">
+      <div style="font-size:3rem; line-height:1;">🎓</div>
+      <div>
+        <h3 style="margin-bottom:8px; font-size:1.4rem; color:var(--amber);">Week 6 Presentation Package</h3>
+        <p style="font-size:0.9rem; color:var(--white-60); margin-bottom:0;">Six concrete deliverables demonstrating that the foundation is solid and the technical approach is validated.</p>
+      </div>
+    </div>
+
+    <div class="midsem-checklist">
+      <div class="midsem-item">
+        <span class="midsem-check">✅</span>
+        <div class="midsem-text">
+          <strong style="color:var(--white);">Problem Statement & Market Analysis</strong><br>
+          $47B market, quantified pain points, competitive landscape, stakeholder personas
+        </div>
+      </div>
+      <div class="midsem-item">
+        <span class="midsem-check">✅</span>
+        <div class="midsem-text">
+          <strong style="color:var(--white);">Dataset Selection & Preprocessing</strong><br>
+          500 synthetic enterprise Q&A pairs, MS MARCO subset, TechQA validation set
+        </div>
+      </div>
+      <div class="midsem-item">
+        <span class="midsem-check">✅</span>
+        <div class="midsem-text">
+          <strong style="color:var(--white);">Baseline RAG Pipeline (AWS Bedrock + OpenSearch)</strong><br>
+          Config A operational: Titan embeddings, dense retrieval, no reranker
+        </div>
+      </div>
+      <div class="midsem-item">
+        <span class="midsem-check">✅</span>
+        <div class="midsem-text">
+          <strong style="color:var(--white);">Initial RAGAS Evaluation</strong><br>
+          Faithfulness: 0.71 · Relevancy: 0.74 · Context Precision: 0.68 (Config A baseline)
+        </div>
+      </div>
+      <div class="midsem-item">
+        <span class="midsem-check">✅</span>
+        <div class="midsem-text">
+          <strong style="color:var(--white);">Options Identified for Comparison</strong><br>
+          7 configurations mapped: 3 embedding models × 3 retrieval strategies × 2 reranking options
+        </div>
+      </div>
+      <div class="midsem-item">
+        <span class="midsem-check">✅</span>
+        <div class="midsem-text">
+          <strong style="color:var(--white);">Claude Code Skills for Automation</strong><br>
+          /ingest-docs, /chunk-optimize, /embed-compare operational. 5 more in progress.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============================================================ -->
+<!-- FINAL DELIVERABLES -->
+<!-- ============================================================ -->
+<section class="section">
+  <div class="section-header hidden">
+    <div class="section-tag">End of Project</div>
+    <h2>Final <span class="gradient-text">Deliverables</span></h2>
+    <p>What we're submitting at Week 14 — production artifacts, not just a report.</p>
+  </div>
+
+  <div class="cards-grid-2">
+    <div class="deliverable-card hidden delay-1">
+      <div class="deliverable-icon">📊</div>
+      <div>
+        <h4 style="margin-bottom:8px;">Full Evaluation Report</h4>
+        <p style="font-size:0.87rem;">Auto-generated via <code style="font-family:var(--font-mono); color:var(--cyan);">/generate-report</code>. Contains: complete RAGAS scores for all 7 configurations, statistical significance tests, optimal configuration justification, cost analysis, and recommendations for production use.</p>
+      </div>
+    </div>
+    <div class="deliverable-card hidden delay-2">
+      <div class="deliverable-icon">🏭</div>
+      <div>
+        <h4 style="margin-bottom:8px;">Production-Ready Pipeline</h4>
+        <p style="font-size:0.87rem;">Fully deployed on AWS (Bedrock + OpenSearch + Lambda + Amplify). Complete with IAM roles, VPC isolation, CloudWatch monitoring, and automated <code style="font-family:var(--font-mono); color:var(--cyan);">/deploy-aws</code> deployment script.</p>
+      </div>
+    </div>
+    <div class="deliverable-card hidden delay-1">
+      <div class="deliverable-icon">🔬</div>
+      <div>
+        <h4 style="margin-bottom:8px;">Comparison Analysis Document</h4>
+        <p style="font-size:0.87rem;">Academic-style analysis of all 7 A/B configurations with methodology, results, and analysis. Includes discussion of tradeoffs: accuracy vs latency vs cost — with business impact framing.</p>
+      </div>
+    </div>
+    <div class="deliverable-card hidden delay-2">
+      <div class="deliverable-icon">🎬</div>
+      <div>
+        <h4 style="margin-bottom:8px;">Demo Video + Live System</h4>
+        <p style="font-size:0.87rem;">5-minute demo video showing the system answering real enterprise questions with citations. The live system will be accessible via AWS Amplify URL for evaluators to interact with directly.</p>
+      </div>
+    </div>
+    <div class="deliverable-card hidden delay-1">
+      <div class="deliverable-icon">🤖</div>
+      <div>
+        <h4 style="margin-bottom:8px;">8 Claude Code Skills (Open Source)</h4>
+        <p style="font-size:0.87rem;">All custom <code style="font-family:var(--font-mono); color:var(--cyan);">.claude/commands/*.md</code> skill files published in the project repo. Each skill is reusable — any team building a RAG system can use these skills directly.</p>
+      </div>
+    </div>
+    <div class="deliverable-card hidden delay-2">
+      <div class="deliverable-icon">📁</div>
+      <div>
+        <h4 style="margin-bottom:8px;">Complete GitHub Repository</h4>
+        <p style="font-size:0.87rem;">Clean, documented codebase with architecture diagrams, API documentation, and a comprehensive README. Includes IaC (CloudFormation/CDK) for one-click AWS deployment replication.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============================================================ -->
+<!-- SUCCESS METRICS -->
+<!-- ============================================================ -->
+<section class="section">
+  <div class="section-header hidden">
+    <div class="section-tag">Definition of Done</div>
+    <h2>Key <span class="gradient-text">Success Metrics</span></h2>
+    <p>These are the specific, measurable criteria that define success. If we hit all of these, the project is a success — no ambiguity.</p>
+  </div>
+
+  <div style="display:flex; flex-direction:column; gap:16px;">
+    <div class="success-metric hidden delay-1">
+      <div class="metric-target gradient-text">≥ 0.85</div>
+      <div>
+        <div style="font-weight:700; margin-bottom:4px;">Average RAGAS Score (Optimal Config)</div>
+        <div class="metric-desc">Weighted average of Faithfulness, Answer Relevancy, and Context Precision for our chosen Config E, evaluated on the full 500-question synthetic dataset.</div>
+      </div>
+    </div>
+    <div class="success-metric hidden delay-2">
+      <div class="metric-target gradient-text">≤ 3.0s</div>
+      <div>
+        <div style="font-weight:700; margin-bottom:4px;">p95 Query Latency</div>
+        <div class="metric-desc">95th percentile end-to-end latency from query submission to final answer — under 3 seconds. Measured under simulated load of 10 concurrent queries.</div>
+      </div>
+    </div>
+    <div class="success-metric hidden delay-3">
+      <div class="metric-target" style="background:var(--gradient-warm); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">7 configs</div>
+      <div>
+        <div style="font-weight:700; margin-bottom:4px;">Configurations Compared</div>
+        <div class="metric-desc">At least 7 distinct RAG configurations evaluated with RAGAS — varying embedding model, retrieval strategy, and reranking approach — with a clear winner justified by data.</div>
+      </div>
+    </div>
+    <div class="success-metric hidden delay-1">
+      <div class="metric-target" style="background:linear-gradient(135deg,var(--emerald),var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">100%</div>
+      <div>
+        <div style="font-weight:700; margin-bottom:4px;">Citation Coverage</div>
+        <div class="metric-desc">Every generated answer includes at least one source citation pointing to a real document in the knowledge base. Zero uncited factual claims in the output.</div>
+      </div>
+    </div>
+    <div class="success-metric hidden delay-2">
+      <div class="metric-target" style="color:var(--amber);">8 skills</div>
+      <div>
+        <div style="font-weight:700; margin-bottom:4px;">Claude Code Automation Skills</div>
+        <div class="metric-desc">All 8 custom slash commands operational and documented: /ingest-docs, /chunk-optimize, /embed-compare, /evaluate-rag, /compare-options, /deploy-aws, /generate-report, /monitor-pipeline.</div>
+      </div>
+    </div>
+    <div class="success-metric hidden delay-3">
+      <div class="metric-target" style="color:var(--lavender);">0 hrs</div>
+      <div>
+        <div style="font-weight:700; margin-bottom:4px;">Manual Configuration Required</div>
+        <div class="metric-desc">The complete pipeline — from raw document ingestion to deployed system with evaluation report — can be reproduced using only Claude Code skills. Zero manual AWS console steps.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============================================================ -->
+<!-- TEAM -->
+<!-- ============================================================ -->
+<section class="section">
+  <div class="section-header hidden">
+    <div class="section-tag">The Team</div>
+    <h2>Who's <span class="gradient-text">Building This</span></h2>
+  </div>
+
+  <div class="cards-grid-3">
+    <div class="team-card hidden delay-1">
+      <div class="team-avatar">🧑‍💻</div>
+      <h3 style="margin-bottom:4px;">Team Member 1</h3>
+      <div style="font-size:0.85rem; color:var(--cyan); margin-bottom:12px;">RAG Pipeline Lead</div>
+      <p style="font-size:0.85rem; margin-bottom:16px;">Responsible for the core ingestion, chunking, embedding, and retrieval pipeline. AWS infrastructure and Lambda functions.</p>
+      <div style="display:flex; gap:6px; justify-content:center; flex-wrap:wrap;">
+        <span class="badge badge-blue">AWS</span>
+        <span class="badge badge-purple">Python</span>
+        <span class="badge badge-cyan">Vector DBs</span>
+      </div>
+    </div>
+    <div class="team-card hidden delay-2">
+      <div class="team-avatar" style="animation-delay:2s;">🧑‍🔬</div>
+      <h3 style="margin-bottom:4px;">Team Member 2</h3>
+      <div style="font-size:0.85rem; color:var(--lavender); margin-bottom:12px;">Evaluation & ML Lead</div>
+      <p style="font-size:0.85rem; margin-bottom:16px;">Responsible for the RAGAS evaluation framework, dataset curation, A/B testing methodology, and metric analysis.</p>
+      <div style="display:flex; gap:6px; justify-content:center; flex-wrap:wrap;">
+        <span class="badge badge-emerald">RAGAS</span>
+        <span class="badge badge-amber">NLP</span>
+        <span class="badge badge-purple">Claude</span>
+      </div>
+    </div>
+    <div class="team-card hidden delay-3">
+      <div class="team-avatar" style="animation-delay:4s;">🧑‍🎨</div>
+      <h3 style="margin-bottom:4px;">Team Member 3</h3>
+      <div style="font-size:0.85rem; color:var(--emerald); margin-bottom:12px;">Automation & UI Lead</div>
+      <p style="font-size:0.85rem; margin-bottom:16px;">Responsible for Claude Code skills, CI/CD pipeline, frontend chat UI, and project documentation/presentation.</p>
+      <div style="display:flex; gap:6px; justify-content:center; flex-wrap:wrap;">
+        <span class="badge badge-cyan">Claude Code</span>
+        <span class="badge badge-coral">React</span>
+        <span class="badge badge-blue">Amplify</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Course Info -->
+  <div class="callout callout-purple mt-48 hidden text-center">
+    <p style="font-size:1rem; color:var(--lavender); font-weight:600; margin-bottom:8px;">Capstone Project — Enterprise AI / NLP</p>
+    <p style="font-size:0.9rem; color:var(--white-60); margin:0;">
+      Academic Year 2025–2026 &nbsp;·&nbsp; Built with Claude Code &nbsp;·&nbsp;
+      Powered by AWS Bedrock, Amazon OpenSearch, and Anthropic Claude
+    </p>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-logo">RAGixAI</div>
+    <ul class="footer-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="problem.html">Problem</a></li>
+      <li><a href="solution.html">Solution</a></li>
+      <li><a href="pipeline.html">Pipeline</a></li>
+      <li><a href="evaluation.html">Evaluation</a></li>
+      <li><a href="aws.html">AWS</a></li>
+      <li><a href="roadmap.html">Roadmap</a></li>
+    </ul>
+    <p class="footer-info">
+      RAGixAI — Enterprise Knowledge Base with RAG &amp; Evaluation &nbsp;·&nbsp;
+      Capstone Project 2025–2026 &nbsp;·&nbsp; Built with Claude Code
+    </p>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

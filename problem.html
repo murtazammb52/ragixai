@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Problem Statement — RAGixAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .problem-hero {
+      min-height: 70vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: calc(var(--nav-height) + 40px) 24px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .problem-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 100%, rgba(244, 63, 94, 0.12) 0%, transparent 70%);
+    }
+
+    .big-stat-banner {
+      display: inline-block;
+      font-size: clamp(3rem, 8vw, 6rem);
+      font-weight: 900;
+      background: var(--gradient-warm);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin: 24px 0;
+    }
+
+    /* ---- Counter Stats Grid ---- */
+    .stats-counter-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2px;
+      background: var(--glass-border);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--border-radius-lg);
+      overflow: hidden;
+    }
+
+    .stat-counter-cell {
+      background: var(--glass-bg);
+      padding: 36px 24px;
+      text-align: center;
+      position: relative;
+      transition: var(--transition);
+    }
+
+    .stat-counter-cell:hover {
+      background: var(--bg-card-hover);
+    }
+
+    .stat-counter-cell::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 20%;
+      right: 20%;
+      height: 2px;
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .stat-counter-cell:hover::after { opacity: 1; }
+    .stat-c1::after { background: var(--gradient-warm); }
+    .stat-c2::after { background: var(--gradient-primary); }
+    .stat-c3::after { background: var(--gradient-cool); }
+    .stat-c4::after { background: var(--gradient-purple); }
+
+    .stat-counter-num {
+      font-size: clamp(2.2rem, 4vw, 3.2rem);
+      font-weight: 900;
+      line-height: 1;
+      margin-bottom: 10px;
+    }
+
+    .stat-counter-label {
+      font-size: 0.85rem;
+      color: var(--white-60);
+      line-height: 1.5;
+    }
+
+    /* ---- Failure Cards ---- */
+    .failure-card {
+      padding: 32px;
+      border-radius: var(--border-radius);
+      background: rgba(244, 63, 94, 0.04);
+      border: 1px solid rgba(244, 63, 94, 0.15);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .failure-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--coral), var(--amber));
+    }
+
+    .failure-card:hover {
+      border-color: rgba(244, 63, 94, 0.35);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(244, 63, 94, 0.15);
+    }
+
+    .failure-icon {
+      font-size: 2.2rem;
+      margin-bottom: 16px;
+    }
+
+    .failure-card h3 {
+      color: #FDA4AF;
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+    }
+
+    /* ---- Pain Points Grid ---- */
+    .pain-card {
+      padding: 28px;
+      border-radius: var(--border-radius);
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      transition: var(--transition);
+    }
+
+    .pain-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(124, 58, 237, 0.3);
+      box-shadow: var(--shadow-glow-purple);
+    }
+
+    .pain-emoji {
+      font-size: 2rem;
+      margin-bottom: 12px;
+    }
+
+    /* ---- Market Bars ---- */
+    .market-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 16px;
+      height: 200px;
+      padding: 0 20px;
+      border-bottom: 2px solid var(--glass-border);
+    }
+
+    .market-bar-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .market-bar {
+      width: 100%;
+      border-radius: 6px 6px 0 0;
+      background: var(--gradient-primary);
+      transition: height 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      min-height: 10px;
+    }
+
+    .market-bar-value {
+      position: absolute;
+      top: -24px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--white);
+      white-space: nowrap;
+    }
+
+    .market-bar-year {
+      font-size: 0.8rem;
+      color: var(--white-60);
+      font-weight: 600;
+    }
+
+    /* ---- Cost Breakdown ---- */
+    .cost-breakdown {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .cost-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--border-radius);
+      transition: var(--transition);
+    }
+
+    .cost-item:hover {
+      border-color: rgba(245, 158, 11, 0.3);
+      background: rgba(245, 158, 11, 0.05);
+    }
+
+    .cost-amount {
+      font-size: 1.6rem;
+      font-weight: 800;
+      background: var(--gradient-warm);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ---- Why RAG Cards ---- */
+    .rag-reason-card {
+      padding: 28px;
+      border-radius: var(--border-radius);
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .rag-reason-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--gradient-primary);
+      transform: scaleX(0);
+      transition: var(--transition);
+      transform-origin: left;
+    }
+
+    .rag-reason-card:hover::after { transform: scaleX(1); }
+
+    .rag-reason-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(6, 182, 212, 0.3);
+    }
+
+    @media (max-width: 768px) {
+      .stats-counter-grid { grid-template-columns: repeat(2, 1fr); }
+      .cost-breakdown { grid-template-columns: 1fr; }
+      .market-chart { height: 140px; gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav" id="main-nav">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo">RAGixAI</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="problem.html">Problem</a></li>
+      <li><a href="solution.html">Solution</a></li>
+      <li><a href="pipeline.html">Pipeline</a></li>
+      <li><a href="evaluation.html">Evaluation</a></li>
+      <li><a href="aws.html">AWS</a></li>
+      <li><a href="roadmap.html" class="nav-cta">Roadmap</a></li>
+    </ul>
+    <div class="nav-toggle" id="nav-toggle"><span></span><span></span><span></span></div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="problem-hero">
+  <div style="position:relative; z-index:2; max-width:800px;">
+    <div class="section-tag" style="margin-bottom:20px;">Problem Statement</div>
+    <h1 style="margin-bottom:16px;">
+      The <span class="gradient-text-warm">Information Overload</span> Crisis
+    </h1>
+    <div class="big-stat-banner">$47B+</div>
+    <p style="font-size:1.2rem; max-width:600px; margin:0 auto 32px;">
+      lost annually to poor knowledge management across enterprises
+    </p>
+    <a href="#stats" class="btn btn-outline">
+      📉 Explore the Data Below ↓
+    </a>
+  </div>
+</section>
+
+<!-- Animated Counter Stats -->
+<section class="section" id="stats">
+  <div class="section-header hidden">
+    <div class="section-tag">By the Numbers</div>
+    <h2>The Scale of the <span class="gradient-text-warm">Problem</span></h2>
+  </div>
+
+  <div class="stats-counter-grid hidden">
+    <div class="stat-counter-cell stat-c1">
+      <div class="stat-counter-num" style="color: #FDA4AF;">
+        <span class="counter" data-target="1" data-suffix=".8">0</span>
+        <span style="font-size:1.2rem;">hrs</span>
+      </div>
+      <div class="stat-counter-label">Wasted per employee<br />per day searching for info</div>
+    </div>
+    <div class="stat-counter-cell stat-c2">
+      <div class="stat-counter-num gradient-text">
+        <span class="counter" data-target="50000" data-suffix="+">0+</span>
+      </div>
+      <div class="stat-counter-label">Pages of unstructured docs<br />across 4 different platforms</div>
+    </div>
+    <div class="stat-counter-cell stat-c3">
+      <div class="stat-counter-num" style="background: var(--gradient-cool); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip:text;">
+        <span class="counter" data-target="73" data-suffix="%">0%</span>
+      </div>
+      <div class="stat-counter-label">Of employees who can't find<br />information quickly</div>
+    </div>
+    <div class="stat-counter-cell stat-c4">
+      <div class="stat-counter-num gradient-text-purple">
+        $<span class="counter" data-target="28000" data-suffix="">0</span>
+      </div>
+      <div class="stat-counter-label">Per employee per year<br />in lost productivity</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Why Traditional Search Fails -->
+<section class="section">
+  <div class="section-header hidden">
+    <div class="section-tag">The Root Cause</div>
+    <h2>Why <span class="gradient-text-warm">Traditional Search</span> Fails</h2>
+    <p>Keyword-based search was built for a different era. It simply cannot handle the complexity of enterprise knowledge.</p>
+  </div>
+
+  <div class="cards-grid-4 hidden">
+    <div class="failure-card delay-1">
+      <div class="failure-icon">🔤</div>
+      <h3>Keyword Mismatch</h3>
+      <p style="font-size:0.88rem;">Employees ask questions in natural language but search engines require exact keyword matches. "How do I onboard a vendor?" returns nothing because the doc says "supplier registration process."</p>
+    </div>
+    <div class="failure-card delay-2">
+      <div class="failure-icon">🧩</div>
+      <h3>No Context Understanding</h3>
+      <p style="font-size:0.88rem;">Traditional search can't understand that a question about "Q3 numbers" relates to multiple documents. It returns a list of links, not a coherent answer with context.</p>
+    </div>
+    <div class="failure-card delay-3">
+      <div class="failure-icon">📎</div>
+      <h3>No Source Citations</h3>
+      <p style="font-size:0.88rem;">Even when information is found, employees can't verify it. There's no link between the answer and the authoritative source document that confirms accuracy.</p>
+    </div>
+    <div class="failure-card delay-4">
+      <div class="failure-icon">🌫️</div>
+      <h3>AI Hallucinations</h3>
+      <p style="font-size:0.88rem;">Basic LLM chatbots without retrieval confidently fabricate answers. In an enterprise context, this is catastrophic — employees act on wrong information.</p>
+    </div>
+  </div>
+</section>
+
+<!-- The Pain Points -->
+<section class="section" style="padding-top:20px;">
+  <div class="section-header hidden">
+    <div class="section-tag">Enterprise Reality</div>
+    <h2>The Real <span class="gradient-text">Pain Points</span></h2>
+    <p>Specific, measurable problems our target company faces every day</p>
+  </div>
+
+  <div class="cards-grid-3 hidden">
+    <div class="pain-card delay-1">
+      <div class="pain-emoji">📁</div>
+      <h3 style="margin-bottom:10px;">Siloed Knowledge Systems</h3>
+      <p style="font-size:0.88rem;">Content spread across Confluence, Google Docs, Notion, and SharePoint with no unified search. Employees need 4 browser tabs just to start a search.</p>
+    </div>
+    <div class="pain-card delay-2">
+      <div class="pain-emoji">🔄</div>
+      <h3 style="margin-bottom:10px;">Stale & Contradictory Docs</h3>
+      <p style="font-size:0.88rem;">Multiple versions of the same document with conflicting information. No way to know which is authoritative without asking someone, which wastes even more time.</p>
+    </div>
+    <div class="pain-card delay-3">
+      <div class="pain-emoji">🆕</div>
+      <h3 style="margin-bottom:10px;">Onboarding Bottleneck</h3>
+      <p style="font-size:0.88rem;">New employees take 3–6 months to become fully productive because institutional knowledge isn't accessible. They repeatedly ask the same questions to busy senior staff.</p>
+    </div>
+    <div class="pain-card delay-2">
+      <div class="pain-emoji">📞</div>
+      <h3 style="margin-bottom:10px;">Expert Dependency</h3>
+      <p style="font-size:0.88rem;">Critical knowledge locked in the heads of a few senior employees. When they're unavailable or leave, entire teams are blocked. Key-person dependency is a major risk.</p>
+    </div>
+    <div class="pain-card delay-3">
+      <div class="pain-emoji">⚖️</div>
+      <h3 style="margin-bottom:10px;">Compliance Risk</h3>
+      <p style="font-size:0.88rem;">Employees unknowingly acting on outdated policies. Legal and compliance documentation isn't surfaced when it matters, creating regulatory exposure.</p>
+    </div>
+    <div class="pain-card delay-4">
+      <div class="pain-emoji">💡</div>
+      <h3 style="margin-bottom:10px;">Innovation Lag</h3>
+      <p style="font-size:0.88rem;">Teams reinvent solutions already built internally because they can't discover existing work. R&D is duplicated. Institutional learning doesn't compound.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Why RAG? Why Now? -->
+<section class="section">
+  <div class="section-header hidden">
+    <div class="section-tag">Market Timing</div>
+    <h2>Why <span class="gradient-text">RAG?</span> Why <span class="gradient-text">Now?</span></h2>
+    <p>Four technological forces have converged to make this the right moment to build RAGixAI</p>
+  </div>
+
+  <div class="cards-grid-4 hidden">
+    <div class="rag-reason-card delay-1">
+      <div style="font-size:2.2rem; margin-bottom:14px;">🧠</div>
+      <h4 style="margin-bottom:10px; color:var(--lavender);">LLM Maturity</h4>
+      <p style="font-size:0.85rem;">Models like Claude 3.5 Sonnet demonstrate human-level comprehension, reasoning, and instruction-following. The LLM layer is no longer the bottleneck.</p>
+    </div>
+    <div class="rag-reason-card delay-2">
+      <div style="font-size:2.2rem; margin-bottom:14px;">📐</div>
+      <h4 style="margin-bottom:10px; color:var(--cyan);">Embedding Models</h4>
+      <p style="font-size:0.85rem;">Dense retrieval embeddings (Cohere Embed v3, Titan Embeddings) now capture semantic meaning with high precision across multilingual enterprise content.</p>
+    </div>
+    <div class="rag-reason-card delay-3">
+      <div style="font-size:2.2rem; margin-bottom:14px;">🗄️</div>
+      <h4 style="margin-bottom:10px; color:var(--emerald);">Vector Databases</h4>
+      <p style="font-size:0.85rem;">AWS OpenSearch, Pinecone, and Weaviate now offer production-grade vector search at enterprise scale with sub-100ms latency. The infrastructure is ready.</p>
+    </div>
+    <div class="rag-reason-card delay-4">
+      <div style="font-size:2.2rem; margin-bottom:14px;">🏢</div>
+      <h4 style="margin-bottom:10px; color:var(--amber);">Enterprise Adoption</h4>
+      <p style="font-size:0.85rem;">Fortune 500 companies are actively deploying RAG-based knowledge systems. The market has validated the approach. Early movers gain compound advantages.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Market Opportunity Chart -->
+<section class="section" style="padding-top:20px;">
+  <div class="section-header hidden">
+    <div class="section-tag">Market Opportunity</div>
+    <h2>Enterprise AI Market <span class="gradient-text">Growth</span></h2>
+    <p>The enterprise knowledge management AI market is exploding — from $2.4B to $23.6B by 2027</p>
+  </div>
+
+  <div class="glass-card hidden" style="padding:40px;">
+    <div class="market-chart" id="market-chart" style="margin-bottom:12px;">
+      <div class="market-bar-group">
+        <div class="market-bar" id="bar-2022" style="height:0%;">
+          <span class="market-bar-value">$2.4B</span>
+        </div>
+        <div class="market-bar-year">2022</div>
+      </div>
+      <div class="market-bar-group">
+        <div class="market-bar" id="bar-2023" style="height:0%; background: linear-gradient(180deg, #7C3AED, #3B82F6);">
+          <span class="market-bar-value">$4.1B</span>
+        </div>
+        <div class="market-bar-year">2023</div>
+      </div>
+      <div class="market-bar-group">
+        <div class="market-bar" id="bar-2024" style="height:0%; background: linear-gradient(180deg, #3B82F6, #06B6D4);">
+          <span class="market-bar-value">$7.8B</span>
+        </div>
+        <div class="market-bar-year">2024</div>
+      </div>
+      <div class="market-bar-group">
+        <div class="market-bar" id="bar-2025" style="height:0%; background: linear-gradient(180deg, #06B6D4, #10B981);">
+          <span class="market-bar-value">$12.3B</span>
+        </div>
+        <div class="market-bar-year">2025</div>
+      </div>
+      <div class="market-bar-group">
+        <div class="market-bar" id="bar-2026" style="height:0%; background: linear-gradient(180deg, #10B981, #F59E0B);">
+          <span class="market-bar-value">$17.9B</span>
+        </div>
+        <div class="market-bar-year">2026</div>
+      </div>
+      <div class="market-bar-group">
+        <div class="market-bar" id="bar-2027" style="height:0%; background: linear-gradient(180deg, #F59E0B, #F43F5E);">
+          <span class="market-bar-value">$23.6B</span>
+        </div>
+        <div class="market-bar-year">2027 (est.)</div>
+      </div>
+    </div>
+
+    <div style="display:flex; justify-content:center; gap:32px; margin-top:20px; flex-wrap:wrap;">
+      <div style="text-align:center;">
+        <div style="font-size:1.8rem; font-weight:800; color:var(--emerald);">9.8× Growth</div>
+        <div style="font-size:0.8rem; color:var(--white-60);">5-Year Market Expansion</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:1.8rem; font-weight:800; color:var(--cyan);">58% CAGR</div>
+        <div style="font-size:0.8rem; color:var(--white-60);">Compound Annual Growth</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:1.8rem; font-weight:800; color:var(--amber);">$23.6B</div>
+        <div style="font-size:0.8rem; color:var(--white-60);">Market Size by 2027</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonial Quote -->
+<section class="section" style="padding-top:0;">
+  <div class="callout callout-cyan hidden" style="max-width:800px; margin:0 auto; text-align:center;">
+    <div style="font-size:3rem; margin-bottom:16px; opacity:0.4;">"</div>
+    <blockquote style="font-size:1.3rem; font-weight:500; color:var(--white); line-height:1.7; margin-bottom:20px;">
+      We have incredible institutional knowledge — but it's trapped in documents that no one can find
+      when they need them. Every week, we reinvent solutions we've already built.
+    </blockquote>
+    <cite style="font-size:0.9rem; color:var(--white-60);">— VP of Engineering, Mid-size Tech Company (composite interview)</cite>
+  </div>
+</section>
+
+<!-- What This Costs Companies -->
+<section class="section" style="padding-top:20px;">
+  <div class="section-header hidden">
+    <div class="section-tag">Financial Impact</div>
+    <h2>What This <span class="gradient-text-warm">Costs Companies</span></h2>
+  </div>
+
+  <div class="cost-breakdown hidden">
+    <div class="cost-item delay-1">
+      <div style="font-size:2rem;">⏱️</div>
+      <div>
+        <div class="cost-amount">$28,000</div>
+        <div style="font-size:0.85rem; color:var(--white-60);">Per employee per year in lost productivity<br />(1.8 hrs/day × 250 work days × $62/hr avg)</div>
+      </div>
+    </div>
+    <div class="cost-item delay-2">
+      <div style="font-size:2rem;">👥</div>
+      <div>
+        <div class="cost-amount">$7M+</div>
+        <div style="font-size:0.85rem; color:var(--white-60);">Annual cost for a 250-person tech company<br />just from information search inefficiency</div>
+      </div>
+    </div>
+    <div class="cost-item delay-3">
+      <div style="font-size:2rem;">🚀</div>
+      <div>
+        <div class="cost-amount">3–6 months</div>
+        <div style="font-size:0.85rem; color:var(--white-60);">Longer new hire ramp-up due to inaccessible<br />institutional knowledge and documentation</div>
+      </div>
+    </div>
+    <div class="cost-item delay-4">
+      <div style="font-size:2rem;">⚠️</div>
+      <div>
+        <div class="cost-amount">$4.5M avg</div>
+        <div style="font-size:0.85rem; color:var(--white-60);">Data breach cost when compliance docs<br />aren't surfaced at critical decision points</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center; margin-top:48px;" class="hidden delay-3">
+    <div class="callout callout-purple" style="display:inline-block; padding:24px 40px;">
+      <h3 style="margin-bottom:8px;">RAGixAI's Projected ROI</h3>
+      <p style="font-size:1rem; margin:0;">
+        Reduce search time by <strong style="color:var(--emerald);">60–80%</strong> →
+        Save <strong style="color:var(--emerald);">$4M–$5.6M</strong> annually for a 250-person company
+      </p>
+    </div>
+    <div style="margin-top:24px;">
+      <a href="solution.html" class="btn btn-primary">💡 See Our Solution →</a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-logo">RAGixAI</div>
+    <ul class="footer-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="problem.html">Problem</a></li>
+      <li><a href="solution.html">Solution</a></li>
+      <li><a href="pipeline.html">Pipeline</a></li>
+      <li><a href="evaluation.html">Evaluation</a></li>
+      <li><a href="aws.html">AWS</a></li>
+      <li><a href="roadmap.html">Roadmap</a></li>
+    </ul>
+    <p class="footer-info">RAGixAI — Enterprise Knowledge Base with RAG &amp; Evaluation · Capstone Project 2025–2026</p>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+  // Market chart animation
+  const chartObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const bars = [
+          { id: 'bar-2022', height: 10 },
+          { id: 'bar-2023', height: 17 },
+          { id: 'bar-2024', height: 33 },
+          { id: 'bar-2025', height: 52 },
+          { id: 'bar-2026', height: 76 },
+          { id: 'bar-2027', height: 100 },
+        ];
+        bars.forEach((b, i) => {
+          setTimeout(() => {
+            const el = document.getElementById(b.id);
+            if (el) el.style.height = b.height + '%';
+          }, i * 150);
+        });
+        chartObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.3 });
+
+  const chart = document.getElementById('market-chart');
+  if (chart) chartObserver.observe(chart);
+</script>
+</body>
+</html>

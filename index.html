@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RAGixAI — Enterprise Knowledge Base</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* ---- Index-specific styles ---- */
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(124, 58, 237, 0.15);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      color: var(--lavender);
+      padding: 8px 20px;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 28px;
+      animation: fadeInUp 0.8s ease forwards;
+    }
+
+    .hero-title {
+      font-size: clamp(2.8rem, 6vw, 5rem);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 24px;
+      animation: fadeInUp 0.8s ease 0.2s both;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      color: var(--white-60);
+      max-width: 650px;
+      margin: 0 auto 40px;
+      animation: fadeInUp 0.8s ease 0.4s both;
+    }
+
+    .hero-ctas {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeInUp 0.8s ease 0.6s both;
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--glass-border);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--border-radius-lg);
+      overflow: hidden;
+      margin-top: 80px;
+      animation: fadeInUp 0.8s ease 0.8s both;
+    }
+
+    .hero-stat-item {
+      background: var(--glass-bg);
+      padding: 28px 20px;
+      text-align: center;
+      backdrop-filter: var(--glass-blur);
+      transition: var(--transition);
+    }
+
+    .hero-stat-item:hover {
+      background: var(--bg-card-hover);
+    }
+
+    .hero-stat-num {
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      font-weight: 800;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+    }
+
+    .hero-stat-label {
+      font-size: 0.8rem;
+      color: var(--white-60);
+      margin-top: 8px;
+      font-weight: 500;
+    }
+
+    /* ---- What We're Building ---- */
+    .build-card {
+      padding: 36px 28px;
+      border-radius: var(--border-radius-lg);
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .build-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .build-card:hover::before { opacity: 1; }
+
+    .build-card-1::before { background: var(--gradient-primary); }
+    .build-card-2::before { background: var(--gradient-warm); }
+    .build-card-3::before { background: linear-gradient(90deg, var(--emerald), var(--cyan)); }
+
+    .build-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--glass-border);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    }
+
+    .build-card-icon {
+      font-size: 2.8rem;
+      margin-bottom: 20px;
+      display: block;
+      line-height: 1;
+    }
+
+    .build-card h3 {
+      margin-bottom: 12px;
+      font-size: 1.2rem;
+    }
+
+    .build-card p {
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+
+    .build-card ul {
+      list-style: none;
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .build-card ul li {
+      font-size: 0.85rem;
+      color: var(--white-60);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .build-card ul li::before {
+      content: '→';
+      color: var(--cyan);
+      font-weight: 700;
+    }
+
+    /* ---- Mini Pipeline ---- */
+    .mini-pipeline {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding: 32px 0;
+      scrollbar-width: thin;
+    }
+
+    .mini-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      cursor: default;
+      transition: var(--transition);
+    }
+
+    .mini-step:hover { transform: translateY(-4px); }
+
+    .mini-step-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--glass-bg);
+      border: 2px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      transition: var(--transition);
+      position: relative;
+    }
+
+    .mini-step:hover .mini-step-icon {
+      background: rgba(124, 58, 237, 0.15);
+      border-color: var(--purple);
+      box-shadow: 0 0 20px rgba(124, 58, 237, 0.4);
+    }
+
+    .mini-step-num {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--gradient-primary);
+      font-size: 0.65rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .mini-step-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--white-60);
+      text-align: center;
+      max-width: 70px;
+    }
+
+    .mini-arrow {
+      width: 40px;
+      height: 2px;
+      flex-shrink: 0;
+      position: relative;
+      background: linear-gradient(90deg, var(--purple), var(--cyan));
+      overflow: hidden;
+    }
+
+    .mini-arrow::after {
+      content: '▶';
+      position: absolute;
+      right: -8px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.6rem;
+      color: var(--cyan);
+    }
+
+    .mini-arrow-shimmer {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+      animation: shimmer 2s infinite;
+    }
+
+    /* ---- Claude Code Callout ---- */
+    .claude-callout {
+      background: linear-gradient(135deg,
+        rgba(124, 58, 237, 0.1) 0%,
+        rgba(59, 130, 246, 0.08) 50%,
+        rgba(6, 182, 212, 0.06) 100%);
+      border: 1px solid rgba(124, 58, 237, 0.25);
+      border-radius: var(--border-radius-lg);
+      padding: 60px 48px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .claude-callout::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(
+        from 0deg at 50% 50%,
+        rgba(124, 58, 237, 0.05),
+        rgba(6, 182, 212, 0.05),
+        rgba(124, 58, 237, 0.05)
+      );
+      animation: rotateSlow 20s linear infinite;
+    }
+
+    .claude-callout > * { position: relative; z-index: 1; }
+
+    .feature-bullets {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 32px;
+    }
+
+    .feature-bullet {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--border-radius-sm);
+      transition: var(--transition);
+    }
+
+    .feature-bullet:hover {
+      border-color: rgba(124, 58, 237, 0.3);
+      background: var(--bg-card-hover);
+    }
+
+    .feature-bullet span {
+      font-size: 0.9rem;
+      color: var(--white-60);
+    }
+
+    @media (max-width: 768px) {
+      .hero-stats { grid-template-columns: repeat(2, 1fr); }
+      .feature-bullets { grid-template-columns: 1fr; }
+      .mini-pipeline { justify-content: flex-start; padding: 16px; }
+      .mini-arrow { width: 20px; }
+      .claude-callout { padding: 32px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav" id="main-nav">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo">RAGixAI</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="problem.html">Problem</a></li>
+      <li><a href="solution.html">Solution</a></li>
+      <li><a href="pipeline.html">Pipeline</a></li>
+      <li><a href="evaluation.html">Evaluation</a></li>
+      <li><a href="aws.html">AWS</a></li>
+      <li><a href="roadmap.html" class="nav-cta">Roadmap</a></li>
+    </ul>
+    <div class="nav-toggle" id="nav-toggle">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero" style="min-height:100vh;">
+  <canvas id="hero-canvas" class="hero-canvas"></canvas>
+  <div class="hero-gradient-mesh"></div>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      🚀 Capstone Project · Enterprise AI · 2025–2026
+    </div>
+
+    <h1 class="hero-title">
+      Transforming <span class="gradient-text">50,000+&nbsp;Documents</span><br />
+      into <span class="gradient-text-warm">Instant Intelligence</span>
+    </h1>
+
+    <p class="hero-subtitle">
+      RAGixAI is an enterprise knowledge assistant powered by Retrieval-Augmented Generation —
+      grounding every answer in your actual documents with precise citations.
+      Built on AWS Bedrock, automated with Claude Code.
+    </p>
+
+    <div class="hero-ctas">
+      <a href="solution.html" class="btn btn-primary btn-glow">
+        🔍 Explore the Solution
+      </a>
+      <a href="pipeline.html" class="btn btn-outline">
+        ⚡ View Pipeline Demo
+      </a>
+    </div>
+
+    <div class="hero-stats">
+      <div class="hero-stat-item">
+        <div class="hero-stat-num">
+          <span class="counter" data-target="50000" data-suffix="+">0+</span>
+        </div>
+        <div class="hero-stat-label">Documents Processed</div>
+      </div>
+      <div class="hero-stat-item">
+        <div class="hero-stat-num">
+          <span class="counter" data-target="1" data-suffix=".8hrs/day">0</span>
+        </div>
+        <div class="hero-stat-label">Productivity Wasted</div>
+      </div>
+      <div class="hero-stat-item">
+        <div class="hero-stat-num">
+          <span class="counter" data-target="87" data-suffix="%">0%</span>
+        </div>
+        <div class="hero-stat-label">Retrieval Accuracy Target</div>
+      </div>
+      <div class="hero-stat-item">
+        <div class="hero-stat-num">
+          <span class="counter" data-target="6" data-suffix=" AWS">0</span>
+        </div>
+        <div class="hero-stat-label">Core AWS Services</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- What We're Building -->
+<section class="section">
+  <div class="section-header hidden">
+    <div class="section-tag">The Project</div>
+    <h2>What We're <span class="gradient-text">Building</span></h2>
+    <p>Three interconnected systems working in harmony to solve the enterprise knowledge crisis</p>
+  </div>
+
+  <div class="cards-grid-3">
+    <div class="build-card build-card-1 hidden delay-1">
+      <span class="build-card-icon">🧠</span>
+      <h3>RAG Pipeline</h3>
+      <p>A production-ready Retrieval-Augmented Generation pipeline that ingests, chunks, embeds, and retrieves enterprise documentation with semantic precision.</p>
+      <ul>
+        <li>Semantic + hybrid retrieval</li>
+        <li>Cross-encoder re-ranking</li>
+        <li>Citation-grounded answers</li>
+        <li>Multi-source ingestion</li>
+      </ul>
+    </div>
+
+    <div class="build-card build-card-2 hidden delay-2">
+      <span class="build-card-icon">📊</span>
+      <h3>Evaluation Framework</h3>
+      <p>A rigorous RAGAS-based evaluation system comparing multiple configurations across faithfulness, relevancy, context precision, and latency metrics.</p>
+      <ul>
+        <li>6 RAGAS metrics tracked</li>
+        <li>A/B configuration testing</li>
+        <li>Automated scoring pipeline</li>
+        <li>Baseline vs target comparison</li>
+      </ul>
+    </div>
+
+    <div class="build-card build-card-3 hidden delay-3">
+      <span class="build-card-icon">☁️</span>
+      <h3>AWS Integration</h3>
+      <p>Enterprise-grade infrastructure on AWS using Bedrock for LLM inference, OpenSearch for vector storage, and Step Functions for orchestration.</p>
+      <ul>
+        <li>Amazon Bedrock (Claude)</li>
+        <li>OpenSearch vector store</li>
+        <li>Textract PDF parsing</li>
+        <li>Step Functions workflow</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Our Approach - Pipeline Preview -->
+<section class="section">
+  <div class="section-header hidden">
+    <div class="section-tag">The Approach</div>
+    <h2>RAG Pipeline <span class="gradient-text">Overview</span></h2>
+    <p>From raw documents to cited answers — six stages of intelligent processing</p>
+  </div>
+
+  <div class="mini-pipeline hidden">
+    <div class="mini-step">
+      <div class="mini-step-icon">
+        <span class="mini-step-num">1</span>
+        📄
+      </div>
+      <div class="mini-step-label">Ingest</div>
+    </div>
+    <div class="mini-arrow"><div class="mini-arrow-shimmer"></div></div>
+
+    <div class="mini-step">
+      <div class="mini-step-icon">
+        <span class="mini-step-num">2</span>
+        ✂️
+      </div>
+      <div class="mini-step-label">Chunk</div>
+    </div>
+    <div class="mini-arrow"><div class="mini-arrow-shimmer"></div></div>
+
+    <div class="mini-step">
+      <div class="mini-step-icon">
+        <span class="mini-step-num">3</span>
+        🔢
+      </div>
+      <div class="mini-step-label">Embed</div>
+    </div>
+    <div class="mini-arrow"><div class="mini-arrow-shimmer"></div></div>
+
+    <div class="mini-step">
+      <div class="mini-step-icon">
+        <span class="mini-step-num">4</span>
+        🔍
+      </div>
+      <div class="mini-step-label">Retrieve</div>
+    </div>
+    <div class="mini-arrow"><div class="mini-arrow-shimmer"></div></div>
+
+    <div class="mini-step">
+      <div class="mini-step-icon">
+        <span class="mini-step-num">5</span>
+        📈
+      </div>
+      <div class="mini-step-label">Rerank</div>
+    </div>
+    <div class="mini-arrow"><div class="mini-arrow-shimmer"></div></div>
+
+    <div class="mini-step">
+      <div class="mini-step-icon">
+        <span class="mini-step-num">6</span>
+        💬
+      </div>
+      <div class="mini-step-label">Answer</div>
+    </div>
+  </div>
+
+  <div class="text-center mt-32 hidden delay-2">
+    <a href="pipeline.html" class="btn btn-outline">
+      🔬 Explore Full Pipeline →
+    </a>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Claude Code Callout -->
+<section style="padding: 80px 24px; max-width: 1280px; margin: 0 auto;">
+  <div class="claude-callout hidden">
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;">
+      <div>
+        <div class="section-tag" style="margin-bottom: 16px;">Automation First</div>
+        <h2 style="margin-bottom: 20px;">
+          Powered by <span class="gradient-text">Claude Code Skills</span><br />
+          — Zero Manual Touch
+        </h2>
+        <p style="margin-bottom: 24px;">
+          The entire RAGixAI pipeline — from document ingestion to final deployment —
+          is automated using custom Claude Code slash commands (.md skill files).
+          No manual configuration. No human bottlenecks. Pure AI-driven orchestration.
+        </p>
+        <a href="solution.html#skills" class="btn btn-primary">
+          View All 8 Custom Skills →
+        </a>
+      </div>
+
+      <div>
+        <div class="feature-bullets">
+          <div class="feature-bullet">
+            <span>🤖</span>
+            <span>Auto-ingest from Confluence, Google Docs, Notion, PDF</span>
+          </div>
+          <div class="feature-bullet">
+            <span>⚡</span>
+            <span>Automated chunking strategy optimization</span>
+          </div>
+          <div class="feature-bullet">
+            <span>📊</span>
+            <span>RAGAS evaluation runs automatically</span>
+          </div>
+          <div class="feature-bullet">
+            <span>🔄</span>
+            <span>A/B configuration testing with one command</span>
+          </div>
+          <div class="feature-bullet">
+            <span>☁️</span>
+            <span>One-command AWS Bedrock deployment</span>
+          </div>
+          <div class="feature-bullet">
+            <span>📈</span>
+            <span>Auto-generated evaluation reports</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    @media (max-width: 768px) {
+      .claude-callout > div > div { grid-template-columns: 1fr !important; }
+    }
+  </style>
+</section>
+
+<!-- Problem Teaser -->
+<section class="section">
+  <div class="section-header hidden">
+    <div class="section-tag">The Problem</div>
+    <h2>The <span class="gradient-text-warm">$47B Knowledge Crisis</span></h2>
+    <p>Mid-size tech companies bleed productivity every single day because information is buried</p>
+  </div>
+
+  <div class="cards-grid-4 hidden">
+    <div class="glass-card text-center delay-1">
+      <div style="font-size:2.5rem; margin-bottom:12px;">⏰</div>
+      <div class="stat-number" style="font-size:2.2rem;">1.8hrs</div>
+      <div class="stat-label">wasted per employee per day searching for info</div>
+    </div>
+    <div class="glass-card text-center delay-2">
+      <div style="font-size:2.5rem; margin-bottom:12px;">💸</div>
+      <div class="stat-number" style="font-size:2.2rem;">$28K</div>
+      <div class="stat-label">annual productivity loss per employee</div>
+    </div>
+    <div class="glass-card text-center delay-3">
+      <div style="font-size:2.5rem; margin-bottom:12px;">😤</div>
+      <div class="stat-number" style="font-size:2.2rem;">73%</div>
+      <div class="stat-label">of employees can't find information quickly</div>
+    </div>
+    <div class="glass-card text-center delay-4">
+      <div style="font-size:2.5rem; margin-bottom:12px;">📑</div>
+      <div class="stat-number" style="font-size:2.2rem;">4+</div>
+      <div class="stat-label">different systems employees must search across</div>
+    </div>
+  </div>
+
+  <div class="text-center mt-48 hidden delay-3">
+    <a href="problem.html" class="btn btn-outline">
+      📉 See Full Problem Analysis →
+    </a>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-logo">RAGixAI</div>
+    <ul class="footer-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="problem.html">Problem</a></li>
+      <li><a href="solution.html">Solution</a></li>
+      <li><a href="pipeline.html">Pipeline</a></li>
+      <li><a href="evaluation.html">Evaluation</a></li>
+      <li><a href="aws.html">AWS</a></li>
+      <li><a href="roadmap.html">Roadmap</a></li>
+    </ul>
+    <p class="footer-info">
+      RAGixAI — Enterprise Knowledge Base with RAG &amp; Evaluation &nbsp;·&nbsp;
+      Capstone Project 2025–2026 &nbsp;·&nbsp; Built with Claude Code
+    </p>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

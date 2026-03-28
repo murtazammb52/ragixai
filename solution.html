@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Solution — RAGixAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .solution-hero {
+      min-height: 65vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: calc(var(--nav-height) + 40px) 24px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .solution-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 50% at 20% 50%, rgba(124, 58, 237, 0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 70% 50% at 80% 50%, rgba(6, 182, 212, 0.1) 0%, transparent 60%);
+    }
+
+    /* ---- What is RAG ---- */
+    .rag-visual {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: wrap;
+      margin-top: 40px;
+    }
+
+    .rag-step-box {
+      width: 200px;
+      padding: 24px 16px;
+      text-align: center;
+      border-radius: var(--border-radius);
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      transition: var(--transition);
+      flex-shrink: 0;
+    }
+
+    .rag-step-box:hover {
+      transform: translateY(-4px);
+      border-color: rgba(124, 58, 237, 0.3);
+    }
+
+    .rag-step-num {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--gradient-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin: 0 auto 12px;
+    }
+
+    .rag-arrow {
+      width: 50px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--purple), var(--cyan));
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .rag-arrow::after {
+      content: '▶';
+      position: absolute;
+      right: -10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.7rem;
+      color: var(--cyan);
+    }
+
+    /* ---- Architecture Components ---- */
+    .arch-card {
+      padding: 32px 28px;
+      border-radius: var(--border-radius);
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .arch-card::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .arch-card:hover::after { opacity: 1; }
+    .arch-1::after { background: var(--gradient-primary); }
+    .arch-2::after { background: linear-gradient(180deg, var(--emerald), var(--cyan)); }
+    .arch-3::after { background: linear-gradient(180deg, var(--cyan), var(--electric-blue)); }
+    .arch-4::after { background: linear-gradient(180deg, var(--electric-blue), var(--purple)); }
+    .arch-5::after { background: var(--gradient-warm); }
+
+    .arch-card:hover {
+      transform: translateX(4px);
+      border-color: rgba(124, 58, 237, 0.2);
+      background: var(--bg-card-hover);
+    }
+
+    .arch-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    /* ---- Claude Code Skills Section ---- */
+    .skills-section {
+      background: linear-gradient(135deg,
+        rgba(0,0,0,0.4) 0%,
+        rgba(124, 58, 237, 0.06) 50%,
+        rgba(0,0,0,0.4) 100%);
+      border: 1px solid rgba(124, 58, 237, 0.2);
+      border-radius: var(--border-radius-lg);
+      padding: 60px 48px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .skills-header {
+      text-align: center;
+      margin-bottom: 48px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .skill-card-v2 {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(124, 58, 237, 0.2);
+      border-radius: var(--border-radius);
+      padding: 20px 24px;
+      transition: var(--transition);
+      font-family: var(--font-mono);
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .skill-card-v2:hover {
+      border-color: var(--cyan);
+      background: rgba(6, 182, 212, 0.07);
+      transform: translateX(4px);
+      box-shadow: -4px 0 20px rgba(6, 182, 212, 0.15);
+    }
+
+    .skill-icon-box {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--border-radius-sm);
+      background: rgba(124, 58, 237, 0.2);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .skill-name {
+      color: var(--cyan);
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .skill-description {
+      color: var(--white-60);
+      font-size: 0.8rem;
+      font-family: var(--font-primary);
+      line-height: 1.5;
+    }
+
+    /* ---- No Manual Touch ---- */
+    .no-manual-section {
+      padding: 48px;
+      border-radius: var(--border-radius-lg);
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.06), rgba(6, 182, 212, 0.06));
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      text-align: center;
+    }
+
+    .automation-flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 32px;
+    }
+
+    .auto-step {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      font-size: 0.85rem;
+      color: var(--white-60);
+      transition: var(--transition);
+    }
+
+    .auto-step:hover {
+      border-color: var(--emerald);
+      color: var(--white);
+    }
+
+    .auto-arrow-sm {
+      color: var(--emerald);
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    /* ---- Comparison ---- */
+    .comparison-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .comparison-col {
+      padding: 32px;
+      border-radius: var(--border-radius);
+    }
+
+    .col-bad {
+      background: rgba(244, 63, 94, 0.05);
+      border: 1px solid rgba(244, 63, 94, 0.2);
+    }
+
+    .col-good {
+      background: rgba(16, 185, 129, 0.05);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .comparison-col h3 {
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .comparison-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 14px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .comparison-row:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .cr-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 2px; }
+    .cr-text { font-size: 0.88rem; color: var(--white-60); }
+
+    @media (max-width: 768px) {
+      .skills-grid { grid-template-columns: 1fr; }
+      .comparison-cols { grid-template-columns: 1fr; }
+      .rag-visual { flex-direction: column; }
+      .rag-arrow { width: 2px; height: 40px; background: linear-gradient(180deg, var(--purple), var(--cyan)); }
+      .rag-arrow::after { right: auto; top: auto; bottom: -10px; left: 50%; transform: translateX(-50%) rotate(90deg); }
+      .skills-section { padding: 32px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav" id="main-nav">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo">RAGixAI</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="problem.html">Problem</a></li>
+      <li><a href="solution.html">Solution</a></li>
+      <li><a href="pipeline.html">Pipeline</a></li>
+      <li><a href="evaluation.html">Evaluation</a></li>
+      <li><a href="aws.html">AWS</a></li>
+      <li><a href="roadmap.html" class="nav-cta">Roadmap</a></li>
+    </ul>
+    <div class="nav-toggle" id="nav-toggle"><span></span><span></span><span></span></div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="solution-hero">
+  <div style="position:relative; z-index:2; max-width:860px;">
+    <div class="section-tag" style="margin-bottom:20px;">The Solution</div>
+    <h1 style="margin-bottom:20px; line-height:1.1;">
+      <span class="gradient-text">RAGixAI:</span> Retrieval-Augmented<br />
+      Generation at Enterprise Scale
+    </h1>
+    <p style="font-size:1.15rem; max-width:640px; margin:0 auto 36px;">
+      A production-ready AI assistant that grounds every answer in your actual documents,
+      delivers source citations, and eliminates the information search problem permanently.
+    </p>
+    <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
+      <a href="pipeline.html" class="btn btn-primary">⚡ See the Pipeline</a>
+      <a href="#skills" class="btn btn-outline">🤖 View Claude Code Skills</a>
+    </div>
+  </div>
+</section>
+
+<!-- What is RAG -->
+<section class="section">
+  <div class="section-header hidden">
+    <div class="section-tag">The Technology</div>
+    <h2>What is <span class="gradient-text">RAG</span>?</h2>
+    <p>Retrieval-Augmented Generation combines the precision of search with the fluency of large language models</p>
+  </div>
+
+  <div class="rag-visual hidden">
+    <div class="rag-step-box delay-1">
+      <div class="rag-step-num">1</div>
+      <div style="font-size:2rem; margin-bottom:10px;">🔍</div>
+      <h4 style="margin-bottom:8px; font-size:1rem;">Retrieve</h4>
+      <p style="font-size:0.82rem;">Find the most semantically relevant chunks from your knowledge base using vector similarity</p>
+    </div>
+    <div class="rag-arrow"></div>
+    <div class="rag-step-box delay-2">
+      <div class="rag-step-num">2</div>
+      <div style="font-size:2rem; margin-bottom:10px;">📋</div>
+      <h4 style="margin-bottom:8px; font-size:1rem;">Augment</h4>
+      <p style="font-size:0.82rem;">Inject the retrieved context into the LLM's prompt so it has authoritative information to reference</p>
+    </div>
+    <div class="rag-arrow"></div>
+    <div class="rag-step-box delay-3">
+      <div class="rag-step-num">3</div>
+      <div style="font-size:2rem; margin-bottom:10px;">💬</div>
+      <h4 style="margin-bottom:8px; font-size:1rem;">Generate</h4>
+      <p style="font-size:0.82rem;">LLM generates a grounded answer using only the retrieved context — with source citations included</p>
+    </div>
+  </div>
+
+  <div class="callout callout-purple mt-32 hidden delay-2" style="text-align:center; max-width:700px; margin:32px auto 0;">
+    <strong>Key Insight:</strong> RAG eliminates hallucinations by forcing the LLM to answer
+    <em>only from retrieved documents</em>. If the answer isn't in the KB, the system says so.
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Solution Architecture -->
+<section class="section">
+  <div class="section-header hidden">
+    <div class="section-tag">Architecture</div>
+    <h2>Our Solution <span class="gradient-text">Architecture</span></h2>
+    <p>Five integrated components working together to deliver enterprise-grade knowledge access</p>
+  </div>
+
+  <div style="display:flex; flex-direction:column; gap:16px;">
+    <div class="arch-card arch-1 hidden delay-1">
+      <div class="arch-header">
+        <div class="icon-circle icon-circle-purple">📥</div>
+        <div>
+          <h3 style="font-size:1.1rem; margin-bottom:4px;">1. Document Ingestion</h3>
+          <div class="badge badge-purple">Multi-source</div>
+        </div>
+      </div>
+      <p style="font-size:0.9rem;">Connectors for Confluence, Google Docs, Notion, and PDFs via Amazon Textract. Supports incremental updates — only new/changed documents are re-processed. Handles 200+ file formats with metadata extraction.</p>
+    </div>
+
+    <div class="arch-card arch-2 hidden delay-2">
+      <div class="arch-header">
+        <div class="icon-circle icon-circle-emerald">✂️</div>
+        <div>
+          <h3 style="font-size:1.1rem; margin-bottom:4px;">2. Semantic Chunking</h3>
+          <div class="badge badge-emerald">Context-Aware</div>
+        </div>
+      </div>
+      <p style="font-size:0.9rem;">Three chunking strategies evaluated — Fixed-size (512 tokens), Recursive Character, and Semantic — with automatic optimization via our <code style="color:var(--cyan); background:rgba(6,182,212,0.1); padding:2px 6px; border-radius:4px;">/chunk-optimize</code> skill. Preserves semantic boundaries so chunks remain meaningful in isolation.</p>
+    </div>
+
+    <div class="arch-card arch-3 hidden delay-3">
+      <div class="arch-header">
+        <div class="icon-circle icon-circle-cyan">🔢</div>
+        <div>
+          <h3 style="font-size:1.1rem; margin-bottom:4px;">3. Vector Embeddings</h3>
+          <div class="badge badge-cyan">Dense Retrieval</div>
+        </div>
+      </div>
+      <p style="font-size:0.9rem;">Each chunk is encoded into a high-dimensional vector using Amazon Titan Embeddings v2 (default) or Cohere Embed-v3. Embeddings capture semantic meaning, enabling "find by concept" rather than exact keyword match. Stored in Amazon OpenSearch with k-NN indexing.</p>
+    </div>
+
+    <div class="arch-card arch-4 hidden delay-4">
+      <div class="arch-header">
+        <div class="icon-circle icon-circle-blue">⚡</div>
+        <div>
+          <h3 style="font-size:1.1rem; margin-bottom:4px;">4. Hybrid Retrieval + Re-ranking</h3>
+          <div class="badge badge-blue">BM25 + Dense</div>
+        </div>
+      </div>
+      <p style="font-size:0.9rem;">Combines BM25 sparse retrieval (exact keyword precision) with dense semantic search (conceptual similarity) via Reciprocal Rank Fusion. Top-k candidates are re-ranked by a cross-encoder for maximum relevance. Consistently outperforms either method alone.</p>
+    </div>
+
+    <div class="arch-card arch-5 hidden delay-5">
+      <div class="arch-header">
+        <div class="icon-circle icon-circle-coral">💬</div>
+        <div>
+          <h3 style="font-size:1.1rem; margin-bottom:4px;">5. LLM Generation with Citations</h3>
+          <div class="badge badge-coral">Claude on Bedrock</div>
+        </div>
+      </div>
+      <p style="font-size:0.9rem;">Claude 3.5 Sonnet via Amazon Bedrock generates grounded responses using retrieved context. Every answer includes inline citations linking to source documents. The system refuses to answer when context is insufficient — no hallucinations.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Claude Code Skills Section -->
+<section class="section" id="skills">
+  <div class="skills-section hidden">
+    <div class="skills-header">
+      <div class="section-tag" style="margin-bottom:16px;">Automation Engine</div>
+      <h2 style="margin-bottom:16px;">
+        Powered by <span class="gradient-text">Claude Code Skills</span>
+      </h2>
+      <p style="max-width:650px; margin:0 auto;">
+        The <strong style="color:var(--white);">entire RAGixAI pipeline</strong> is automated using custom Claude Code
+        slash commands — <code style="color:var(--cyan);">.md</code> skill files that orchestrate every step
+        from data ingestion to deployment. Zero manual configuration. Zero human bottlenecks.
+      </p>
+    </div>
+
+    <div class="skills-grid">
+      <div class="skill-card-v2 hidden delay-1">
+        <div class="skill-icon-box">📥</div>
+        <div>
+          <div class="skill-name">/ingest-docs</div>
+          <div class="skill-description">Auto-ingest documents from Confluence, Google Docs, Notion, and PDFs. Handles authentication, pagination, incremental sync, and metadata extraction without manual configuration.</div>
+        </div>
+      </div>
+
+      <div class="skill-card-v2 hidden delay-2">
+        <div class="skill-icon-box">✂️</div>
+        <div>
+          <div class="skill-name">/chunk-optimize</div>
+          <div class="skill-description">Automatically tests all three chunking strategies (Fixed 512-token, Recursive Character, Semantic) against your dataset and reports optimal configuration with RAGAS scores.</div>
+        </div>
+      </div>
+
+      <div class="skill-card-v2 hidden delay-3">
+        <div class="skill-icon-box">🔢</div>
+        <div>
+          <div class="skill-name">/embed-compare</div>
+          <div class="skill-description">Benchmarks Amazon Titan Embeddings v2, Cohere Embed-v3, and OpenAI text-embedding-3 on your corpus. Reports speed, accuracy, dimensionality, and cost-per-token metrics.</div>
+        </div>
+      </div>
+
+      <div class="skill-card-v2 hidden delay-4">
+        <div class="skill-icon-box">📊</div>
+        <div>
+          <div class="skill-name">/evaluate-rag</div>
+          <div class="skill-description">Runs the full RAGAS evaluation suite — Faithfulness, Answer Relevancy, Context Precision, Context Recall, Answer Correctness, Latency — on any pipeline configuration.</div>
+        </div>
+      </div>
+
+      <div class="skill-card-v2 hidden delay-2">
+        <div class="skill-icon-box">🔄</div>
+        <div>
+          <div class="skill-name">/compare-options</div>
+          <div class="skill-description">A/B tests multiple RAG configurations in parallel — different chunking strategies, embedding models, retrieval methods, and re-ranking configs — with side-by-side metric comparison.</div>
+        </div>
+      </div>
+
+      <div class="skill-card-v2 hidden delay-3">
+        <div class="skill-icon-box">☁️</div>
+        <div>
+          <div class="skill-name">/deploy-aws</div>
+          <div class="skill-description">Deploys the complete RAG pipeline to AWS Bedrock + OpenSearch + Lambda + Step Functions from a single command. Handles IAM roles, VPC config, and environment setup automatically.</div>
+        </div>
+      </div>
+
+      <div class="skill-card-v2 hidden delay-4">
+        <div class="skill-icon-box">📋</div>
+        <div>
+          <div class="skill-name">/generate-report</div>
+          <div class="skill-description">Auto-generates a structured evaluation report with charts, metric summaries, configuration comparisons, and recommended optimal setup. Outputs as PDF and HTML.</div>
+        </div>
+      </div>
+
+      <div class="skill-card-v2 hidden delay-5">
+        <div class="skill-icon-box">📡</div>
+        <div>
+          <div class="skill-name">/monitor-pipeline</div>
+          <div class="skill-description">Queries live CloudWatch metrics for the deployed pipeline — latency percentiles, retrieval accuracy trends, token usage, cost per query — with anomaly detection alerts.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- No Manual Touch Philosophy -->
+<section class="section" style="padding-top:0;">
+  <div class="no-manual-section hidden">
+    <div class="section-tag" style="margin-bottom:16px;">Philosophy</div>
+    <h2 style="margin-bottom:16px;">No Manual Touch <span class="gradient-text">Philosophy</span></h2>
+    <p style="max-width:600px; margin:0 auto 16px;">
+      From the moment a document enters the system to the moment the pipeline is live in production —
+      everything is orchestrated by Claude Code. This enables:
+    </p>
+    <ul class="check-list" style="max-width:500px; margin:0 auto 32px; text-align:left;">
+      <li>Reproducible experiments (same command = same result)</li>
+      <li>Rapid iteration (reconfigure and re-evaluate in minutes)</li>
+      <li>Peer review of automation logic (skills are version-controlled .md files)</li>
+      <li>Zero deployment drift between development and production</li>
+    </ul>
+
+    <div class="automation-flow">
+      <div class="auto-step">📥 Ingest</div>
+      <span class="auto-arrow-sm">→</span>
+      <div class="auto-step">✂️ Chunk</div>
+      <span class="auto-arrow-sm">→</span>
+      <div class="auto-step">🔢 Embed</div>
+      <span class="auto-arrow-sm">→</span>
+      <div class="auto-step">📊 Evaluate</div>
+      <span class="auto-arrow-sm">→</span>
+      <div class="auto-step">🔄 Optimize</div>
+      <span class="auto-arrow-sm">→</span>
+      <div class="auto-step">☁️ Deploy</div>
+    </div>
+    <p style="margin-top:16px; font-size:0.85rem; color:var(--emerald);">
+      ✓ Every step automated via Claude Code custom skills
+    </p>
+  </div>
+</section>
+
+<!-- Traditional vs RAGixAI -->
+<section class="section">
+  <div class="section-header hidden">
+    <div class="section-tag">Comparison</div>
+    <h2>Traditional Approach <span class="gradient-text-warm">vs</span> RAGixAI</h2>
+  </div>
+
+  <div class="comparison-cols hidden">
+    <div class="comparison-col col-bad">
+      <h3>❌ Traditional Approach</h3>
+      <div class="comparison-row">
+        <span class="cr-icon">🔤</span>
+        <div class="cr-text">Keyword search returns a list of links, forcing employees to read multiple documents</div>
+      </div>
+      <div class="comparison-row">
+        <span class="cr-icon">🤷</span>
+        <div class="cr-text">No source verification — employees can't tell if information is current or accurate</div>
+      </div>
+      <div class="comparison-row">
+        <span class="cr-icon">🌐</span>
+        <div class="cr-text">Requires searching 4+ different systems (Confluence, Google Docs, Notion, SharePoint)</div>
+      </div>
+      <div class="comparison-row">
+        <span class="cr-icon">⏱️</span>
+        <div class="cr-text">1.8 hours wasted per day, per employee — a massive operational cost</div>
+      </div>
+      <div class="comparison-row">
+        <span class="cr-icon">🤖</span>
+        <div class="cr-text">Basic chatbots hallucinate — confidently giving wrong answers without citations</div>
+      </div>
+      <div class="comparison-row">
+        <span class="cr-icon">🔧</span>
+        <div class="cr-text">Manual pipeline setup — each configuration change requires developer intervention</div>
+      </div>
+    </div>
+
+    <div class="comparison-col col-good">
+      <h3>✅ RAGixAI Approach</h3>
+      <div class="comparison-row">
+        <span class="cr-icon">💬</span>
+        <div class="cr-text">Natural language Q&A with a direct, synthesized answer in seconds</div>
+      </div>
+      <div class="comparison-row">
+        <span class="cr-icon">📎</span>
+        <div class="cr-text">Inline citations linking to source documents — full auditability and trust</div>
+      </div>
+      <div class="comparison-row">
+        <span class="cr-icon">🔗</span>
+        <div class="cr-text">Single unified interface across all knowledge sources, automatically synchronized</div>
+      </div>
+      <div class="comparison-row">
+        <span class="cr-icon">⚡</span>
+        <div class="cr-text">Instant answers with &lt;2s latency — 60–80% reduction in search time</div>
+      </div>
+      <div class="comparison-row">
+        <span class="cr-icon">🛡️</span>
+        <div class="cr-text">Grounded generation — if it's not in the KB, the system says so honestly</div>
+      </div>
+      <div class="comparison-row">
+        <span class="cr-icon">🤖</span>
+        <div class="cr-text">Fully automated via Claude Code skills — reconfigure and redeploy in minutes</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center mt-48 hidden delay-2">
+    <a href="pipeline.html" class="btn btn-primary">⚡ Explore the Full Pipeline →</a>
+    &nbsp;&nbsp;
+    <a href="evaluation.html" class="btn btn-outline">📊 See Evaluation Metrics →</a>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-logo">RAGixAI</div>
+    <ul class="footer-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="problem.html">Problem</a></li>
+      <li><a href="solution.html">Solution</a></li>
+      <li><a href="pipeline.html">Pipeline</a></li>
+      <li><a href="evaluation.html">Evaluation</a></li>
+      <li><a href="aws.html">AWS</a></li>
+      <li><a href="roadmap.html">Roadmap</a></li>
+    </ul>
+    <p class="footer-info">RAGixAI — Enterprise Knowledge Base with RAG &amp; Evaluation · Capstone Project 2025–2026</p>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>
