@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AWS Architecture — RAGixAI</title>
+  <title>AWS Architecture (Stretch Goal) — RAGixAI</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
@@ -346,7 +346,7 @@
       <li><a href="solution.html">Solution</a></li>
       <li><a href="pipeline.html">Pipeline</a></li>
       <li><a href="evaluation.html">Evaluation</a></li>
-      <li><a href="aws.html">AWS</a></li>
+      <li><a href="aws.html" class="active">AWS (Stretch)</a></li>
       <li><a href="roadmap.html" class="nav-cta">Roadmap</a></li>
     </ul>
     <div class="nav-toggle" id="nav-toggle"><span></span><span></span><span></span></div>
@@ -358,7 +358,7 @@
   <div style="position:relative; z-index:2; max-width:800px;">
     <div class="section-tag" style="margin-bottom:20px;">Infrastructure</div>
     <h1 style="margin-bottom:20px;">
-      Built on AWS — <span class="gradient-text">Free Tier Only</span>
+      AWS Architecture <span class="gradient-text-warm" style="font-size:0.55em; font-weight:600; display:inline-block; vertical-align:middle; padding:4px 14px; background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.35); border-radius:8px; margin-left:12px;">Stretch Goal — Phase 2</span>
     </h1>
     <p style="font-size:1.15rem; color:var(--white-60); max-width:660px; margin:0 auto 32px;">
       10 AWS services — every single one within the AWS Free Tier. Zero cost for development,
@@ -370,6 +370,17 @@
     </div>
   </div>
 </section>
+
+<!-- Stretch Goal Banner -->
+<div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(234, 88, 12, 0.1)); border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 12px; padding: 20px 32px; max-width: 1280px; margin: 24px auto; display: flex; align-items: flex-start; gap: 16px;">
+  <span style="font-size: 1.8rem; flex-shrink: 0;">🎯</span>
+  <div>
+    <strong style="color: #F59E0B; font-size: 1rem; display: block; margin-bottom: 6px;">Phase 2 Stretch Goal</strong>
+    <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin: 0; line-height: 1.6;">
+      Our <strong style="color: white;">primary implementation runs fully locally</strong> — ChromaDB, sentence-transformers, and HuggingFace free API on your laptop. AWS deployment is our stretch goal if time permits, leveraging the free-tier services shown below. No AWS account is required for the demo.
+    </p>
+  </div>
+</div>
 
 <!-- Service count stats -->
 <section style="padding: 0 24px 60px; max-width:1280px; margin:0 auto;">
@@ -765,6 +776,64 @@
   </div>
 </section>
 
+<!-- Local vs AWS Comparison -->
+<section class="section" style="padding-top: 0;">
+  <div class="section-header hidden">
+    <div class="section-tag">Stack Comparison</div>
+    <h2>Local Stack <span class="gradient-text-warm">vs</span> AWS Stack</h2>
+    <p>Phase 1 runs locally — Phase 2 (stretch goal) upgrades to AWS</p>
+  </div>
+
+  <div style="overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
+      <thead>
+        <tr style="background: rgba(124,58,237,0.1);">
+          <th style="padding: 14px 16px; text-align: left; border: 1px solid rgba(255,255,255,0.08); color: var(--lavender);">Component</th>
+          <th style="padding: 14px 16px; text-align: left; border: 1px solid rgba(255,255,255,0.08); color: #10B981;">🖥️ Local Stack (Phase 1)</th>
+          <th style="padding: 14px 16px; text-align: left; border: 1px solid rgba(255,255,255,0.08); color: #F59E0B;">☁️ AWS Stack (Phase 2 — Stretch)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background: rgba(255,255,255,0.02);">
+          <td style="padding: 12px 16px; border: 1px solid rgba(255,255,255,0.06); color: rgba(255,255,255,0.7);">Document Loader</td>
+          <td style="padding: 12px 16px; border: 1px solid rgba(255,255,255,0.06); color: #10B981;">pypdf, unstructured</td>
+          <td style="padding: 12px 16px; border: 1px solid rgba(255,255,255,0.06); color: #F59E0B;">Amazon Textract</td>
+        </tr>
+        <tr>
+          <td style="padding: 12px 16px; border: 1px solid rgba(255,255,255,0.06); color: rgba(255,255,255,0.7);">Chunking</td>
+          <td style="padding: 12px 16px; border: 1px solid rgba(255,255,255,0.06); color: #10B981;">LangChain text splitters</td>
+          <td style="padding: 12px 16px; border: 1px solid rgba(255,255,255,0.06); color: #F59E0B;">Lambda + LangChain</td>
+        </tr>
+        <tr style="background: rgba(255,255,255,0.02);">
+          <td style="padding: 12px 16px; border: 1px solid rgba(255,255,255,0.06); color: rgba(255,255,255,0.7);">Embeddings</td>
+          <td style="padding: 12px 16px; border: 1px solid rgba(255,255,255,0.06); color: #10B981;">sentence-transformers (local)</td>
+          <td style="padding: 12px 16px; border: 1px solid rgba(255,255,255,0.06); color: #F59E0B;">Amazon Titan Embeddings v2</td>
+        </tr>
+        <tr>
+          <td style="padding: 12px 16px; border: 1px solid rgba(255,255,255,0.06); color: rgba(255,255,255,0.7);">Vector Store</td>
+          <td style="padding: 12px 16px; border: 1px solid rgba(255,255,255,0.06); color: #10B981;">ChromaDB (local)</td>
+          <td style="padding: 12px 16px; border: 1px solid rgba(255,255,255,0.06); color: #F59E0B;">EC2 t2.micro + ChromaDB</td>
+        </tr>
+        <tr style="background: rgba(255,255,255,0.02);">
+          <td style="padding: 12px 16px; border: 1px solid rgba(255,255,255,0.06); color: rgba(255,255,255,0.7);">LLM</td>
+          <td style="padding: 12px 16px; border: 1px solid rgba(255,255,255,0.06); color: #10B981;">HuggingFace API / Gemini free</td>
+          <td style="padding: 12px 16px; border: 1px solid rgba(255,255,255,0.06); color: #F59E0B;">HuggingFace API (same)</td>
+        </tr>
+        <tr>
+          <td style="padding: 12px 16px; border: 1px solid rgba(255,255,255,0.06); color: rgba(255,255,255,0.7);">Evaluation</td>
+          <td style="padding: 12px 16px; border: 1px solid rgba(255,255,255,0.06); color: #10B981;">RAGAS (local)</td>
+          <td style="padding: 12px 16px; border: 1px solid rgba(255,255,255,0.06); color: #F59E0B;">RAGAS + CloudWatch</td>
+        </tr>
+        <tr style="background: rgba(255,255,255,0.02);">
+          <td style="padding: 12px 16px; border: 1px solid rgba(255,255,255,0.06); color: rgba(255,255,255,0.7);">Cost</td>
+          <td style="padding: 12px 16px; border: 1px solid rgba(255,255,255,0.06); color: #10B981;"><strong>$0 — 100% Free</strong></td>
+          <td style="padding: 12px 16px; border: 1px solid rgba(255,255,255,0.06); color: #F59E0B;">Free tier (with limits)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
 <div class="divider"></div>
 
 <!-- ============================================================ -->
@@ -1074,7 +1143,7 @@
       <li><a href="solution.html">Solution</a></li>
       <li><a href="pipeline.html">Pipeline</a></li>
       <li><a href="evaluation.html">Evaluation</a></li>
-      <li><a href="aws.html">AWS</a></li>
+      <li><a href="aws.html">AWS (Stretch)</a></li>
       <li><a href="roadmap.html">Roadmap</a></li>
     </ul>
     <p class="footer-info">

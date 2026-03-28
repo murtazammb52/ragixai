@@ -312,7 +312,7 @@
       <li><a href="solution.html">Solution</a></li>
       <li><a href="pipeline.html">Pipeline</a></li>
       <li><a href="evaluation.html">Evaluation</a></li>
-      <li><a href="aws.html">AWS</a></li>
+      <li><a href="aws.html">AWS (Stretch)</a></li>
       <li><a href="roadmap.html" class="nav-cta">Roadmap</a></li>
     </ul>
     <div class="nav-toggle" id="nav-toggle"><span></span><span></span><span></span></div>
@@ -382,7 +382,15 @@
   <div class="section-header hidden">
     <div class="section-tag">Architecture</div>
     <h2>Our Solution <span class="gradient-text">Architecture</span></h2>
-    <p>Five integrated components working together to deliver enterprise-grade knowledge access</p>
+    <p>Five integrated components — all running locally on your laptop. AWS upgrade is a stretch goal.</p>
+  </div>
+
+  <div style="background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(6,182,212,0.08)); border: 1px solid rgba(16,185,129,0.3); border-radius: 12px; padding: 16px 24px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px;">
+    <span style="font-size: 1.4rem;">🖥️</span>
+    <div>
+      <strong style="color: #10B981;">Phase 1 (Primary): Fully Local Stack</strong>
+      <span style="color: rgba(255,255,255,0.6); font-size: 0.88rem; margin-left: 12px;">pypdf · sentence-transformers · ChromaDB · HuggingFace API · RAGAS — all free, no cloud account needed</span>
+    </div>
   </div>
 
   <div style="display:flex; flex-direction:column; gap:16px;">
@@ -394,7 +402,7 @@
           <div class="badge badge-purple">Multi-source</div>
         </div>
       </div>
-      <p style="font-size:0.9rem;">Connectors for Confluence, Google Docs, Notion, and PDFs via Amazon Textract. Supports incremental updates — only new/changed documents are re-processed. Handles 200+ file formats with metadata extraction.</p>
+      <p style="font-size:0.9rem;">Connectors for Confluence, Google Docs, Notion, and PDFs via <strong style="color:var(--cyan);">pypdf / unstructured</strong> (local, free). Supports incremental updates — only new/changed documents are re-processed. Handles 200+ file formats with metadata extraction. <em style="color:rgba(255,255,255,0.4); font-size:0.85rem;">(AWS upgrade: Amazon Textract)</em></p>
     </div>
 
     <div class="arch-card arch-2 hidden delay-2">
@@ -416,7 +424,7 @@
           <div class="badge badge-cyan">Dense Retrieval</div>
         </div>
       </div>
-      <p style="font-size:0.9rem;">Each chunk is encoded into a high-dimensional vector using Amazon Titan Embeddings v2 (default) or Cohere Embed-v3. Embeddings capture semantic meaning, enabling "find by concept" rather than exact keyword match. Stored in Amazon OpenSearch with k-NN indexing.</p>
+      <p style="font-size:0.9rem;">Each chunk is encoded into a high-dimensional vector using <strong style="color:var(--cyan);">sentence-transformers</strong> (local, no API key required). Embeddings capture semantic meaning, enabling "find by concept" rather than exact keyword match. Stored in <strong style="color:var(--cyan);">ChromaDB</strong> (local). <em style="color:rgba(255,255,255,0.4); font-size:0.85rem;">(AWS upgrade: Titan Embeddings + OpenSearch)</em></p>
     </div>
 
     <div class="arch-card arch-4 hidden delay-4">
@@ -435,10 +443,10 @@
         <div class="icon-circle icon-circle-coral">💬</div>
         <div>
           <h3 style="font-size:1.1rem; margin-bottom:4px;">5. LLM Generation with Citations</h3>
-          <div class="badge badge-coral">Claude on Bedrock</div>
+          <div class="badge badge-coral">Free LLM API</div>
         </div>
       </div>
-      <p style="font-size:0.9rem;">Claude 3.5 Sonnet via Amazon Bedrock generates grounded responses using retrieved context. Every answer includes inline citations linking to source documents. The system refuses to answer when context is insufficient — no hallucinations.</p>
+      <p style="font-size:0.9rem;"><strong style="color:var(--cyan);">HuggingFace Inference API</strong> (free tier) or <strong style="color:var(--cyan);">Google Gemini API</strong> (1M tokens/day free) generates grounded responses using retrieved context. Every answer includes inline citations linking to source documents. The system refuses to answer when context is insufficient — no hallucinations. <em style="color:rgba(255,255,255,0.4); font-size:0.85rem;">(AWS upgrade: Claude via Amazon Bedrock)</em></p>
     </div>
   </div>
 </section>
@@ -505,7 +513,7 @@
         <div class="skill-icon-box">☁️</div>
         <div>
           <div class="skill-name">/deploy-aws</div>
-          <div class="skill-description">Deploys the complete RAG pipeline to AWS Bedrock + OpenSearch + Lambda + Step Functions from a single command. Handles IAM roles, VPC config, and environment setup automatically.</div>
+          <div class="skill-description">Optional stretch goal: deploys the complete RAG pipeline to AWS (Bedrock + OpenSearch + Lambda) from a single command. Handles IAM roles, VPC config, and environment setup automatically. <span style="color: #F59E0B;">Phase 2 only — if time permits.</span></div>
         </div>
       </div>
 
@@ -521,10 +529,47 @@
         <div class="skill-icon-box">📡</div>
         <div>
           <div class="skill-name">/monitor-pipeline</div>
-          <div class="skill-description">Queries live CloudWatch metrics for the deployed pipeline — latency percentiles, retrieval accuracy trends, token usage, cost per query — with anomaly detection alerts.</div>
+          <div class="skill-description">Queries live CloudWatch metrics for the deployed pipeline — latency percentiles, retrieval accuracy trends, token usage, cost per query — with anomaly detection alerts. <span style="color: #F59E0B;">Phase 2 stretch goal.</span></div>
         </div>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- Phase 2 Stretch Goal -->
+<section class="section" style="padding-top:0;">
+  <div style="background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(234,88,12,0.06)); border: 1px solid rgba(245,158,11,0.25); border-radius: 16px; padding: 40px 48px;">
+    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+      <span style="font-size: 1.8rem;">🎯</span>
+      <div>
+        <div class="section-tag" style="margin-bottom: 4px;">Phase 2 — If Time Permits</div>
+        <h3 style="margin: 0; font-size: 1.3rem;">AWS Upgrade Path <span style="color: #F59E0B;">(Stretch Goal)</span></h3>
+      </div>
+    </div>
+    <p style="color: rgba(255,255,255,0.65); font-size: 0.92rem; margin-bottom: 24px; max-width: 700px;">
+      If time permits after completing the local pipeline, we upgrade individual components to AWS free-tier services. The architecture stays identical — we swap local tools for managed services one at a time.
+    </p>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+      <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(245,158,11,0.2); border-radius: 8px; padding: 14px 16px;">
+        <div style="color: #F59E0B; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">S3</div>
+        <div style="color: rgba(255,255,255,0.6); font-size: 0.82rem;">Document storage (replaces local folder)</div>
+      </div>
+      <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(245,158,11,0.2); border-radius: 8px; padding: 14px 16px;">
+        <div style="color: #F59E0B; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">Lambda</div>
+        <div style="color: rgba(255,255,255,0.6); font-size: 0.82rem;">Serverless processing (replaces local scripts)</div>
+      </div>
+      <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(245,158,11,0.2); border-radius: 8px; padding: 14px 16px;">
+        <div style="color: #F59E0B; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">EC2 t2.micro</div>
+        <div style="color: rgba(255,255,255,0.6); font-size: 0.82rem;">ChromaDB hosted (same DB, cloud instance)</div>
+      </div>
+      <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(245,158,11,0.2); border-radius: 8px; padding: 14px 16px;">
+        <div style="color: #F59E0B; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">API Gateway</div>
+        <div style="color: rgba(255,255,255,0.6); font-size: 0.82rem;">REST API endpoint (replaces local server)</div>
+      </div>
+    </div>
+    <p style="margin-top: 16px; font-size: 0.82rem; color: rgba(255,255,255,0.4);">
+      All services stay within AWS free tier. <a href="aws.html" style="color: #F59E0B;">See full AWS architecture →</a>
+    </p>
   </div>
 </section>
 
@@ -689,7 +734,7 @@
       <li><a href="solution.html">Solution</a></li>
       <li><a href="pipeline.html">Pipeline</a></li>
       <li><a href="evaluation.html">Evaluation</a></li>
-      <li><a href="aws.html">AWS</a></li>
+      <li><a href="aws.html">AWS (Stretch)</a></li>
       <li><a href="roadmap.html">Roadmap</a></li>
     </ul>
     <p class="footer-info">RAGixAI — Enterprise Knowledge Base with RAG &amp; Evaluation · Capstone Project 2025–2026</p>

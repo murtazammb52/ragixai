@@ -480,7 +480,7 @@
       <li><a href="solution.html">Solution</a></li>
       <li><a href="pipeline.html">Pipeline</a></li>
       <li><a href="evaluation.html">Evaluation</a></li>
-      <li><a href="aws.html">AWS</a></li>
+      <li><a href="aws.html">AWS (Stretch)</a></li>
       <li><a href="roadmap.html" class="nav-cta">Roadmap</a></li>
     </ul>
     <div class="nav-toggle" id="nav-toggle"><span></span><span></span><span></span></div>
@@ -567,8 +567,8 @@
       <rect x="170" y="60" width="130" height="100" rx="12" fill="rgba(59,130,246,0.1)" stroke="rgba(59,130,246,0.5)" stroke-width="1.5"/>
       <text x="235" y="100" text-anchor="middle" fill="#93C5FD" font-size="24">🔍</text>
       <text x="235" y="122" text-anchor="middle" fill="white" font-size="11" font-weight="700">INGESTION</text>
-      <text x="235" y="137" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9">Amazon Textract</text>
-      <text x="235" y="150" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9">AWS Lambda · S3</text>
+      <text x="235" y="137" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9">pypdf / unstructured</text>
+      <text x="235" y="150" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9">(AWS upgrade: Textract)</text>
       <circle cx="295" cy="65" r="11" fill="url(#lineGrad)"/>
       <text x="295" y="69" text-anchor="middle" fill="white" font-size="9" font-weight="700">2</text>
 
@@ -591,8 +591,8 @@
       <rect x="490" y="60" width="130" height="100" rx="12" fill="rgba(167,139,250,0.1)" stroke="rgba(167,139,250,0.5)" stroke-width="1.5"/>
       <text x="555" y="100" text-anchor="middle" fill="#C4B5FD" font-size="24">🔢</text>
       <text x="555" y="122" text-anchor="middle" fill="white" font-size="11" font-weight="700">EMBEDDING</text>
-      <text x="555" y="137" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9">Cohere Embed v3</text>
-      <text x="555" y="150" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9">Amazon Titan</text>
+      <text x="555" y="137" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9">sentence-transformers</text>
+      <text x="555" y="150" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9">(AWS: Titan / Cohere)</text>
       <circle cx="615" cy="65" r="11" fill="url(#lineGrad)"/>
       <text x="615" y="69" text-anchor="middle" fill="white" font-size="9" font-weight="700">4</text>
 
@@ -603,8 +603,8 @@
       <rect x="650" y="60" width="130" height="100" rx="12" fill="rgba(16,185,129,0.1)" stroke="rgba(16,185,129,0.5)" stroke-width="1.5"/>
       <text x="715" y="100" text-anchor="middle" fill="#6EE7B7" font-size="24">🗄️</text>
       <text x="715" y="122" text-anchor="middle" fill="white" font-size="11" font-weight="700">VECTOR STORE</text>
-      <text x="715" y="137" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9">AWS OpenSearch</text>
-      <text x="715" y="150" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9">k-NN · Cosine Sim</text>
+      <text x="715" y="137" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9">ChromaDB (local)</text>
+      <text x="715" y="150" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9">(AWS upgrade: OpenSearch)</text>
       <circle cx="775" cy="65" r="11" fill="url(#lineGrad)"/>
       <text x="775" y="69" text-anchor="middle" fill="white" font-size="9" font-weight="700">5</text>
 
@@ -628,8 +628,8 @@
       <rect x="490" y="180" width="130" height="100" rx="12" fill="rgba(59,130,246,0.1)" stroke="rgba(59,130,246,0.5)" stroke-width="1.5"/>
       <text x="555" y="220" text-anchor="middle" fill="#93C5FD" font-size="24">🧠</text>
       <text x="555" y="242" text-anchor="middle" fill="white" font-size="11" font-weight="700">LLM GENERATE</text>
-      <text x="555" y="257" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9">Claude via Bedrock</text>
-      <text x="555" y="270" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9">Context-grounded</text>
+      <text x="555" y="257" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9">HF Inference / Gemini</text>
+      <text x="555" y="270" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9">(AWS upgrade: Bedrock)</text>
       <circle cx="500" cy="185" r="11" fill="url(#lineGrad2)"/>
       <text x="500" y="189" text-anchor="middle" fill="white" font-size="9" font-weight="700">9</text>
 
@@ -697,7 +697,7 @@
       <div class="glass-card pipeline-node text-center" data-detail="detail-2" style="padding:16px; cursor:pointer;">
         <div style="font-size:1.8rem; margin-bottom:8px;">🔍</div>
         <div style="font-size:0.8rem; font-weight:700; color:#93C5FD;">2. Ingestion</div>
-        <div style="font-size:0.72rem; color:var(--white-60); margin-top:4px;">Textract + Lambda</div>
+        <div style="font-size:0.72rem; color:var(--white-60); margin-top:4px;">pypdf / unstructured</div>
       </div>
       <div class="glass-card pipeline-node text-center" data-detail="detail-3" style="padding:16px; cursor:pointer;">
         <div style="font-size:1.8rem; margin-bottom:8px;">✂️</div>
@@ -712,7 +712,7 @@
       <div class="glass-card pipeline-node text-center" data-detail="detail-5" style="padding:16px; cursor:pointer;">
         <div style="font-size:1.8rem; margin-bottom:8px;">🗄️</div>
         <div style="font-size:0.8rem; font-weight:700; color:var(--emerald);">5. Vector Store</div>
-        <div style="font-size:0.72rem; color:var(--white-60); margin-top:4px;">OpenSearch k-NN</div>
+        <div style="font-size:0.72rem; color:var(--white-60); margin-top:4px;">ChromaDB (local)</div>
       </div>
     </div>
     <!-- Stage cards row 2 -->
@@ -735,7 +735,7 @@
       <div class="glass-card pipeline-node text-center" data-detail="detail-9" style="padding:16px; cursor:pointer;">
         <div style="font-size:1.8rem; margin-bottom:8px;">🧠</div>
         <div style="font-size:0.8rem; font-weight:700; color:#93C5FD;">9. LLM Generate</div>
-        <div style="font-size:0.72rem; color:var(--white-60); margin-top:4px;">Claude on Bedrock</div>
+        <div style="font-size:0.72rem; color:var(--white-60); margin-top:4px;">HF Inference / Gemini</div>
       </div>
       <div class="glass-card pipeline-node text-center" data-detail="detail-10" style="padding:16px; cursor:pointer;">
         <div style="font-size:1.8rem; margin-bottom:8px;">💬</div>
@@ -767,7 +767,7 @@
         <div class="glass-card text-center" style="padding:16px;">
           <div style="font-size:1.8rem; margin-bottom:8px;">📕</div>
           <div style="font-size:0.85rem; font-weight:700; margin-bottom:4px;">PDF Files</div>
-          <div class="badge badge-amber">S3 + Textract</div>
+          <div class="badge badge-amber">pypdf / unstructured</div>
         </div>
       </div>
     </div>
@@ -816,7 +816,7 @@
 
     <div id="detail-9" class="stage-detail-panel hidden-panel">
       <h3>🧠 Stage 9: LLM Generation</h3>
-      <p style="margin-bottom:16px;">Claude 3.5 Sonnet on Amazon Bedrock synthesizes retrieved chunks into a coherent, grounded answer.</p>
+      <p style="margin-bottom:16px;">HuggingFace Inference API (free) or Google Gemini free tier synthesizes retrieved chunks into a coherent, grounded answer. <span style="color:var(--white-60); font-size:0.88em;">(AWS upgrade: Amazon Bedrock)</span></p>
       <div class="code-block">
         <div class="code-header">
           <div class="code-dot code-dot-red"></div>
@@ -1095,7 +1095,7 @@ ASSISTANT:</pre>
       <div class="flow-step-num">3</div>
       <div class="flow-step-content">
         <div class="flow-label">Embedding Generation</div>
-        <div class="flow-text">🔢 Query → <span class="flow-highlight">[0.24, -0.18, 0.91, 0.03, ..., -0.44]</span> (1024-dim Cohere vector)</div>
+        <div class="flow-text">🔢 Query → <span class="flow-highlight">[0.24, -0.18, 0.91, 0.03, ..., -0.44]</span> (sentence-transformers local vector)</div>
       </div>
     </div>
     <div class="flow-step" style="animation-delay:0.7s;">
@@ -1115,7 +1115,7 @@ ASSISTANT:</pre>
     <div class="flow-step" style="animation-delay:1.1s;">
       <div class="flow-step-num">6</div>
       <div class="flow-step-content">
-        <div class="flow-label">LLM Generation (Claude 3.5 Sonnet)</div>
+        <div class="flow-label">LLM Generation (HF Inference API / Gemini free tier)</div>
         <div class="flow-text">🧠 Prompt: system + 5 context chunks + query → generation (avg <span class="flow-highlight">1.2s</span>)</div>
       </div>
     </div>
@@ -1139,7 +1139,7 @@ ASSISTANT:</pre>
       <li><a href="solution.html">Solution</a></li>
       <li><a href="pipeline.html">Pipeline</a></li>
       <li><a href="evaluation.html">Evaluation</a></li>
-      <li><a href="aws.html">AWS</a></li>
+      <li><a href="aws.html">AWS (Stretch)</a></li>
       <li><a href="roadmap.html">Roadmap</a></li>
     </ul>
     <p class="footer-info">
