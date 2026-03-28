@@ -25,7 +25,7 @@
       position: absolute;
       inset: 0;
       background:
-        radial-gradient(ellipse 70% 50% at 50% 80%, rgba(245, 158, 11, 0.1) 0%, transparent 60%),
+        radial-gradient(ellipse 70% 50% at 50% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 60%),
         radial-gradient(ellipse 50% 40% at 20% 30%, rgba(59, 130, 246, 0.1) 0%, transparent 60%),
         radial-gradient(ellipse 50% 40% at 80% 30%, rgba(124, 58, 237, 0.08) 0%, transparent 60%);
     }
@@ -96,6 +96,25 @@
       box-shadow: 0 8px 30px rgba(0,0,0,0.4);
     }
 
+    /* Free tier badge on service boxes */
+    .free-badge {
+      position: absolute;
+      top: -8px;
+      right: -6px;
+      background: var(--emerald);
+      color: var(--bg-primary);
+      font-size: 0.55rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      padding: 2px 6px;
+      border-radius: 8px;
+      text-transform: uppercase;
+    }
+
+    .free-badge.always {
+      background: var(--cyan);
+    }
+
     .aws-service-icon {
       font-size: 1.5rem;
       line-height: 1;
@@ -131,13 +150,13 @@
     .aws-stepfunctions:hover { background: rgba(255, 115, 160, 0.18); border-color: #FF73A0; }
     .aws-stepfunctions .aws-service-name { color: #FFB3CC; }
 
-    .aws-bedrock { background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.4); }
-    .aws-bedrock:hover { background: rgba(59, 130, 246, 0.18); border-color: var(--electric-blue); }
-    .aws-bedrock .aws-service-name { color: #93C5FD; }
+    .aws-ec2 { background: rgba(247, 164, 32, 0.1); border-color: rgba(247, 164, 32, 0.35); }
+    .aws-ec2:hover { background: rgba(247, 164, 32, 0.18); border-color: #F7A420; }
+    .aws-ec2 .aws-service-name { color: #FCD34D; }
 
-    .aws-opensearch { background: rgba(6, 182, 212, 0.1); border-color: rgba(6, 182, 212, 0.35); }
-    .aws-opensearch:hover { background: rgba(6, 182, 212, 0.18); border-color: var(--cyan); }
-    .aws-opensearch .aws-service-name { color: #67E8F9; }
+    .aws-dynamo { background: rgba(6, 182, 212, 0.1); border-color: rgba(6, 182, 212, 0.35); }
+    .aws-dynamo:hover { background: rgba(6, 182, 212, 0.18); border-color: var(--cyan); }
+    .aws-dynamo .aws-service-name { color: #67E8F9; }
 
     .aws-apigw { background: rgba(167, 139, 250, 0.1); border-color: rgba(167, 139, 250, 0.4); }
     .aws-apigw:hover { background: rgba(167, 139, 250, 0.18); border-color: var(--lavender); }
@@ -155,6 +174,10 @@
     .aws-iam:hover { background: rgba(220, 38, 38, 0.18); border-color: #EF4444; }
     .aws-iam .aws-service-name { color: #FCA5A5; }
 
+    .aws-hf { background: rgba(255, 170, 0, 0.1); border-color: rgba(255, 170, 0, 0.4); }
+    .aws-hf:hover { background: rgba(255, 170, 0, 0.18); border-color: #FFAA00; }
+    .aws-hf .aws-service-name { color: #FFD060; }
+
     /* ---- Flow Arrow ---- */
     .arch-flow-arrow {
       display: flex;
@@ -166,10 +189,10 @@
       margin: 4px 0;
     }
 
-    /* ---- Bedrock Callout ---- */
-    .bedrock-callout {
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(124, 58, 237, 0.08));
-      border: 1px solid rgba(59, 130, 246, 0.3);
+    /* ---- Free Tier Callout ---- */
+    .free-tier-callout {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(6, 182, 212, 0.06));
+      border: 1px solid rgba(16, 185, 129, 0.3);
       border-radius: var(--border-radius-lg);
       padding: 40px;
       display: grid;
@@ -178,32 +201,32 @@
       align-items: center;
     }
 
-    .bedrock-icon {
+    .free-icon {
       font-size: 4rem;
       line-height: 1;
       animation: pulseGlow 3s ease-in-out infinite;
     }
 
-    /* ---- Cost Table ---- */
-    .cost-section-card {
+    /* ---- Free Tier Table ---- */
+    .free-tier-section-card {
       padding: 32px;
       background: var(--glass-bg);
       border: 1px solid var(--glass-border);
       border-radius: var(--border-radius-lg);
     }
 
-    .cost-row {
+    .free-tier-row {
       display: grid;
-      grid-template-columns: 2fr 1fr 1fr;
+      grid-template-columns: 2fr 1.5fr 1fr;
       gap: 16px;
       padding: 12px 0;
       border-bottom: 1px solid rgba(255,255,255,0.05);
       align-items: center;
     }
 
-    .cost-row:last-child { border-bottom: none; }
+    .free-tier-row:last-child { border-bottom: none; }
 
-    .cost-row.header {
+    .free-tier-row.header {
       font-size: 0.8rem;
       font-weight: 700;
       color: var(--lavender);
@@ -212,10 +235,76 @@
       border-bottom: 1px solid var(--glass-border);
     }
 
-    .cost-service { font-size: 0.9rem; }
-    .cost-monthly { font-size: 0.9rem; font-weight: 600; color: var(--amber); text-align: right; }
-    .cost-note { font-size: 0.78rem; color: var(--white-60); }
-    .cost-total { font-size: 1.1rem; font-weight: 800; color: var(--emerald); text-align: right; }
+    .free-service { font-size: 0.9rem; }
+    .free-limit { font-size: 0.88rem; font-weight: 600; color: var(--emerald); }
+    .free-type {
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 10px;
+      text-align: center;
+      font-weight: 700;
+    }
+    .free-type.always {
+      background: rgba(6, 182, 212, 0.15);
+      color: var(--cyan);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+    }
+    .free-type.twelve {
+      background: rgba(16, 185, 129, 0.12);
+      color: var(--emerald);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    .free-total-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 0 0;
+      border-top: 2px solid var(--glass-border);
+      margin-top: 12px;
+    }
+
+    .free-total-label {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .free-total-cost {
+      font-size: 2rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--emerald), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ---- LLM Section ---- */
+    .llm-option-card {
+      padding: 24px;
+      border-radius: var(--border-radius);
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      transition: var(--transition);
+    }
+
+    .llm-option-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(6, 182, 212, 0.3);
+    }
+
+    /* ---- After Free Tier ---- */
+    .after-tier-card {
+      padding: 24px;
+      border-radius: var(--border-radius);
+      background: var(--glass-bg);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      transition: var(--transition);
+    }
+
+    .after-tier-card:hover {
+      border-color: rgba(245, 158, 11, 0.4);
+      background: rgba(245, 158, 11, 0.04);
+    }
 
     /* ---- Security Grid ---- */
     .security-card {
@@ -236,26 +325,12 @@
       margin-bottom: 12px;
     }
 
-    /* ---- Detail Modal-style Panel ---- */
-    .service-detail {
-      display: none;
-      padding: 20px;
-      background: rgba(0,0,0,0.3);
-      border: 1px solid var(--glass-border);
-      border-radius: var(--border-radius);
-      margin-top: 12px;
-      font-size: 0.88rem;
-      color: var(--white-60);
-    }
-
-    .service-detail.open { display: block; }
-
     @media (max-width: 768px) {
       .arch-services-row { gap: 10px; }
       .aws-service-box { min-width: 90px; padding: 10px 12px; }
-      .bedrock-callout { grid-template-columns: 1fr; text-align: center; }
-      .cost-row { grid-template-columns: 1fr 1fr; }
-      .cost-note { display: none; }
+      .free-tier-callout { grid-template-columns: 1fr; text-align: center; }
+      .free-tier-row { grid-template-columns: 1fr 1fr; }
+      .free-type { display: none; }
     }
   </style>
 </head>
@@ -283,15 +358,15 @@
   <div style="position:relative; z-index:2; max-width:800px;">
     <div class="section-tag" style="margin-bottom:20px;">Infrastructure</div>
     <h1 style="margin-bottom:20px;">
-      Built on AWS — <span class="gradient-text">Enterprise Grade</span>
+      Built on AWS — <span class="gradient-text">Free Tier Only</span>
     </h1>
-    <p style="font-size:1.15rem; color:var(--white-60); max-width:620px; margin:0 auto 32px;">
-      10 AWS services working together to deliver a secure, scalable, and production-ready
-      RAG pipeline. No vendor lock-in on the AI layer — Amazon Bedrock gives us model flexibility.
+    <p style="font-size:1.15rem; color:var(--white-60); max-width:660px; margin:0 auto 32px;">
+      10 AWS services — every single one within the AWS Free Tier. Zero cost for development,
+      testing, and demonstration. Total estimated monthly cost: <strong style="color:var(--emerald);">$0</strong>.
     </p>
     <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
       <a href="#architecture" class="btn btn-primary btn-glow">🏗️ View Architecture</a>
-      <a href="#bedrock" class="btn btn-outline">☁️ Why Bedrock?</a>
+      <a href="#free-limits" class="btn btn-outline">💚 Free Tier Limits</a>
     </div>
   </div>
 </section>
@@ -308,15 +383,47 @@
       <div class="stat-label">Architecture Layers</div>
     </div>
     <div class="stat-item">
-      <div class="stat-number">99.9%</div>
-      <div class="stat-label">Target Uptime SLA</div>
+      <div class="stat-number gradient-text">$0</div>
+      <div class="stat-label">Est. Monthly Cost</div>
     </div>
     <div class="stat-item">
-      <div class="stat-number">~$380</div>
-      <div class="stat-label">Est. Monthly Cost</div>
+      <div class="stat-number">100%</div>
+      <div class="stat-label">Free Tier Compatible</div>
     </div>
   </div>
 </section>
+
+<!-- ============================================================ -->
+<!-- FREE TIER CALLOUT -->
+<!-- ============================================================ -->
+<section class="section" style="padding-top:0;">
+  <div class="free-tier-callout hidden">
+    <div class="free-icon">💚</div>
+    <div>
+      <h3 style="margin-bottom:16px; font-size:1.5rem;">Total Estimated Cost: <span style="background:linear-gradient(135deg,var(--emerald),var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">$0/month</span></h3>
+      <p style="margin-bottom:20px; color:var(--white-60);">Every service in our architecture runs entirely within AWS Free Tier allowances. For a capstone project with our expected usage (hundreds of queries, tens of thousands of documents), we stay well within the limits. No credit card charges — none.</p>
+      <div class="cards-grid-3" style="gap:16px;">
+        <div class="glass-card" style="padding:16px;">
+          <div style="font-size:1.3rem; margin-bottom:8px;">🔵</div>
+          <div style="font-weight:700; font-size:0.9rem; margin-bottom:6px; color:var(--cyan);">Always Free</div>
+          <div style="font-size:0.82rem; color:var(--white-60);">Lambda, Step Functions, DynamoDB, CloudWatch, IAM — no 12-month expiry, no strings attached.</div>
+        </div>
+        <div class="glass-card" style="padding:16px;">
+          <div style="font-size:1.3rem; margin-bottom:8px;">📅</div>
+          <div style="font-weight:700; font-size:0.9rem; margin-bottom:6px; color:var(--emerald);">12-Month Free</div>
+          <div style="font-size:0.82rem; color:var(--white-60);">S3, EC2 t2.micro, API Gateway, Textract, Amplify — free for the first year on a new AWS account.</div>
+        </div>
+        <div class="glass-card" style="padding:16px;">
+          <div style="font-size:1.3rem; margin-bottom:8px;">🤗</div>
+          <div style="font-weight:700; font-size:0.9rem; margin-bottom:6px; color:var(--lavender);">HuggingFace LLM</div>
+          <div style="font-size:0.82rem; color:var(--white-60);">Mistral-7B-Instruct or Flan-T5-XL via HuggingFace Inference API free tier — replaces paid Bedrock LLM.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
 
 <!-- ============================================================ -->
 <!-- ARCHITECTURE DIAGRAM -->
@@ -325,7 +432,7 @@
   <div class="section-header hidden">
     <div class="section-tag">System Design</div>
     <h2>AWS <span class="gradient-text">Architecture</span></h2>
-    <p>A layered architecture separating concerns across data ingestion, storage, processing, serving, and observability.</p>
+    <p>A layered architecture using only free-tier services. Green badges = Always Free. Teal badges = Free for 12 months on new accounts.</p>
   </div>
 
   <div class="arch-diagram hidden">
@@ -350,6 +457,12 @@
         <div class="glass-card" style="padding:12px 18px; display:inline-flex; align-items:center; gap:8px; font-size:0.85rem;">
           <span>📄</span> PDF Files
         </div>
+        <div class="aws-service-box aws-s3" style="position:relative;">
+          <span class="free-badge">12-mo free</span>
+          <div class="aws-service-icon">🪣</div>
+          <div class="aws-service-name">Amazon S3</div>
+          <div class="aws-service-sub">Raw document storage</div>
+        </div>
         <div style="flex:1; text-align:right; font-size:0.75rem; color:var(--white-60);">Automated by /ingest-docs</div>
       </div>
     </div>
@@ -364,25 +477,22 @@
         <div class="arch-layer-line"></div>
       </div>
       <div class="arch-services-row">
-        <div class="aws-service-box aws-s3">
-          <div class="aws-service-icon">🪣</div>
-          <div class="aws-service-name">Amazon S3</div>
-          <div class="aws-service-sub">Raw document storage</div>
-        </div>
-        <div style="color:var(--white-30); font-size:1.2rem;">→</div>
-        <div class="aws-service-box aws-textract">
+        <div class="aws-service-box aws-textract" style="position:relative;">
+          <span class="free-badge">12-mo free</span>
           <div class="aws-service-icon">🔍</div>
           <div class="aws-service-name">Amazon Textract</div>
           <div class="aws-service-sub">PDF / OCR parsing</div>
         </div>
         <div style="color:var(--white-30); font-size:1.2rem;">→</div>
-        <div class="aws-service-box aws-lambda">
+        <div class="aws-service-box aws-lambda" style="position:relative;">
+          <span class="free-badge always">always free</span>
           <div class="aws-service-icon">λ</div>
           <div class="aws-service-name">AWS Lambda</div>
           <div class="aws-service-sub">Chunking + embedding</div>
         </div>
         <div style="color:var(--white-30); font-size:1.2rem;">→</div>
-        <div class="aws-service-box aws-stepfunctions">
+        <div class="aws-service-box aws-stepfunctions" style="position:relative;">
+          <span class="free-badge always">always free</span>
           <div class="aws-service-icon">🔄</div>
           <div class="aws-service-name">Step Functions</div>
           <div class="aws-service-sub">Pipeline orchestration</div>
@@ -400,20 +510,22 @@
         <div class="arch-layer-line"></div>
       </div>
       <div class="arch-services-row">
-        <div class="aws-service-box aws-opensearch" style="min-width:160px;">
-          <div class="aws-service-icon">🔍</div>
-          <div class="aws-service-name">Amazon OpenSearch</div>
-          <div class="aws-service-sub">Vector store (k-NN) + BM25 full-text</div>
+        <div class="aws-service-box aws-ec2" style="position:relative; min-width:160px;">
+          <span class="free-badge">12-mo free</span>
+          <div class="aws-service-icon">🖥️</div>
+          <div class="aws-service-name">EC2 t2.micro</div>
+          <div class="aws-service-sub">ChromaDB / FAISS vector store</div>
         </div>
         <div style="flex:1; padding:16px;">
           <div style="font-size:0.82rem; color:var(--white-60);">
-            Dual-purpose: stores both dense vector embeddings (1024-dim k-NN index) and traditional inverted index for BM25 sparse retrieval. Enables hybrid search in a single query.
+            Hosts ChromaDB or FAISS on a free t2.micro instance (750 hours/month free). Replaces Amazon OpenSearch (which is NOT free tier). Supports dense vector similarity search for semantic retrieval at our project scale.
           </div>
         </div>
-        <div class="aws-service-box aws-s3">
-          <div class="aws-service-icon">🪣</div>
-          <div class="aws-service-name">S3 (chunks)</div>
-          <div class="aws-service-sub">Raw chunk storage + metadata</div>
+        <div class="aws-service-box aws-dynamo" style="position:relative;">
+          <span class="free-badge always">always free</span>
+          <div class="aws-service-icon">📋</div>
+          <div class="aws-service-name">DynamoDB</div>
+          <div class="aws-service-sub">Metadata + chat history</div>
         </div>
       </div>
     </div>
@@ -428,25 +540,29 @@
         <div class="arch-layer-line"></div>
       </div>
       <div class="arch-services-row">
-        <div class="aws-service-box aws-apigw">
+        <div class="aws-service-box aws-apigw" style="position:relative;">
+          <span class="free-badge">12-mo free</span>
           <div class="aws-service-icon">🌐</div>
           <div class="aws-service-name">API Gateway</div>
           <div class="aws-service-sub">REST API endpoint</div>
         </div>
         <div style="color:var(--white-30); font-size:1.2rem;">→</div>
-        <div class="aws-service-box aws-lambda">
+        <div class="aws-service-box aws-lambda" style="position:relative;">
+          <span class="free-badge always">always free</span>
           <div class="aws-service-icon">λ</div>
           <div class="aws-service-name">Lambda (Query)</div>
           <div class="aws-service-sub">Retrieval + reranking</div>
         </div>
         <div style="color:var(--white-30); font-size:1.2rem;">→</div>
-        <div class="aws-service-box aws-bedrock" style="min-width:140px;">
-          <div class="aws-service-icon">🧠</div>
-          <div class="aws-service-name">Amazon Bedrock</div>
-          <div class="aws-service-sub">Claude 3.5 Sonnet + Cohere Embed</div>
+        <div class="aws-service-box aws-hf" style="position:relative; min-width:140px;">
+          <span class="free-badge always">free tier</span>
+          <div class="aws-service-icon">🤗</div>
+          <div class="aws-service-name">HuggingFace API</div>
+          <div class="aws-service-sub">Mistral-7B / Flan-T5 LLM</div>
         </div>
         <div style="color:var(--white-30); font-size:1.2rem;">→</div>
-        <div class="aws-service-box aws-amplify">
+        <div class="aws-service-box aws-amplify" style="position:relative;">
+          <span class="free-badge">12-mo free</span>
           <div class="aws-service-icon">🖥️</div>
           <div class="aws-service-name">AWS Amplify</div>
           <div class="aws-service-sub">Frontend hosting</div>
@@ -464,18 +580,20 @@
         <div class="arch-layer-line"></div>
       </div>
       <div class="arch-services-row">
-        <div class="aws-service-box aws-cloudwatch">
+        <div class="aws-service-box aws-cloudwatch" style="position:relative;">
+          <span class="free-badge always">always free</span>
           <div class="aws-service-icon">📊</div>
           <div class="aws-service-name">CloudWatch</div>
           <div class="aws-service-sub">Metrics · Alarms · Logs</div>
         </div>
-        <div class="aws-service-box aws-iam" style="margin-left:16px;">
+        <div class="aws-service-box aws-iam" style="margin-left:16px; position:relative;">
+          <span class="free-badge always">always free</span>
           <div class="aws-service-icon">🔑</div>
           <div class="aws-service-name">AWS IAM</div>
-          <div class="aws-service-sub">Roles · Policies · VPC</div>
+          <div class="aws-service-sub">Roles · Policies</div>
         </div>
         <div style="flex:1; padding:16px;">
-          <div style="font-size:0.82rem; color:var(--white-60);">All services communicate via IAM roles with least-privilege permissions. Data encrypted at rest (AES-256) and in transit (TLS 1.3). No data leaves the AWS account.</div>
+          <div style="font-size:0.82rem; color:var(--white-60);">All services communicate via IAM roles with least-privilege permissions. Data encrypted at rest and in transit. No data leaves the AWS account (except HuggingFace API calls for LLM inference, which contain only anonymized query text).</div>
         </div>
       </div>
     </div>
@@ -491,7 +609,7 @@
   <div class="section-header hidden">
     <div class="section-tag">Service Roles</div>
     <h2>Each Service's <span class="gradient-text">Specific Role</span></h2>
-    <p>10 services, each carefully chosen for its specific strength in the RAGixAI architecture.</p>
+    <p>10 services, each chosen for its specific strength — and every one is free.</p>
   </div>
 
   <div class="cards-grid-2">
@@ -501,10 +619,13 @@
         <div class="icon-circle icon-circle-amber" style="width:44px; height:44px; font-size:1.2rem;">🪣</div>
         <div>
           <div style="font-weight:700; font-size:1rem; color:#F7A420;">Amazon S3</div>
-          <div class="badge badge-amber" style="font-size:0.7rem; margin-top:4px;">Storage · Orange</div>
+          <div style="display:flex; gap:6px; margin-top:4px; flex-wrap:wrap;">
+            <span class="badge badge-amber" style="font-size:0.7rem;">Storage</span>
+            <span style="padding:2px 8px; border-radius:8px; font-size:0.68rem; font-weight:700; background:rgba(16,185,129,0.15); color:var(--emerald); border:1px solid rgba(16,185,129,0.3);">5 GB free · 12 months</span>
+          </div>
         </div>
       </div>
-      <p style="font-size:0.88rem;">Primary document repository. All raw source files (PDFs, exported markdowns) are stored here before processing. Also stores processed chunk metadata as JSON objects. Lifecycle policies auto-expire old versions.</p>
+      <p style="font-size:0.88rem;">Primary document repository. All raw source files (PDFs, exported markdowns) are stored here before processing. Also stores processed chunk metadata as JSON objects. Free tier: 5 GB storage, 20,000 GET requests, 2,000 PUT requests per month.</p>
     </div>
 
     <!-- Textract -->
@@ -513,10 +634,13 @@
         <div class="icon-circle icon-circle-blue" style="width:44px; height:44px; font-size:1.2rem;">🔍</div>
         <div>
           <div style="font-weight:700; font-size:1rem; color:#93C5FD;">Amazon Textract</div>
-          <div class="badge badge-blue" style="font-size:0.7rem; margin-top:4px;">ML · Document AI · Blue</div>
+          <div style="display:flex; gap:6px; margin-top:4px; flex-wrap:wrap;">
+            <span class="badge badge-blue" style="font-size:0.7rem;">Document AI</span>
+            <span style="padding:2px 8px; border-radius:8px; font-size:0.68rem; font-weight:700; background:rgba(16,185,129,0.15); color:var(--emerald); border:1px solid rgba(16,185,129,0.3);">1,000 pages/month free · 12 months</span>
+          </div>
         </div>
       </div>
-      <p style="font-size:0.88rem;">ML-powered document parsing service. Extracts text from PDFs including scanned images, tables, and forms with high accuracy. Handles multi-column layouts and complex enterprise document formats that simple PDF parsers fail on.</p>
+      <p style="font-size:0.88rem;">ML-powered document parsing. Extracts text from PDFs including scanned images and tables. Our project ingestion volume (research papers, evaluation datasets) stays well within the 1,000 pages/month free allowance.</p>
     </div>
 
     <!-- Lambda -->
@@ -525,10 +649,13 @@
         <div class="icon-circle icon-circle-amber" style="width:44px; height:44px; font-size:1.2rem;">λ</div>
         <div>
           <div style="font-weight:700; font-size:1rem; color:#F7A420;">AWS Lambda</div>
-          <div class="badge badge-amber" style="font-size:0.7rem; margin-top:4px;">Serverless · Compute · Orange</div>
+          <div style="display:flex; gap:6px; margin-top:4px; flex-wrap:wrap;">
+            <span class="badge badge-amber" style="font-size:0.7rem;">Serverless</span>
+            <span style="padding:2px 8px; border-radius:8px; font-size:0.68rem; font-weight:700; background:rgba(6,182,212,0.12); color:var(--cyan); border:1px solid rgba(6,182,212,0.3);">1M requests/month · Always Free</span>
+          </div>
         </div>
       </div>
-      <p style="font-size:0.88rem;">Serverless functions handle two roles: (1) the ingestion pipeline — chunking and embedding generation triggered by S3 events, and (2) the query handler — executing retrieval, reranking, and Bedrock calls. Auto-scales to zero when idle.</p>
+      <p style="font-size:0.88rem;">Handles two roles: (1) ingestion pipeline — chunking and embedding triggered by S3 events, and (2) query handler — executing retrieval and reranking. 1M free requests/month and 400,000 GB-seconds compute — Always Free, no expiry.</p>
     </div>
 
     <!-- Step Functions -->
@@ -537,34 +664,43 @@
         <div class="icon-circle" style="width:44px; height:44px; font-size:1.2rem; background:rgba(255,115,160,0.2); border:1px solid rgba(255,115,160,0.3);">🔄</div>
         <div>
           <div style="font-weight:700; font-size:1rem; color:#FFB3CC;">AWS Step Functions</div>
-          <div class="badge" style="font-size:0.7rem; margin-top:4px; background:rgba(255,115,160,0.15); color:#FFB3CC; border:1px solid rgba(255,115,160,0.3);">Orchestration · Pink</div>
+          <div style="display:flex; gap:6px; margin-top:4px; flex-wrap:wrap;">
+            <span style="padding:2px 8px; border-radius:8px; font-size:0.7rem; font-weight:700; background:rgba(255,115,160,0.12); color:#FFB3CC; border:1px solid rgba(255,115,160,0.3);">Orchestration</span>
+            <span style="padding:2px 8px; border-radius:8px; font-size:0.68rem; font-weight:700; background:rgba(6,182,212,0.12); color:var(--cyan); border:1px solid rgba(6,182,212,0.3);">4,000 transitions/month · Always Free</span>
+          </div>
         </div>
       </div>
-      <p style="font-size:0.88rem;">Visual workflow orchestration for the ingestion pipeline. Defines the state machine: S3 trigger → Textract → chunk → embed → index → complete. Provides automatic error handling, retries, and execution history for debugging.</p>
+      <p style="font-size:0.88rem;">Orchestrates the ingestion state machine: S3 trigger → Textract → chunk → embed → index → complete. 4,000 state transitions/month free (Always Free tier). Provides error handling, retries, and execution history.</p>
     </div>
 
-    <!-- Bedrock -->
-    <div class="aws-card hidden delay-1" style="border-color:rgba(59,130,246,0.3); background:rgba(59,130,246,0.05);">
+    <!-- EC2 -->
+    <div class="aws-card hidden delay-1">
       <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
-        <div class="icon-circle icon-circle-blue" style="width:44px; height:44px; font-size:1.2rem;">🧠</div>
+        <div class="icon-circle" style="width:44px; height:44px; font-size:1.2rem; background:rgba(247,164,32,0.2); border:1px solid rgba(247,164,32,0.3);">🖥️</div>
         <div>
-          <div style="font-weight:700; font-size:1rem; color:#93C5FD;">Amazon Bedrock</div>
-          <div class="badge badge-blue" style="font-size:0.7rem; margin-top:4px;">AI/ML · Foundation Models · Blue</div>
+          <div style="font-weight:700; font-size:1rem; color:#FCD34D;">Amazon EC2 t2.micro</div>
+          <div style="display:flex; gap:6px; margin-top:4px; flex-wrap:wrap;">
+            <span style="padding:2px 8px; border-radius:8px; font-size:0.7rem; font-weight:700; background:rgba(247,164,32,0.12); color:#FCD34D; border:1px solid rgba(247,164,32,0.3);">Compute</span>
+            <span style="padding:2px 8px; border-radius:8px; font-size:0.68rem; font-weight:700; background:rgba(16,185,129,0.15); color:var(--emerald); border:1px solid rgba(16,185,129,0.3);">750 hours/month · 12 months</span>
+          </div>
         </div>
       </div>
-      <p style="font-size:0.88rem;">The AI brain of RAGixAI. Provides access to Claude 3.5 Sonnet for answer generation AND Cohere Embed v3 for document and query embedding — all through a single AWS API with unified security, logging, and billing.</p>
+      <p style="font-size:0.88rem;">Hosts ChromaDB or FAISS as the vector store. A t2.micro (1 vCPU, 1 GB RAM) is sufficient for our project corpus size. 750 hours/month = effectively always-on for a single instance. Replaces Amazon OpenSearch, which has no free tier.</p>
     </div>
 
-    <!-- OpenSearch -->
+    <!-- DynamoDB -->
     <div class="aws-card hidden delay-2">
       <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
-        <div class="icon-circle icon-circle-cyan" style="width:44px; height:44px; font-size:1.2rem;">🔎</div>
+        <div class="icon-circle icon-circle-cyan" style="width:44px; height:44px; font-size:1.2rem;">📋</div>
         <div>
-          <div style="font-weight:700; font-size:1rem; color:#67E8F9;">Amazon OpenSearch</div>
-          <div class="badge badge-cyan" style="font-size:0.7rem; margin-top:4px;">Search · Vector DB · Blue-Green</div>
+          <div style="font-weight:700; font-size:1rem; color:#67E8F9;">Amazon DynamoDB</div>
+          <div style="display:flex; gap:6px; margin-top:4px; flex-wrap:wrap;">
+            <span class="badge badge-cyan" style="font-size:0.7rem;">NoSQL DB</span>
+            <span style="padding:2px 8px; border-radius:8px; font-size:0.68rem; font-weight:700; background:rgba(6,182,212,0.12); color:var(--cyan); border:1px solid rgba(6,182,212,0.3);">25 GB storage · Always Free</span>
+          </div>
         </div>
       </div>
-      <p style="font-size:0.88rem;">The heart of retrieval. k-NN plugin enables approximate nearest-neighbor vector search at scale. Simultaneously maintains an inverted text index for BM25 sparse retrieval. Managed service with automated backups and failover.</p>
+      <p style="font-size:0.88rem;">Stores document metadata (source URL, ingestion timestamp, chunk count, embedding model used) and chat history. 25 GB storage + 25 WCU + 25 RCU free — Always Free, no expiry. More than sufficient for our evaluation runs.</p>
     </div>
 
     <!-- API Gateway -->
@@ -573,10 +709,13 @@
         <div class="icon-circle icon-circle-purple" style="width:44px; height:44px; font-size:1.2rem;">🌐</div>
         <div>
           <div style="font-weight:700; font-size:1rem; color:var(--lavender);">Amazon API Gateway</div>
-          <div class="badge badge-purple" style="font-size:0.7rem; margin-top:4px;">API · REST · Purple</div>
+          <div style="display:flex; gap:6px; margin-top:4px; flex-wrap:wrap;">
+            <span class="badge badge-purple" style="font-size:0.7rem;">API</span>
+            <span style="padding:2px 8px; border-radius:8px; font-size:0.68rem; font-weight:700; background:rgba(16,185,129,0.15); color:var(--emerald); border:1px solid rgba(16,185,129,0.3);">1M HTTP calls/month · 12 months</span>
+          </div>
         </div>
       </div>
-      <p style="font-size:0.88rem;">Exposes a RESTful API for the frontend and enterprise integrations. Handles authentication via Cognito, rate limiting, CORS, and request/response transformation. WebSocket support for streaming responses.</p>
+      <p style="font-size:0.88rem;">Exposes the REST API for the chat frontend. Handles CORS, rate limiting, and request routing to Lambda. 1 million HTTP API calls per month free (12 months) — vastly more than our demo usage requires.</p>
     </div>
 
     <!-- Amplify -->
@@ -585,10 +724,13 @@
         <div class="icon-circle icon-circle-amber" style="width:44px; height:44px; font-size:1.2rem;">🖥️</div>
         <div>
           <div style="font-weight:700; font-size:1rem; color:#F7A420;">AWS Amplify</div>
-          <div class="badge badge-amber" style="font-size:0.7rem; margin-top:4px;">Frontend · Hosting · Orange</div>
+          <div style="display:flex; gap:6px; margin-top:4px; flex-wrap:wrap;">
+            <span class="badge badge-amber" style="font-size:0.7rem;">Frontend</span>
+            <span style="padding:2px 8px; border-radius:8px; font-size:0.68rem; font-weight:700; background:rgba(16,185,129,0.15); color:var(--emerald); border:1px solid rgba(16,185,129,0.3);">1K build mins + 5 GB + 15 GB BW · 12 months</span>
+          </div>
         </div>
       </div>
-      <p style="font-size:0.88rem;">Hosts the React-based chat interface. Git-integrated CI/CD deploys on every push. CloudFront CDN ensures sub-100ms global load times. The <code style="font-family:var(--font-mono); color:var(--amber);">/deploy-aws</code> skill handles full deployment automatically.</p>
+      <p style="font-size:0.88rem;">Hosts the React-based chat interface with Git-integrated CI/CD. Free tier: 1,000 build minutes, 5 GB storage, 15 GB bandwidth per month. The <code style="font-family:var(--font-mono); color:var(--amber);">/deploy-aws</code> skill handles full deployment automatically.</p>
     </div>
 
     <!-- CloudWatch -->
@@ -597,10 +739,13 @@
         <div class="icon-circle icon-circle-coral" style="width:44px; height:44px; font-size:1.2rem;">📊</div>
         <div>
           <div style="font-weight:700; font-size:1rem; color:#FDA4AF;">Amazon CloudWatch</div>
-          <div class="badge badge-coral" style="font-size:0.7rem; margin-top:4px;">Monitoring · Alerts · Red-Orange</div>
+          <div style="display:flex; gap:6px; margin-top:4px; flex-wrap:wrap;">
+            <span class="badge badge-coral" style="font-size:0.7rem;">Monitoring</span>
+            <span style="padding:2px 8px; border-radius:8px; font-size:0.68rem; font-weight:700; background:rgba(6,182,212,0.12); color:var(--cyan); border:1px solid rgba(6,182,212,0.3);">10 metrics + 10 alarms · Always Free</span>
+          </div>
         </div>
       </div>
-      <p style="font-size:0.88rem;">Monitors all services in real time. Custom dashboards track: query latency (p50/p95/p99), retrieval hit rate, Bedrock token usage and cost, Lambda cold starts, and OpenSearch cluster health. Alarm triggers auto-scaling.</p>
+      <p style="font-size:0.88rem;">Monitors all services in real time. Custom dashboards track: query latency (p50/p95/p99), retrieval hit rate, Lambda cold starts. Basic monitoring + 10 custom metrics + 10 alarms = Always Free — no charges for our project.</p>
     </div>
 
     <!-- IAM -->
@@ -609,10 +754,13 @@
         <div class="icon-circle icon-circle-coral" style="width:44px; height:44px; font-size:1.2rem; background:rgba(220,38,38,0.2); border-color:rgba(220,38,38,0.3);">🔑</div>
         <div>
           <div style="font-weight:700; font-size:1rem; color:#FCA5A5;">AWS IAM</div>
-          <div class="badge badge-coral" style="font-size:0.7rem; margin-top:4px; background:rgba(220,38,38,0.15); color:#FCA5A5;">Security · Governance · Red</div>
+          <div style="display:flex; gap:6px; margin-top:4px; flex-wrap:wrap;">
+            <span class="badge badge-coral" style="font-size:0.7rem; background:rgba(220,38,38,0.15); color:#FCA5A5;">Security</span>
+            <span style="padding:2px 8px; border-radius:8px; font-size:0.68rem; font-weight:700; background:rgba(6,182,212,0.12); color:var(--cyan); border:1px solid rgba(6,182,212,0.3);">Always Free</span>
+          </div>
         </div>
       </div>
-      <p style="font-size:0.88rem;">Zero-trust security with least-privilege IAM roles for every service. Lambda roles can only call Bedrock and OpenSearch — nothing else. All cross-service communication is role-based, not key-based. VPC isolation for sensitive components.</p>
+      <p style="font-size:0.88rem;">Zero-trust security with least-privilege IAM roles for every service. Lambda roles can only call their specific target services — nothing else. All cross-service communication is role-based, never key-based. Always free — no usage charges ever.</p>
     </div>
   </div>
 </section>
@@ -620,35 +768,46 @@
 <div class="divider"></div>
 
 <!-- ============================================================ -->
-<!-- WHY BEDROCK -->
+<!-- LLM STRATEGY -->
 <!-- ============================================================ -->
-<section class="section" id="bedrock">
+<section class="section" id="llm">
   <div class="section-header hidden">
-    <div class="section-tag">AI Layer</div>
-    <h2>Why <span class="gradient-text">Amazon Bedrock?</span></h2>
+    <div class="section-tag">LLM Strategy</div>
+    <h2>Free-Tier <span class="gradient-text">Language Model</span></h2>
+    <p>Amazon Bedrock is not free tier — we use HuggingFace Inference API instead, with an optional paid upgrade path.</p>
   </div>
 
-  <div class="bedrock-callout hidden">
-    <div class="bedrock-icon">🧠</div>
-    <div>
-      <h3 style="margin-bottom:16px; font-size:1.5rem;">The Single Pane of Glass for Foundation Models</h3>
-      <p style="margin-bottom:20px;">Amazon Bedrock provides a unified API to access Claude 3.5 Sonnet, Cohere Embed v3, and other models — without managing infrastructure, without separate billing relationships, and without data leaving the AWS account.</p>
-      <div class="cards-grid-3" style="gap:16px;">
-        <div class="glass-card" style="padding:16px;">
-          <div style="font-size:1.3rem; margin-bottom:8px;">🔒</div>
-          <div style="font-weight:700; font-size:0.9rem; margin-bottom:6px;">Enterprise Security</div>
-          <div style="font-size:0.82rem; color:var(--white-60);">Data never used for model training. VPC endpoints. SOC 2 Type II compliant.</div>
+  <div class="cards-grid-2">
+    <!-- Primary: HuggingFace -->
+    <div class="llm-option-card hidden delay-1" style="border-color:rgba(255,170,0,0.4); background:rgba(255,170,0,0.05);">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+        <div style="font-size:2rem;">🤗</div>
+        <div>
+          <div style="font-weight:700; font-size:1.1rem; color:#FFD060;">HuggingFace Inference API</div>
+          <span style="padding:3px 10px; border-radius:10px; font-size:0.72rem; font-weight:700; background:rgba(16,185,129,0.15); color:var(--emerald); border:1px solid rgba(16,185,129,0.3);">Primary — Free Tier</span>
         </div>
-        <div class="glass-card" style="padding:16px;">
-          <div style="font-size:1.3rem; margin-bottom:8px;">🔄</div>
-          <div style="font-weight:700; font-size:0.9rem; margin-bottom:6px;">Model Flexibility</div>
-          <div style="font-size:0.82rem; color:var(--white-60);">Swap Claude for Titan or Llama with one config change. No code rewrite required.</div>
+      </div>
+      <p style="font-size:0.88rem; margin-bottom:16px;">HuggingFace provides free serverless inference for open-source models. We use <code style="color:#FFD060; font-family:var(--font-mono);">mistralai/Mistral-7B-Instruct-v0.2</code> or <code style="color:#FFD060; font-family:var(--font-mono);">google/flan-t5-xl</code> — both available on the free tier with no credit card required.</p>
+      <ul class="check-list" style="font-size:0.85rem;">
+        <li>No AWS account needed for LLM calls</li>
+        <li>Mistral-7B: strong instruction following, ~4K context</li>
+        <li>Flan-T5-XL: fast, optimized for QA tasks</li>
+        <li>Free API key — just create a HuggingFace account</li>
+      </ul>
+    </div>
+
+    <!-- Optional: Bedrock -->
+    <div class="llm-option-card hidden delay-2" style="border-color:rgba(59,130,246,0.3);">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+        <div style="font-size:2rem;">🧠</div>
+        <div>
+          <div style="font-weight:700; font-size:1.1rem; color:#93C5FD;">Amazon Bedrock</div>
+          <span style="padding:3px 10px; border-radius:10px; font-size:0.72rem; font-weight:700; background:rgba(245,158,11,0.12); color:var(--amber); border:1px solid rgba(245,158,11,0.3);">Optional Upgrade — Pay-Per-Use</span>
         </div>
-        <div class="glass-card" style="padding:16px;">
-          <div style="font-size:1.3rem; margin-bottom:8px;">📦</div>
-          <div style="font-weight:700; font-size:0.9rem; margin-bottom:6px;">Zero Infra</div>
-          <div style="font-size:0.82rem; color:var(--white-60);">No GPU instances to manage. Serverless inference. Pay per token, not per hour.</div>
-        </div>
+      </div>
+      <p style="font-size:0.88rem; margin-bottom:16px;">Amazon Bedrock is <strong style="color:var(--coral);">not free tier</strong> — it charges per token. However, if upgraded for final demo, <strong style="color:var(--white);">Claude Haiku costs only ~$0.0008/1K tokens</strong> — roughly $0.001 per typical query. Optional for the final production demo.</p>
+      <div style="padding:12px 16px; background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.25); border-radius:var(--border-radius-sm); font-size:0.83rem;">
+        <strong style="color:var(--amber);">Note:</strong> For all development, testing, and capstone evaluation, we use HuggingFace free tier. Bedrock is documented as an optional upgrade path only.
       </div>
     </div>
   </div>
@@ -657,82 +816,219 @@
 <div class="divider"></div>
 
 <!-- ============================================================ -->
-<!-- COST ESTIMATION -->
+<!-- FREE TIER LIMITS TABLE -->
+<!-- ============================================================ -->
+<section class="section" id="free-limits">
+  <div class="section-header hidden">
+    <div class="section-tag">Free Tier Limits</div>
+    <h2>Exact <span class="gradient-text">Monthly Limits</span></h2>
+    <p>A complete reference for every free tier allowance we rely on. Our expected usage is shown in context.</p>
+  </div>
+
+  <div class="free-tier-section-card hidden">
+    <div class="free-tier-row header">
+      <div>Service</div>
+      <div>Free Tier Allowance</div>
+      <div>Type</div>
+    </div>
+    <div class="free-tier-row">
+      <div class="free-service">🪣 Amazon S3</div>
+      <div class="free-limit">5 GB storage · 20K GET · 2K PUT/month</div>
+      <div><span class="free-type twelve">12 months</span></div>
+    </div>
+    <div class="free-tier-row">
+      <div class="free-service">λ AWS Lambda</div>
+      <div class="free-limit">1M requests/month · 400K GB-seconds</div>
+      <div><span class="free-type always">always free</span></div>
+    </div>
+    <div class="free-tier-row">
+      <div class="free-service">🖥️ EC2 t2.micro</div>
+      <div class="free-limit">750 hours/month (≈ always on)</div>
+      <div><span class="free-type twelve">12 months</span></div>
+    </div>
+    <div class="free-tier-row">
+      <div class="free-service">🌐 API Gateway</div>
+      <div class="free-limit">1M HTTP API calls/month</div>
+      <div><span class="free-type twelve">12 months</span></div>
+    </div>
+    <div class="free-tier-row">
+      <div class="free-service">🔄 Step Functions</div>
+      <div class="free-limit">4,000 state transitions/month</div>
+      <div><span class="free-type always">always free</span></div>
+    </div>
+    <div class="free-tier-row">
+      <div class="free-service">🔍 Amazon Textract</div>
+      <div class="free-limit">1,000 pages/month</div>
+      <div><span class="free-type twelve">12 months</span></div>
+    </div>
+    <div class="free-tier-row">
+      <div class="free-service">🖥️ AWS Amplify</div>
+      <div class="free-limit">1,000 build mins · 5 GB storage · 15 GB bandwidth/month</div>
+      <div><span class="free-type twelve">12 months</span></div>
+    </div>
+    <div class="free-tier-row">
+      <div class="free-service">📋 Amazon DynamoDB</div>
+      <div class="free-limit">25 GB storage · 25 WCU · 25 RCU</div>
+      <div><span class="free-type always">always free</span></div>
+    </div>
+    <div class="free-tier-row">
+      <div class="free-service">📊 Amazon CloudWatch</div>
+      <div class="free-limit">Basic monitoring · 10 metrics · 10 alarms</div>
+      <div><span class="free-type always">always free</span></div>
+    </div>
+    <div class="free-tier-row">
+      <div class="free-service">🔑 AWS IAM</div>
+      <div class="free-limit">Unlimited users, roles, policies</div>
+      <div><span class="free-type always">always free</span></div>
+    </div>
+    <div class="free-tier-row">
+      <div class="free-service">🤗 HuggingFace Inference API</div>
+      <div class="free-limit">Rate-limited free serverless inference</div>
+      <div><span class="free-type always">always free</span></div>
+    </div>
+
+    <div class="free-total-row">
+      <div>
+        <div class="free-total-label">Total Estimated Monthly Cost</div>
+        <div style="font-size:0.82rem; color:var(--white-60); margin-top:4px;">Within free tier limits — for development, testing, and capstone demo</div>
+      </div>
+      <div class="free-total-cost">$0 / month</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============================================================ -->
+<!-- WHAT REPLACES THE PAID SERVICES -->
 <!-- ============================================================ -->
 <section class="section">
   <div class="section-header hidden">
-    <div class="section-tag">Cost Analysis</div>
-    <h2>Monthly <span class="gradient-text">Cost Estimation</span></h2>
-    <p>Rough ballpark for a 500-employee company with 50,000 documents and ~2,000 queries/day.</p>
+    <div class="section-tag">Architecture Decisions</div>
+    <h2>What Replaces <span class="gradient-text">Paid Services</span></h2>
+    <p>We explicitly chose not to use three popular AWS services because they have no free tier.</p>
   </div>
 
-  <div class="cost-section-card hidden">
-    <div class="cost-row header">
-      <div>Service</div>
-      <div>Monthly Cost</div>
-      <div>Notes</div>
+  <div style="display:flex; flex-direction:column; gap:20px;">
+    <!-- OpenSearch replacement -->
+    <div class="hidden delay-1" style="display:grid; grid-template-columns:1fr auto 1fr; gap:24px; align-items:center; padding:28px; border-radius:var(--border-radius-lg); background:var(--glass-bg); border:1px solid var(--glass-border);">
+      <div>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+          <span style="font-size:1.4rem;">❌</span>
+          <div>
+            <div style="font-weight:700; color:var(--coral);">Amazon OpenSearch Service</div>
+            <div style="font-size:0.78rem; color:var(--white-60); margin-top:2px;">NOT free tier — minimum ~$0.10/hour</div>
+          </div>
+        </div>
+        <p style="font-size:0.85rem; color:var(--white-60); margin:0;">A managed OpenSearch cluster costs at minimum $72–$150/month even on the smallest instance. There is no free tier option.</p>
+      </div>
+      <div style="text-align:center; font-size:1.8rem; color:var(--emerald);">→</div>
+      <div>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+          <span style="font-size:1.4rem;">✅</span>
+          <div>
+            <div style="font-weight:700; color:var(--emerald);">ChromaDB / FAISS on EC2 t2.micro</div>
+            <div style="font-size:0.78rem; color:var(--white-60); margin-top:2px;">Free for 750 hours/month (12 months)</div>
+          </div>
+        </div>
+        <p style="font-size:0.85rem; color:var(--white-60); margin:0;">Self-hosted ChromaDB or FAISS on the free t2.micro instance. Handles dense vector similarity search for our project-scale corpus with no cost.</p>
+      </div>
     </div>
-    <div class="cost-row">
-      <div class="cost-service">☁️ Amazon S3</div>
-      <div class="cost-monthly">~$8</div>
-      <div class="cost-note">~100GB raw docs + chunks · Standard storage</div>
+
+    <!-- Bedrock replacement -->
+    <div class="hidden delay-2" style="display:grid; grid-template-columns:1fr auto 1fr; gap:24px; align-items:center; padding:28px; border-radius:var(--border-radius-lg); background:var(--glass-bg); border:1px solid var(--glass-border);">
+      <div>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+          <span style="font-size:1.4rem;">❌</span>
+          <div>
+            <div style="font-weight:700; color:var(--coral);">Amazon Bedrock</div>
+            <div style="font-size:0.78rem; color:var(--white-60); margin-top:2px;">NOT free tier — pay per token</div>
+          </div>
+        </div>
+        <p style="font-size:0.85rem; color:var(--white-60); margin:0;">Bedrock charges per token used. Claude Haiku costs ~$0.0008/1K tokens — inexpensive but not free. For unlimited development iteration, a free alternative is better.</p>
+      </div>
+      <div style="text-align:center; font-size:1.8rem; color:var(--emerald);">→</div>
+      <div>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+          <span style="font-size:1.4rem;">✅</span>
+          <div>
+            <div style="font-weight:700; color:var(--emerald);">HuggingFace Inference API</div>
+            <div style="font-size:0.78rem; color:var(--white-60); margin-top:2px;">Free — rate-limited serverless inference</div>
+          </div>
+        </div>
+        <p style="font-size:0.85rem; color:var(--white-60); margin:0;">Mistral-7B-Instruct-v0.2 or Flan-T5-XL via HuggingFace free tier. Sufficient for all development and evaluation runs. Optional: upgrade to Bedrock Claude Haiku for final demo.</p>
+      </div>
     </div>
-    <div class="cost-row">
-      <div class="cost-service">🔍 Amazon Textract</div>
-      <div class="cost-monthly">~$15</div>
-      <div class="cost-note">One-time bulk + ~500 new docs/month · $1.50/1000 pages</div>
+
+    <!-- Kendra removal -->
+    <div class="hidden delay-3" style="display:grid; grid-template-columns:1fr auto 1fr; gap:24px; align-items:center; padding:28px; border-radius:var(--border-radius-lg); background:var(--glass-bg); border:1px solid var(--glass-border);">
+      <div>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+          <span style="font-size:1.4rem;">❌</span>
+          <div>
+            <div style="font-weight:700; color:var(--coral);">Amazon Kendra</div>
+            <div style="font-size:0.78rem; color:var(--white-60); margin-top:2px;">NOT free tier — $810/month minimum</div>
+          </div>
+        </div>
+        <p style="font-size:0.85rem; color:var(--white-60); margin:0;">Amazon Kendra's Developer edition costs $810/month. There is no free tier. This is entirely outside our project budget and unnecessary given our RAG implementation.</p>
+      </div>
+      <div style="text-align:center; font-size:1.8rem; color:var(--emerald);">→</div>
+      <div>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+          <span style="font-size:1.4rem;">✅</span>
+          <div>
+            <div style="font-weight:700; color:var(--emerald);">Custom RAG Pipeline (our system)</div>
+            <div style="font-size:0.78rem; color:var(--white-60); margin-top:2px;">Free — built by us using Lambda + EC2</div>
+          </div>
+        </div>
+        <p style="font-size:0.85rem; color:var(--white-60); margin:0;">Our custom-built retrieval pipeline (Lambda + ChromaDB + BM25) provides equivalent or better performance for our use case, with full transparency and no vendor lock-in.</p>
+      </div>
     </div>
-    <div class="cost-row">
-      <div class="cost-service">λ AWS Lambda</div>
-      <div class="cost-monthly">~$12</div>
-      <div class="cost-note">60K query invocations/month + ingestion · Low memory</div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============================================================ -->
+<!-- AFTER FREE TIER EXPIRES -->
+<!-- ============================================================ -->
+<section class="section">
+  <div class="section-header hidden">
+    <div class="section-tag">After Free Tier</div>
+    <h2>Optional <span class="gradient-text-warm">Upgrade Path</span></h2>
+    <p>What happens when the 12-month free tier expires — an optional paid configuration for production use.</p>
+  </div>
+
+  <div class="callout callout-purple hidden" style="margin-bottom:32px;">
+    <p style="font-size:0.95rem; color:var(--white-60); margin:0;">
+      <strong style="color:var(--lavender);">For this capstone project:</strong> We operate entirely within free tier limits. The upgrade path below is informational only — documented to show we understand the production cost structure.
+    </p>
+  </div>
+
+  <div class="cards-grid-3">
+    <div class="after-tier-card hidden delay-1">
+      <div style="font-size:1.6rem; margin-bottom:12px;">🔍</div>
+      <h4 style="margin-bottom:8px; color:var(--amber);">Vector Store Upgrade</h4>
+      <p style="font-size:0.87rem; margin-bottom:12px;">Replace EC2-hosted ChromaDB with Amazon OpenSearch (t3.small, ~$50/month) for managed failover and larger index sizes when corpus exceeds EC2 capacity.</p>
+      <div style="font-size:0.85rem; color:var(--white-60);">Trigger: &gt;50K documents or SLA needed</div>
     </div>
-    <div class="cost-row">
-      <div class="cost-service">🔄 Step Functions</div>
-      <div class="cost-monthly">~$5</div>
-      <div class="cost-note">500 ingestion workflow executions/month · Standard</div>
+    <div class="after-tier-card hidden delay-2">
+      <div style="font-size:1.6rem; margin-bottom:12px;">🧠</div>
+      <h4 style="margin-bottom:8px; color:var(--amber);">LLM Upgrade</h4>
+      <p style="font-size:0.87rem; margin-bottom:12px;">Switch from HuggingFace free tier to Amazon Bedrock Claude Haiku (~$0.001/query) for lower latency, higher reliability, and enterprise security guarantees.</p>
+      <div style="font-size:0.85rem; color:var(--white-60);">Cost: ~$60/month at 2,000 queries/day</div>
     </div>
-    <div class="cost-row">
-      <div class="cost-service">🧠 Bedrock — Claude 3.5 Sonnet</div>
-      <div class="cost-monthly">~$180</div>
-      <div class="cost-note">60K queries/month · avg 2K input + 500 output tokens</div>
-    </div>
-    <div class="cost-row">
-      <div class="cost-service">📐 Bedrock — Cohere Embed v3</div>
-      <div class="cost-monthly">~$18</div>
-      <div class="cost-note">50M doc tokens (one-time) + 60K query embeddings/month</div>
-    </div>
-    <div class="cost-row">
-      <div class="cost-service">🔎 OpenSearch (t3.medium)</div>
-      <div class="cost-monthly">~$100</div>
-      <div class="cost-note">2-node cluster · 200GB SSD · Recommended for enterprise</div>
-    </div>
-    <div class="cost-row">
-      <div class="cost-service">🌐 API Gateway</div>
-      <div class="cost-monthly">~$22</div>
-      <div class="cost-note">60K REST API calls + data transfer</div>
-    </div>
-    <div class="cost-row">
-      <div class="cost-service">🖥️ Amplify + CloudFront</div>
-      <div class="cost-monthly">~$10</div>
-      <div class="cost-note">Frontend hosting + CDN distribution</div>
-    </div>
-    <div class="cost-row">
-      <div class="cost-service">📊 CloudWatch</div>
-      <div class="cost-monthly">~$10</div>
-      <div class="cost-note">Custom metrics + dashboards + log retention 30 days</div>
-    </div>
-    <div class="cost-row" style="border-top:2px solid var(--glass-border); border-bottom:none; margin-top:8px; padding-top:16px;">
-      <div style="font-weight:700; font-size:1rem; color:var(--white);">Total Estimated Monthly</div>
-      <div class="cost-total">~$380/mo</div>
-      <div class="cost-note" style="color:var(--emerald); font-style:italic;">= $4,560/year · ROI vs $14M/year in lost productivity</div>
+    <div class="after-tier-card hidden delay-3">
+      <div style="font-size:1.6rem; margin-bottom:12px;">⚡</div>
+      <h4 style="margin-bottom:8px; color:var(--amber);">Compute Upgrade</h4>
+      <p style="font-size:0.87rem; margin-bottom:12px;">Upgrade EC2 from t2.micro to t3.medium (~$30/month) for higher concurrent query throughput and larger in-memory vector indices.</p>
+      <div style="font-size:0.85rem; color:var(--white-60);">Trigger: p95 latency exceeds 3s target</div>
     </div>
   </div>
 
   <div class="callout callout-emerald mt-32 hidden">
     <p style="font-size:0.9rem; margin:0; color:#6EE7B7;">
-      <strong>ROI: 3,070× return.</strong> At 500 employees losing 1.8hrs/day at average $65/hr fully-loaded cost:
-      $58,500/day = $14.2M/year in lost productivity. RAGixAI at $4,560/year = 0.03% of the problem it solves.
+      <strong>Post-free-tier estimate: ~$150/month</strong> — for a small production deployment with managed OpenSearch, Bedrock Claude Haiku, and t3.medium EC2. Compare this to $4,560/year vs a $14.2M/year productivity problem — still a 3,000× ROI.
     </p>
   </div>
 </section>
@@ -744,41 +1040,26 @@
 <!-- ============================================================ -->
 <section class="section">
   <div class="section-header hidden">
-    <div class="section-tag">Enterprise Trust</div>
-    <h2>Security &amp; <span class="gradient-text">Compliance</span></h2>
-    <p>Enterprise-grade security baked in from day one — not bolted on after.</p>
+    <div class="section-tag">Security</div>
+    <h2>Security &amp; <span class="gradient-text">Access Control</span></h2>
+    <p>Security practices apply even on free tier — good habits from day one.</p>
   </div>
 
   <div class="cards-grid-3">
     <div class="security-card hidden delay-1">
       <div class="security-icon">🔐</div>
-      <h4 style="margin-bottom:8px; color:var(--white);">Encryption Everywhere</h4>
-      <p style="font-size:0.87rem;">AES-256 at rest for all S3 objects and OpenSearch indices. TLS 1.3 for all data in transit. KMS-managed keys with automatic annual rotation.</p>
+      <h4 style="margin-bottom:8px; color:var(--white);">Encryption at Rest</h4>
+      <p style="font-size:0.87rem;">AES-256 for all S3 objects and DynamoDB tables. EBS volume encryption enabled on EC2 t2.micro. No plaintext data persisted anywhere.</p>
     </div>
     <div class="security-card hidden delay-2">
-      <div class="security-icon">🏰</div>
-      <h4 style="margin-bottom:8px; color:var(--white);">VPC Isolation</h4>
-      <p style="font-size:0.87rem;">OpenSearch and Lambda run in private VPC subnets. No public internet access. All AWS service communication via VPC endpoints to avoid data leaving the private network.</p>
-    </div>
-    <div class="security-card hidden delay-3">
       <div class="security-icon">🔑</div>
       <h4 style="margin-bottom:8px; color:var(--white);">Least-Privilege IAM</h4>
-      <p style="font-size:0.87rem;">Each Lambda function has an IAM role with exactly the permissions it needs — nothing more. Service-to-service communication uses IAM roles, never static access keys.</p>
-    </div>
-    <div class="security-card hidden delay-1">
-      <div class="security-icon">📋</div>
-      <h4 style="margin-bottom:8px; color:var(--white);">Full Audit Trail</h4>
-      <p style="font-size:0.87rem;">AWS CloudTrail logs every API call. CloudWatch captures every query with user ID, query text, retrieved chunks, and response. Full 90-day audit history for compliance.</p>
-    </div>
-    <div class="security-card hidden delay-2">
-      <div class="security-icon">🚫</div>
-      <h4 style="margin-bottom:8px; color:var(--white);">No Training on Your Data</h4>
-      <p style="font-size:0.87rem;">Amazon Bedrock guarantees that your prompts and completions are never used to train or improve foundation models. Your enterprise data stays your enterprise data.</p>
+      <p style="font-size:0.87rem;">Each Lambda function has an IAM role with exactly the permissions it needs. Service-to-service communication uses IAM roles, never static access keys. IAM is always free.</p>
     </div>
     <div class="security-card hidden delay-3">
-      <div class="security-icon">✅</div>
-      <h4 style="margin-bottom:8px; color:var(--white);">Compliance Posture</h4>
-      <p style="font-size:0.87rem;">AWS infrastructure is SOC 2 Type II, ISO 27001, GDPR, HIPAA-eligible, and FedRAMP Moderate certified. RAGixAI inherits these certifications for your compliance reports.</p>
+      <div class="security-icon">🚫</div>
+      <h4 style="margin-bottom:8px; color:var(--white);">No Training on Data</h4>
+      <p style="font-size:0.87rem;">HuggingFace Inference API does not use submitted prompts for training. For the optional Bedrock upgrade, Amazon guarantees no model training on your data either.</p>
     </div>
   </div>
 </section>

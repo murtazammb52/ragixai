@@ -563,6 +563,50 @@
   </div>
 </section>
 
+<!-- Evaluation Datasets -->
+<section class="section" style="padding-top:0;">
+  <div class="section-header hidden">
+    <div class="section-tag">Evaluation Data</div>
+    <h2>Datasets We Will <span class="gradient-text">Evaluate With</span></h2>
+    <p>All pipeline configurations will be benchmarked against these three publicly available HuggingFace datasets with ground-truth labels.</p>
+  </div>
+
+  <div class="cards-grid-3">
+    <div class="arch-card hidden delay-1" style="border-color:rgba(124,58,237,0.3);">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+        <div class="icon-circle icon-circle-purple" style="font-size:1rem;">📖</div>
+        <div>
+          <h4 style="font-size:0.95rem; margin-bottom:4px;">SQuAD 2.0</h4>
+          <code style="font-size:0.72rem; color:var(--lavender); background:rgba(124,58,237,0.12); padding:2px 8px; border-radius:4px;">rajpurkar/squad_v2</code>
+        </div>
+      </div>
+      <p style="font-size:0.85rem;">150,000+ QA pairs + 50,000+ unanswerable questions. Measures retrieval accuracy and answer correctness. The unanswerable questions test our "refuse to answer" capability.</p>
+    </div>
+    <div class="arch-card hidden delay-2" style="border-color:rgba(59,130,246,0.3);">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+        <div class="icon-circle icon-circle-blue" style="font-size:1rem;">🔍</div>
+        <div>
+          <h4 style="font-size:0.95rem; margin-bottom:4px;">MS MARCO v2.1</h4>
+          <code style="font-size:0.72rem; color:#93C5FD; background:rgba(59,130,246,0.12); padding:2px 8px; border-radius:4px;">microsoft/ms_marco</code>
+        </div>
+      </div>
+      <p style="font-size:0.85rem;">8.8M passages, 1M+ queries. Industry standard retrieval benchmark. Tests chunking and embedding quality at enterprise scale — the stress test for our vector store.</p>
+    </div>
+    <div class="arch-card hidden delay-3" style="border-color:rgba(6,182,212,0.3);">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+        <div class="icon-circle icon-circle-cyan" style="font-size:1rem;">⚗️</div>
+        <div>
+          <h4 style="font-size:0.95rem; margin-bottom:4px;">Amnesty QA</h4>
+          <code style="font-size:0.72rem; color:var(--cyan); background:rgba(6,182,212,0.12); padding:2px 8px; border-radius:4px;">explodinggradients/amnesty_qa</code>
+        </div>
+      </div>
+      <p style="font-size:0.85rem;">Official RAGAS tutorial dataset. Contains <code style="color:var(--cyan); font-size:0.8rem;">question, contexts, answer, ground_truth</code> — perfectly structured for all RAGAS metrics out of the box.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
 <!-- Traditional vs RAGixAI -->
 <section class="section">
   <div class="section-header hidden">

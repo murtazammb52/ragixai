@@ -652,7 +652,7 @@
   <div class="section-header hidden">
     <div class="section-tag">A/B Configuration Testing</div>
     <h2>Option Comparison <span class="gradient-text">Matrix</span></h2>
-    <p>We test multiple RAG configurations head-to-head. The highlighted row is our chosen optimal configuration based on the best balance of accuracy, speed, and cost.</p>
+    <p>We will evaluate these options head-to-head. All configurations will be run through the full RAGAS suite and measured on the same datasets before any selection is made.</p>
   </div>
 
   <div class="hidden" style="overflow-x:auto;">
@@ -715,14 +715,14 @@
           <td>1.7s</td>
           <td>$0.29</td>
         </tr>
-        <tr class="recommended">
-          <td><span class="matrix-star">★</span> <strong>Config E (Ours)</strong></td>
+        <tr>
+          <td><strong>Config E</strong></td>
           <td>Cohere Embed v3</td>
           <td>Hybrid</td>
           <td>Cross-encoder</td>
-          <td><strong style="color:var(--emerald);">0.89</strong></td>
-          <td><strong style="color:var(--emerald);">0.87</strong></td>
-          <td><strong style="color:var(--emerald);">0.84</strong></td>
+          <td>0.89</td>
+          <td>0.87</td>
+          <td>0.84</td>
           <td>2.4s</td>
           <td>$0.38</td>
         </tr>
@@ -754,7 +754,7 @@
 
   <div class="callout callout-purple mt-32 hidden">
     <p style="font-size:0.95rem; color:var(--white-60); margin:0;">
-      <strong style="color:var(--lavender);">Why Config E wins:</strong> The cross-encoder reranker adds only 0.7s latency vs Config D but improves faithfulness by +6% and context precision by +3.7%. At $0.38/1K queries, the quality-cost ratio is optimal. Config F costs 34% more for marginally equivalent performance.
+      <strong style="color:var(--lavender);">Reading the matrix:</strong> Each configuration varies one or more pipeline components. We will run all 7 configs through our evaluation datasets and select based on the measured tradeoff between accuracy, latency, and cost-per-query.
     </p>
   </div>
 </section>
@@ -798,46 +798,108 @@
 <section class="section">
   <div class="section-header hidden">
     <div class="section-tag">Test Data</div>
-    <h2>Evaluation <span class="gradient-text">Dataset</span></h2>
-    <p>A rigorous evaluation requires a high-quality, diverse test set. We use three complementary datasets.</p>
+    <h2>Datasets We Will <span class="gradient-text">Use</span></h2>
+    <p>A rigorous evaluation requires high-quality, publicly available datasets with ground truth labels. We use three complementary datasets sourced from HuggingFace.</p>
   </div>
 
-  <div class="cards-grid-3">
-    <div class="dataset-card hidden delay-1">
-      <div class="dataset-tag" style="background:rgba(124,58,237,0.15); color:var(--lavender); border:1px solid rgba(124,58,237,0.3);">Primary · Synthetic</div>
-      <div style="font-size:2rem; margin-bottom:12px;">🏢</div>
-      <h3 style="margin-bottom:10px;">Synthetic Enterprise KB</h3>
-      <p style="font-size:0.88rem; margin-bottom:16px;">500 Q&A pairs generated from real enterprise document templates (HR policies, IT guides, compliance docs, technical runbooks). Generated with Claude + human review for quality.</p>
-      <ul class="check-list" style="font-size:0.85rem;">
-        <li>500 question-answer pairs</li>
-        <li>Covers all 4 document sources</li>
-        <li>10 topic categories</li>
-        <li>Multi-hop questions included</li>
-      </ul>
+  <!-- Dataset Cards -->
+  <div style="display:flex; flex-direction:column; gap:24px;">
+
+    <!-- Dataset 1: SQuAD 2.0 -->
+    <div class="hidden delay-1" style="border-radius:var(--border-radius-lg); background:linear-gradient(135deg, rgba(124,58,237,0.07) 0%, rgba(0,0,0,0.3) 100%); border:1px solid rgba(124,58,237,0.3); padding:32px; position:relative; overflow:hidden;">
+      <div style="position:absolute; top:0; left:0; bottom:0; width:4px; background:var(--gradient-primary); border-radius:4px 0 0 4px;"></div>
+      <div style="display:grid; grid-template-columns:auto 1fr; gap:24px; align-items:start;">
+        <div style="text-align:center; min-width:80px;">
+          <div style="font-size:2.8rem; margin-bottom:8px;">📖</div>
+          <div style="font-size:0.7rem; font-weight:800; letter-spacing:0.08em; color:var(--lavender); text-transform:uppercase;">Dataset 1</div>
+          <div style="font-size:0.65rem; color:var(--white-60); margin-top:4px;">Primary QA</div>
+        </div>
+        <div>
+          <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:10px;">
+            <h3 style="font-size:1.2rem; margin:0;">SQuAD 2.0</h3>
+            <span style="padding:3px 10px; border-radius:12px; font-size:0.72rem; font-weight:700; background:rgba(124,58,237,0.15); color:var(--lavender); border:1px solid rgba(124,58,237,0.3);">QA Evaluation</span>
+          </div>
+          <div style="font-size:0.85rem; color:var(--white-60); margin-bottom:8px; font-style:italic;">Stanford Question Answering Dataset v2</div>
+          <div style="margin-bottom:12px;">
+            <code style="background:rgba(124,58,237,0.15); color:var(--lavender); padding:4px 10px; border-radius:6px; font-size:0.82rem; border:1px solid rgba(124,58,237,0.25);">rajpurkar/squad_v2</code>
+            <span style="font-size:0.78rem; color:var(--white-60); margin-left:10px;">HuggingFace</span>
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px; margin-bottom:16px;">
+            <div style="padding:10px 14px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.07); border-radius:8px;">
+              <div style="font-size:0.72rem; color:var(--white-60); margin-bottom:3px; text-transform:uppercase; letter-spacing:0.05em;">Size</div>
+              <div style="font-size:0.9rem; font-weight:700; color:var(--white);">150,000+ QA pairs</div>
+              <div style="font-size:0.75rem; color:var(--white-60);">50,000+ unanswerable questions</div>
+            </div>
+          </div>
+          <p style="font-size:0.87rem; color:var(--white-60); margin:0; line-height:1.6;">Provides ground-truth question-answer pairs for measuring retrieval accuracy and answer correctness. The unanswerable questions are perfect for testing our "refuse to answer" capability — a critical enterprise requirement.</p>
+        </div>
+      </div>
     </div>
-    <div class="dataset-card hidden delay-2">
-      <div class="dataset-tag" style="background:rgba(59,130,246,0.15); color:#93C5FD; border:1px solid rgba(59,130,246,0.3);">Benchmark · Public</div>
-      <div style="font-size:2rem; margin-bottom:12px;">📚</div>
-      <h3 style="margin-bottom:10px;">MS MARCO Passages</h3>
-      <p style="font-size:0.88rem; margin-bottom:16px;">Industry-standard information retrieval benchmark. Used to validate retrieval quality in isolation — separate from generation quality. Provides an external, unbiased reference point.</p>
-      <ul class="check-list" style="font-size:0.85rem;">
-        <li>1,000 selected passages</li>
-        <li>Dense retrieval benchmarks</li>
-        <li>Standardized MRR metrics</li>
-        <li>Widely published baselines</li>
-      </ul>
+
+    <!-- Dataset 2: MS MARCO v2.1 -->
+    <div class="hidden delay-2" style="border-radius:var(--border-radius-lg); background:linear-gradient(135deg, rgba(59,130,246,0.07) 0%, rgba(0,0,0,0.3) 100%); border:1px solid rgba(59,130,246,0.3); padding:32px; position:relative; overflow:hidden;">
+      <div style="position:absolute; top:0; left:0; bottom:0; width:4px; background:linear-gradient(180deg, var(--electric-blue), var(--cyan)); border-radius:4px 0 0 4px;"></div>
+      <div style="display:grid; grid-template-columns:auto 1fr; gap:24px; align-items:start;">
+        <div style="text-align:center; min-width:80px;">
+          <div style="font-size:2.8rem; margin-bottom:8px;">🔍</div>
+          <div style="font-size:0.7rem; font-weight:800; letter-spacing:0.08em; color:#93C5FD; text-transform:uppercase;">Dataset 2</div>
+          <div style="font-size:0.65rem; color:var(--white-60); margin-top:4px;">Retrieval</div>
+        </div>
+        <div>
+          <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:10px;">
+            <h3 style="font-size:1.2rem; margin:0;">MS MARCO v2.1</h3>
+            <span style="padding:3px 10px; border-radius:12px; font-size:0.72rem; font-weight:700; background:rgba(59,130,246,0.15); color:#93C5FD; border:1px solid rgba(59,130,246,0.3);">Retrieval Benchmark</span>
+          </div>
+          <div style="font-size:0.85rem; color:var(--white-60); margin-bottom:8px; font-style:italic;">Microsoft Machine Reading Comprehension</div>
+          <div style="margin-bottom:12px;">
+            <code style="background:rgba(59,130,246,0.15); color:#93C5FD; padding:4px 10px; border-radius:6px; font-size:0.82rem; border:1px solid rgba(59,130,246,0.25);">microsoft/ms_marco (v2.1)</code>
+            <span style="font-size:0.78rem; color:var(--white-60); margin-left:10px;">HuggingFace</span>
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px; margin-bottom:16px;">
+            <div style="padding:10px 14px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.07); border-radius:8px;">
+              <div style="font-size:0.72rem; color:var(--white-60); margin-bottom:3px; text-transform:uppercase; letter-spacing:0.05em;">Size</div>
+              <div style="font-size:0.9rem; font-weight:700; color:var(--white);">8.8M passages</div>
+              <div style="font-size:0.75rem; color:var(--white-60);">1M+ queries</div>
+            </div>
+          </div>
+          <p style="font-size:0.87rem; color:var(--white-60); margin:0; line-height:1.6;">Enterprise-scale retrieval dataset and the industry standard benchmark for dense retrieval evaluation. Tests chunking and embedding quality at scale — a stress test our pipeline must pass before production.</p>
+        </div>
+      </div>
     </div>
-    <div class="dataset-card hidden delay-3">
-      <div class="dataset-tag" style="background:rgba(6,182,212,0.15); color:#67E8F9; border:1px solid rgba(6,182,212,0.3);">Domain-Specific · Technical</div>
-      <div style="font-size:2rem; margin-bottom:12px;">💻</div>
-      <h3 style="margin-bottom:10px;">TechQA Dataset</h3>
-      <p style="font-size:0.88rem; margin-bottom:16px;">IBM's TechQA dataset of technical support questions answered from enterprise documentation. Directly mirrors our target use case: employees asking technical questions about internal systems.</p>
-      <ul class="check-list" style="font-size:0.85rem;">
-        <li>600 technical Q&A pairs</li>
-        <li>Enterprise documentation domain</li>
-        <li>Long-context questions</li>
-        <li>Expert-verified ground truth</li>
-      </ul>
+
+    <!-- Dataset 3: Amnesty QA (RAGAS) -->
+    <div class="hidden delay-3" style="border-radius:var(--border-radius-lg); background:linear-gradient(135deg, rgba(6,182,212,0.07) 0%, rgba(0,0,0,0.3) 100%); border:1px solid rgba(6,182,212,0.3); padding:32px; position:relative; overflow:hidden;">
+      <div style="position:absolute; top:0; left:0; bottom:0; width:4px; background:linear-gradient(180deg, var(--cyan), var(--emerald)); border-radius:4px 0 0 4px;"></div>
+      <div style="display:grid; grid-template-columns:auto 1fr; gap:24px; align-items:start;">
+        <div style="text-align:center; min-width:80px;">
+          <div style="font-size:2.8rem; margin-bottom:8px;">⚗️</div>
+          <div style="font-size:0.7rem; font-weight:800; letter-spacing:0.08em; color:var(--cyan); text-transform:uppercase;">Dataset 3</div>
+          <div style="font-size:0.65rem; color:var(--white-60); margin-top:4px;">RAGAS Native</div>
+        </div>
+        <div>
+          <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:10px;">
+            <h3 style="font-size:1.2rem; margin:0;">Amnesty QA</h3>
+            <span style="padding:3px 10px; border-radius:12px; font-size:0.72rem; font-weight:700; background:rgba(6,182,212,0.15); color:var(--cyan); border:1px solid rgba(6,182,212,0.3);">Official RAGAS Example</span>
+          </div>
+          <div style="font-size:0.85rem; color:var(--white-60); margin-bottom:8px; font-style:italic;">Amnesty QA — Official RAGAS Example Dataset</div>
+          <div style="margin-bottom:12px;">
+            <code style="background:rgba(6,182,212,0.12); color:var(--cyan); padding:4px 10px; border-radius:6px; font-size:0.82rem; border:1px solid rgba(6,182,212,0.25);">explodinggradients/amnesty_qa</code>
+            <span style="font-size:0.78rem; color:var(--white-60); margin-left:10px;">HuggingFace</span>
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px; margin-bottom:16px;">
+            <div style="padding:10px 14px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.07); border-radius:8px;">
+              <div style="font-size:0.72rem; color:var(--white-60); margin-bottom:3px; text-transform:uppercase; letter-spacing:0.05em;">Size</div>
+              <div style="font-size:0.9rem; font-weight:700; color:var(--white);">~20 Q&amp;A pairs</div>
+              <div style="font-size:0.75rem; color:var(--white-60);">Full context + ground truth</div>
+            </div>
+            <div style="padding:10px 14px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.07); border-radius:8px;">
+              <div style="font-size:0.72rem; color:var(--white-60); margin-bottom:3px; text-transform:uppercase; letter-spacing:0.05em;">Fields</div>
+              <div style="font-size:0.82rem; font-weight:600; color:var(--white); font-family:var(--font-mono);">question, contexts,<br/>answer, ground_truth</div>
+            </div>
+          </div>
+          <p style="font-size:0.87rem; color:var(--white-60); margin:0; line-height:1.6;">The <strong style="color:var(--white);">official dataset used in RAGAS documentation and tutorials</strong>. Contains all fields required for computing Faithfulness, Context Recall, Answer Relevancy, and Context Precision — perfectly structured for end-to-end RAGAS pipeline validation out of the box.</p>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -847,7 +909,7 @@
       <div style="font-size:2.5rem;">⚙️</div>
       <div>
         <h3 style="margin-bottom:12px; color:var(--cyan);">Automated Evaluation with <code style="font-family:var(--font-mono);">/evaluate-rag</code></h3>
-        <p style="font-size:0.9rem; margin-bottom:0;">The <code style="font-family:var(--font-mono); color:var(--cyan);">/evaluate-rag</code> Claude Code skill runs the entire RAGAS evaluation suite automatically: ingests the test dataset, runs queries through the pipeline, scores all 5 RAGAS metrics, and generates a comparison report — in a single command. No manual scoring. No human bias.</p>
+        <p style="font-size:0.9rem; margin-bottom:0;">The <code style="font-family:var(--font-mono); color:var(--cyan);">/evaluate-rag</code> Claude Code skill runs the entire RAGAS evaluation suite automatically: ingests each dataset, runs queries through the pipeline, scores all 5 RAGAS metrics, and generates a comparison report — in a single command. No manual scoring. No human bias.</p>
       </div>
     </div>
   </div>
