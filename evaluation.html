@@ -630,13 +630,13 @@
           <div class="metric-bar-track">
             <div class="metric-bar-fill baseline score-bar-fill" data-width="100%" style="background:rgba(244,63,94,0.6);"></div>
           </div>
-          <div class="metric-bar-labels"><span class="bar-label-baseline">Baseline: 6,480s (1.8hrs)</span></div>
+          <div class="metric-bar-labels"><span class="bar-label-baseline">Baseline: 12,600s (3.5hrs per 10-K)</span></div>
         </div>
         <div>
           <div class="metric-bar-track">
             <div class="metric-bar-fill target score-bar-fill" data-width="0.04%"></div>
           </div>
-          <div class="metric-bar-labels"><span class="bar-label-target">Target: 2.4s (p95) — 2,700× faster</span></div>
+          <div class="metric-bar-labels"><span class="bar-label-target">Target: 2.4s (p95) — 5,250× faster</span></div>
         </div>
       </div>
     </div>
@@ -754,7 +754,7 @@
 
   <div class="callout callout-purple mt-32 hidden">
     <p style="font-size:0.95rem; color:var(--white-60); margin:0;">
-      <strong style="color:var(--lavender);">Reading the matrix:</strong> Each configuration varies one or more pipeline components. We will run all 7 configs through our evaluation datasets and select based on the measured tradeoff between accuracy, latency, and cost-per-query.
+      <strong style="color:var(--lavender);">Reading the matrix:</strong> Each configuration varies one or more pipeline components. We will run all 7 configs through our EDGAR Corpus + FinanceBench datasets and select based on the measured tradeoff between accuracy, latency, and cost-per-query.
     </p>
   </div>
 </section>
@@ -768,24 +768,24 @@
   <div class="section-header hidden">
     <div class="section-tag">Business Impact</div>
     <h2>Why These Metrics <span class="gradient-text">Matter</span></h2>
-    <p>Each RAGAS metric maps directly to a real business outcome. This isn't academic — it's enterprise ROI.</p>
+    <p>Each RAGAS metric maps directly to a real business outcome for financial analysts and compliance teams. This isn't academic — it's financial ROI.</p>
   </div>
 
   <div class="cards-grid-3">
     <div class="impact-card hidden delay-1">
       <div class="impact-number">0.89</div>
       <div class="impact-label">Faithfulness Target</div>
-      <div class="impact-desc">Means only 1 in 9 claims may not be directly from the source docs. In enterprise contexts, this prevents employees from acting on hallucinated information — protecting compliance and legal standing.</div>
+      <div class="impact-desc">Means only 1 in 9 claims may not be directly from the source SEC filing. In financial and compliance contexts, this prevents analysts from acting on hallucinated figures — protecting investment decisions and legal standing.</div>
     </div>
     <div class="impact-card hidden delay-2">
-      <div class="impact-number" style="background:var(--gradient-warm); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">2,700×</div>
-      <div class="impact-label">Faster Than Manual Search</div>
-      <div class="impact-desc">1.8 hours of searching reduced to 2.4 seconds (p95 latency). For a 500-person company, that's 900 person-hours saved daily — $9M+/year in recovered productivity.</div>
+      <div class="impact-number" style="background:var(--gradient-warm); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">5,250×</div>
+      <div class="impact-label">Faster Than Manual Filing Review</div>
+      <div class="impact-desc">3.5 hours to read a 10-K reduced to 2.4 seconds (p95 latency). Analysts covering 10+ companies recover days of research time per quarter — transforming how financial due diligence is done.</div>
     </div>
     <div class="impact-card hidden delay-3">
       <div class="impact-number" style="background:linear-gradient(135deg,var(--emerald),var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">100%</div>
       <div class="impact-label">Source Citations</div>
-      <div class="impact-desc">Every answer includes exact document and page citations. Employees can verify sources in one click, building trust and ensuring compliance documentation is always traceable.</div>
+      <div class="impact-desc">Every answer includes the exact SEC filing name, section, and page. Analysts can verify in one click — audit-ready citations that meet compliance and legal documentation requirements.</div>
     </div>
   </div>
 </section>
@@ -799,105 +799,113 @@
   <div class="section-header hidden">
     <div class="section-tag">Test Data</div>
     <h2>Datasets We Will <span class="gradient-text">Use</span></h2>
-    <p>A rigorous evaluation requires high-quality, publicly available datasets with ground truth labels. We use three complementary datasets sourced from HuggingFace.</p>
+    <p>All three datasets are rooted in SEC EDGAR — providing real financial filings as the document corpus and expert-annotated ground truth for rigorous RAGAS evaluation.</p>
   </div>
 
   <!-- Dataset Cards -->
   <div style="display:flex; flex-direction:column; gap:24px;">
 
-    <!-- Dataset 1: SQuAD 2.0 -->
+    <!-- Dataset 1: EDGAR Corpus -->
     <div class="hidden delay-1" style="border-radius:var(--border-radius-lg); background:linear-gradient(135deg, rgba(124,58,237,0.07) 0%, rgba(0,0,0,0.3) 100%); border:1px solid rgba(124,58,237,0.3); padding:32px; position:relative; overflow:hidden;">
       <div style="position:absolute; top:0; left:0; bottom:0; width:4px; background:var(--gradient-primary); border-radius:4px 0 0 4px;"></div>
       <div style="display:grid; grid-template-columns:auto 1fr; gap:24px; align-items:start;">
         <div style="text-align:center; min-width:80px;">
-          <div style="font-size:2.8rem; margin-bottom:8px;">📖</div>
+          <div style="font-size:2.8rem; margin-bottom:8px;">🏛️</div>
           <div style="font-size:0.7rem; font-weight:800; letter-spacing:0.08em; color:var(--lavender); text-transform:uppercase;">Dataset 1</div>
-          <div style="font-size:0.65rem; color:var(--white-60); margin-top:4px;">Primary QA</div>
+          <div style="font-size:0.65rem; color:var(--white-60); margin-top:4px;">Document Corpus</div>
         </div>
         <div>
           <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:10px;">
-            <h3 style="font-size:1.2rem; margin:0;">SQuAD 2.0</h3>
-            <span style="padding:3px 10px; border-radius:12px; font-size:0.72rem; font-weight:700; background:rgba(124,58,237,0.15); color:var(--lavender); border:1px solid rgba(124,58,237,0.3);">QA Evaluation</span>
+            <h3 style="font-size:1.2rem; margin:0;">EDGAR Corpus</h3>
+            <span style="padding:3px 10px; border-radius:12px; font-size:0.72rem; font-weight:700; background:rgba(124,58,237,0.15); color:var(--lavender); border:1px solid rgba(124,58,237,0.3);">Ingestion Corpus</span>
           </div>
-          <div style="font-size:0.85rem; color:var(--white-60); margin-bottom:8px; font-style:italic;">Stanford Question Answering Dataset v2</div>
+          <div style="font-size:0.85rem; color:var(--white-60); margin-bottom:8px; font-style:italic;">SEC EDGAR Annual Report Corpus (2000–2020)</div>
           <div style="margin-bottom:12px;">
-            <code style="background:rgba(124,58,237,0.15); color:var(--lavender); padding:4px 10px; border-radius:6px; font-size:0.82rem; border:1px solid rgba(124,58,237,0.25);">rajpurkar/squad_v2</code>
+            <code style="background:rgba(124,58,237,0.15); color:var(--lavender); padding:4px 10px; border-radius:6px; font-size:0.82rem; border:1px solid rgba(124,58,237,0.25);">eloukas/edgar-corpus</code>
             <span style="font-size:0.78rem; color:var(--white-60); margin-left:10px;">HuggingFace</span>
           </div>
           <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px; margin-bottom:16px;">
             <div style="padding:10px 14px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.07); border-radius:8px;">
-              <div style="font-size:0.72rem; color:var(--white-60); margin-bottom:3px; text-transform:uppercase; letter-spacing:0.05em;">Size</div>
-              <div style="font-size:0.9rem; font-weight:700; color:var(--white);">150,000+ QA pairs</div>
-              <div style="font-size:0.75rem; color:var(--white-60);">50,000+ unanswerable questions</div>
+              <div style="font-size:0.72rem; color:var(--white-60); margin-bottom:3px; text-transform:uppercase; letter-spacing:0.05em;">Coverage</div>
+              <div style="font-size:0.9rem; font-weight:700; color:var(--white);">6,900+ companies</div>
+              <div style="font-size:0.75rem; color:var(--white-60);">10-K annual reports, 2000–2020</div>
+            </div>
+            <div style="padding:10px 14px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.07); border-radius:8px;">
+              <div style="font-size:0.72rem; color:var(--white-60); margin-bottom:3px; text-transform:uppercase; letter-spacing:0.05em;">Filing Types</div>
+              <div style="font-size:0.82rem; font-weight:600; color:var(--white); font-family:var(--font-mono);">10-K, 10-K405,<br/>10-KSB variants</div>
             </div>
           </div>
-          <p style="font-size:0.87rem; color:var(--white-60); margin:0; line-height:1.6;">Provides ground-truth question-answer pairs for measuring retrieval accuracy and answer correctness. The unanswerable questions are perfect for testing our "refuse to answer" capability — a critical enterprise requirement.</p>
+          <p style="font-size:0.87rem; color:var(--white-60); margin:0; line-height:1.6;">The primary document corpus ingested into our vector store. Each 10-K filing is ingested from the EDGAR API, chunked, embedded, and indexed. This forms the knowledge base our RAG pipeline retrieves from — real financial disclosures, not synthetic text.</p>
         </div>
       </div>
     </div>
 
-    <!-- Dataset 2: MS MARCO v2.1 -->
+    <!-- Dataset 2: FinanceBench -->
     <div class="hidden delay-2" style="border-radius:var(--border-radius-lg); background:linear-gradient(135deg, rgba(59,130,246,0.07) 0%, rgba(0,0,0,0.3) 100%); border:1px solid rgba(59,130,246,0.3); padding:32px; position:relative; overflow:hidden;">
       <div style="position:absolute; top:0; left:0; bottom:0; width:4px; background:linear-gradient(180deg, var(--electric-blue), var(--cyan)); border-radius:4px 0 0 4px;"></div>
       <div style="display:grid; grid-template-columns:auto 1fr; gap:24px; align-items:start;">
         <div style="text-align:center; min-width:80px;">
-          <div style="font-size:2.8rem; margin-bottom:8px;">🔍</div>
+          <div style="font-size:2.8rem; margin-bottom:8px;">📊</div>
           <div style="font-size:0.7rem; font-weight:800; letter-spacing:0.08em; color:#93C5FD; text-transform:uppercase;">Dataset 2</div>
-          <div style="font-size:0.65rem; color:var(--white-60); margin-top:4px;">Retrieval</div>
+          <div style="font-size:0.65rem; color:var(--white-60); margin-top:4px;">QA Evaluation</div>
         </div>
         <div>
           <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:10px;">
-            <h3 style="font-size:1.2rem; margin:0;">MS MARCO v2.1</h3>
-            <span style="padding:3px 10px; border-radius:12px; font-size:0.72rem; font-weight:700; background:rgba(59,130,246,0.15); color:#93C5FD; border:1px solid rgba(59,130,246,0.3);">Retrieval Benchmark</span>
+            <h3 style="font-size:1.2rem; margin:0;">FinanceBench</h3>
+            <span style="padding:3px 10px; border-radius:12px; font-size:0.72rem; font-weight:700; background:rgba(59,130,246,0.15); color:#93C5FD; border:1px solid rgba(59,130,246,0.3);">Expert QA Benchmark</span>
           </div>
-          <div style="font-size:0.85rem; color:var(--white-60); margin-bottom:8px; font-style:italic;">Microsoft Machine Reading Comprehension</div>
+          <div style="font-size:0.85rem; color:var(--white-60); margin-bottom:8px; font-style:italic;">Expert-annotated QA pairs sourced directly from SEC 10-K &amp; 10-Q filings</div>
           <div style="margin-bottom:12px;">
-            <code style="background:rgba(59,130,246,0.15); color:#93C5FD; padding:4px 10px; border-radius:6px; font-size:0.82rem; border:1px solid rgba(59,130,246,0.25);">microsoft/ms_marco (v2.1)</code>
+            <code style="background:rgba(59,130,246,0.15); color:#93C5FD; padding:4px 10px; border-radius:6px; font-size:0.82rem; border:1px solid rgba(59,130,246,0.25);">PatronusAI/financebench</code>
             <span style="font-size:0.78rem; color:var(--white-60); margin-left:10px;">HuggingFace</span>
           </div>
           <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px; margin-bottom:16px;">
             <div style="padding:10px 14px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.07); border-radius:8px;">
               <div style="font-size:0.72rem; color:var(--white-60); margin-bottom:3px; text-transform:uppercase; letter-spacing:0.05em;">Size</div>
-              <div style="font-size:0.9rem; font-weight:700; color:var(--white);">8.8M passages</div>
-              <div style="font-size:0.75rem; color:var(--white-60);">1M+ queries</div>
+              <div style="font-size:0.9rem; font-weight:700; color:var(--white);">150 QA pairs</div>
+              <div style="font-size:0.75rem; color:var(--white-60);">Expert-annotated ground truth</div>
+            </div>
+            <div style="padding:10px 14px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.07); border-radius:8px;">
+              <div style="font-size:0.72rem; color:var(--white-60); margin-bottom:3px; text-transform:uppercase; letter-spacing:0.05em;">Fields</div>
+              <div style="font-size:0.82rem; font-weight:600; color:var(--white); font-family:var(--font-mono);">question, answer,<br/>evidence, doc_name</div>
             </div>
           </div>
-          <p style="font-size:0.87rem; color:var(--white-60); margin:0; line-height:1.6;">Enterprise-scale retrieval dataset and the industry standard benchmark for dense retrieval evaluation. Tests chunking and embedding quality at scale — a stress test our pipeline must pass before production.</p>
+          <p style="font-size:0.87rem; color:var(--white-60); margin:0; line-height:1.6;">The gold-standard benchmark for financial RAG evaluation. Every QA pair is sourced from real SEC 10-K and 10-Q filings with expert-verified answers and exact evidence passages. Designed specifically to stress-test financial document retrieval systems — precisely our use case.</p>
         </div>
       </div>
     </div>
 
-    <!-- Dataset 3: Amnesty QA (RAGAS) -->
+    <!-- Dataset 3: RAGAS Testset (Auto-generated from EDGAR) -->
     <div class="hidden delay-3" style="border-radius:var(--border-radius-lg); background:linear-gradient(135deg, rgba(6,182,212,0.07) 0%, rgba(0,0,0,0.3) 100%); border:1px solid rgba(6,182,212,0.3); padding:32px; position:relative; overflow:hidden;">
       <div style="position:absolute; top:0; left:0; bottom:0; width:4px; background:linear-gradient(180deg, var(--cyan), var(--emerald)); border-radius:4px 0 0 4px;"></div>
       <div style="display:grid; grid-template-columns:auto 1fr; gap:24px; align-items:start;">
         <div style="text-align:center; min-width:80px;">
           <div style="font-size:2.8rem; margin-bottom:8px;">⚗️</div>
           <div style="font-size:0.7rem; font-weight:800; letter-spacing:0.08em; color:var(--cyan); text-transform:uppercase;">Dataset 3</div>
-          <div style="font-size:0.65rem; color:var(--white-60); margin-top:4px;">RAGAS Native</div>
+          <div style="font-size:0.65rem; color:var(--white-60); margin-top:4px;">RAGAS Generated</div>
         </div>
         <div>
           <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:10px;">
-            <h3 style="font-size:1.2rem; margin:0;">Amnesty QA</h3>
-            <span style="padding:3px 10px; border-radius:12px; font-size:0.72rem; font-weight:700; background:rgba(6,182,212,0.15); color:var(--cyan); border:1px solid rgba(6,182,212,0.3);">Official RAGAS Example</span>
+            <h3 style="font-size:1.2rem; margin:0;">RAGAS Testset (EDGAR)</h3>
+            <span style="padding:3px 10px; border-radius:12px; font-size:0.72rem; font-weight:700; background:rgba(6,182,212,0.15); color:var(--cyan); border:1px solid rgba(6,182,212,0.3);">Auto-Generated QA</span>
           </div>
-          <div style="font-size:0.85rem; color:var(--white-60); margin-bottom:8px; font-style:italic;">Amnesty QA — Official RAGAS Example Dataset</div>
+          <div style="font-size:0.85rem; color:var(--white-60); margin-bottom:8px; font-style:italic;">Synthetic QA pairs auto-generated from ingested EDGAR filings using RAGAS TestsetGenerator</div>
           <div style="margin-bottom:12px;">
-            <code style="background:rgba(6,182,212,0.12); color:var(--cyan); padding:4px 10px; border-radius:6px; font-size:0.82rem; border:1px solid rgba(6,182,212,0.25);">explodinggradients/amnesty_qa</code>
-            <span style="font-size:0.78rem; color:var(--white-60); margin-left:10px;">HuggingFace</span>
+            <code style="background:rgba(6,182,212,0.12); color:var(--cyan); padding:4px 10px; border-radius:6px; font-size:0.82rem; border:1px solid rgba(6,182,212,0.25);">ragas.testset.TestsetGenerator</code>
+            <span style="font-size:0.78rem; color:var(--white-60); margin-left:10px;">Generated locally</span>
           </div>
           <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px; margin-bottom:16px;">
             <div style="padding:10px 14px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.07); border-radius:8px;">
               <div style="font-size:0.72rem; color:var(--white-60); margin-bottom:3px; text-transform:uppercase; letter-spacing:0.05em;">Size</div>
-              <div style="font-size:0.9rem; font-weight:700; color:var(--white);">~20 Q&amp;A pairs</div>
-              <div style="font-size:0.75rem; color:var(--white-60);">Full context + ground truth</div>
+              <div style="font-size:0.9rem; font-weight:700; color:var(--white);">~100 QA pairs</div>
+              <div style="font-size:0.75rem; color:var(--white-60);">Generated per evaluation run</div>
             </div>
             <div style="padding:10px 14px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.07); border-radius:8px;">
               <div style="font-size:0.72rem; color:var(--white-60); margin-bottom:3px; text-transform:uppercase; letter-spacing:0.05em;">Fields</div>
               <div style="font-size:0.82rem; font-weight:600; color:var(--white); font-family:var(--font-mono);">question, contexts,<br/>answer, ground_truth</div>
             </div>
           </div>
-          <p style="font-size:0.87rem; color:var(--white-60); margin:0; line-height:1.6;">The <strong style="color:var(--white);">official dataset used in RAGAS documentation and tutorials</strong>. Contains all fields required for computing Faithfulness, Context Recall, Answer Relevancy, and Context Precision — perfectly structured for end-to-end RAGAS pipeline validation out of the box.</p>
+          <p style="font-size:0.87rem; color:var(--white-60); margin:0; line-height:1.6;">RAGAS <code style="font-family:var(--font-mono); color:var(--cyan);">TestsetGenerator</code> automatically produces domain-matched QA pairs directly from the ingested EDGAR documents. This ensures our evaluation questions are perfectly aligned to our actual document corpus — testing the pipeline on questions about the exact filings it has indexed.</p>
         </div>
       </div>
     </div>
@@ -909,7 +917,7 @@
       <div style="font-size:2.5rem;">⚙️</div>
       <div>
         <h3 style="margin-bottom:12px; color:var(--cyan);">Automated Evaluation with <code style="font-family:var(--font-mono);">/evaluate-rag</code></h3>
-        <p style="font-size:0.9rem; margin-bottom:0;">The <code style="font-family:var(--font-mono); color:var(--cyan);">/evaluate-rag</code> Claude Code skill runs the entire RAGAS evaluation suite automatically: ingests each dataset, runs queries through the pipeline, scores all 5 RAGAS metrics, and generates a comparison report — in a single command. No manual scoring. No human bias.</p>
+        <p style="font-size:0.9rem; margin-bottom:0;">The <code style="font-family:var(--font-mono); color:var(--cyan);">/evaluate-rag</code> Claude Code skill runs the entire RAGAS evaluation suite automatically: ingests EDGAR filings and FinanceBench QA pairs, runs queries through the pipeline, scores all 5 RAGAS metrics, and generates a comparison report — in a single command. No manual scoring. No human bias.</p>
       </div>
     </div>
   </div>
@@ -929,7 +937,7 @@
       <li><a href="roadmap.html">Roadmap</a></li>
     </ul>
     <p class="footer-info">
-      RAGixAI — Enterprise Knowledge Base with RAG &amp; Evaluation &nbsp;·&nbsp;
+      RAGixAI — SEC EDGAR Financial Intelligence with RAG &amp; Evaluation &nbsp;·&nbsp;
       Capstone Project 2025–2026 &nbsp;·&nbsp; Built with Claude Code
     </p>
   </div>

@@ -402,7 +402,7 @@
           <div class="badge badge-purple">Multi-source</div>
         </div>
       </div>
-      <p style="font-size:0.9rem;">Connectors for Confluence, Google Docs, Notion, and PDFs via <strong style="color:var(--cyan);">pypdf / unstructured</strong> (local, free). Supports incremental updates — only new/changed documents are re-processed. Handles 200+ file formats with metadata extraction. <em style="color:rgba(255,255,255,0.4); font-size:0.85rem;">(AWS upgrade: Amazon Textract)</em></p>
+      <p style="font-size:0.9rem;">Ingests SEC EDGAR filings (10-K, 10-Q, 8-K) via the <strong style="color:var(--cyan);">EDGAR REST API</strong> and the local <strong style="color:var(--cyan);">eloukas/edgar-corpus</strong> HuggingFace dataset. Supports incremental updates — only new filings are re-processed. Handles complex financial document structure with metadata extraction. <em style="color:rgba(255,255,255,0.4); font-size:0.85rem;">(AWS upgrade: Amazon Textract)</em></p>
     </div>
 
     <div class="arch-card arch-2 hidden delay-2">
@@ -473,7 +473,7 @@
         <div class="skill-icon-box">📥</div>
         <div>
           <div class="skill-name">/ingest-docs</div>
-          <div class="skill-description">Auto-ingest documents from Confluence, Google Docs, Notion, and PDFs. Handles authentication, pagination, incremental sync, and metadata extraction without manual configuration.</div>
+          <div class="skill-description">Auto-ingest SEC EDGAR filings via the EDGAR REST API and local EDGAR corpus. Handles filing retrieval, incremental sync, and metadata extraction (company, CIK, filing type, date) without manual configuration.</div>
         </div>
       </div>
 
@@ -613,39 +613,39 @@
   <div class="section-header hidden">
     <div class="section-tag">Evaluation Data</div>
     <h2>Datasets We Will <span class="gradient-text">Evaluate With</span></h2>
-    <p>All pipeline configurations will be benchmarked against these three publicly available HuggingFace datasets with ground-truth labels.</p>
+    <p>All pipeline configurations will be benchmarked against three SEC EDGAR-rooted datasets — real financial filings as the corpus, expert-annotated QA for ground truth, and auto-generated RAGAS testsets for domain coverage.</p>
   </div>
 
   <div class="cards-grid-3">
     <div class="arch-card hidden delay-1" style="border-color:rgba(124,58,237,0.3);">
       <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
-        <div class="icon-circle icon-circle-purple" style="font-size:1rem;">📖</div>
+        <div class="icon-circle icon-circle-purple" style="font-size:1rem;">🏛️</div>
         <div>
-          <h4 style="font-size:0.95rem; margin-bottom:4px;">SQuAD 2.0</h4>
-          <code style="font-size:0.72rem; color:var(--lavender); background:rgba(124,58,237,0.12); padding:2px 8px; border-radius:4px;">rajpurkar/squad_v2</code>
+          <h4 style="font-size:0.95rem; margin-bottom:4px;">EDGAR Corpus</h4>
+          <code style="font-size:0.72rem; color:var(--lavender); background:rgba(124,58,237,0.12); padding:2px 8px; border-radius:4px;">eloukas/edgar-corpus</code>
         </div>
       </div>
-      <p style="font-size:0.85rem;">150,000+ QA pairs + 50,000+ unanswerable questions. Measures retrieval accuracy and answer correctness. The unanswerable questions test our "refuse to answer" capability.</p>
+      <p style="font-size:0.85rem;">6,900+ companies, 10-K annual reports from 2000–2020. The primary document corpus ingested into our vector store — real SEC filings form the knowledge base our RAG pipeline retrieves from.</p>
     </div>
     <div class="arch-card hidden delay-2" style="border-color:rgba(59,130,246,0.3);">
       <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
-        <div class="icon-circle icon-circle-blue" style="font-size:1rem;">🔍</div>
+        <div class="icon-circle icon-circle-blue" style="font-size:1rem;">📊</div>
         <div>
-          <h4 style="font-size:0.95rem; margin-bottom:4px;">MS MARCO v2.1</h4>
-          <code style="font-size:0.72rem; color:#93C5FD; background:rgba(59,130,246,0.12); padding:2px 8px; border-radius:4px;">microsoft/ms_marco</code>
+          <h4 style="font-size:0.95rem; margin-bottom:4px;">FinanceBench</h4>
+          <code style="font-size:0.72rem; color:#93C5FD; background:rgba(59,130,246,0.12); padding:2px 8px; border-radius:4px;">PatronusAI/financebench</code>
         </div>
       </div>
-      <p style="font-size:0.85rem;">8.8M passages, 1M+ queries. Industry standard retrieval benchmark. Tests chunking and embedding quality at enterprise scale — the stress test for our vector store.</p>
+      <p style="font-size:0.85rem;">150 expert-annotated QA pairs sourced directly from real SEC 10-K and 10-Q filings. The gold standard benchmark for financial document RAG — tests retrieval accuracy on the exact domain we're targeting.</p>
     </div>
     <div class="arch-card hidden delay-3" style="border-color:rgba(6,182,212,0.3);">
       <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
         <div class="icon-circle icon-circle-cyan" style="font-size:1rem;">⚗️</div>
         <div>
-          <h4 style="font-size:0.95rem; margin-bottom:4px;">Amnesty QA</h4>
-          <code style="font-size:0.72rem; color:var(--cyan); background:rgba(6,182,212,0.12); padding:2px 8px; border-radius:4px;">explodinggradients/amnesty_qa</code>
+          <h4 style="font-size:0.95rem; margin-bottom:4px;">RAGAS Testset (EDGAR)</h4>
+          <code style="font-size:0.72rem; color:var(--cyan); background:rgba(6,182,212,0.12); padding:2px 8px; border-radius:4px;">ragas.testset.TestsetGenerator</code>
         </div>
       </div>
-      <p style="font-size:0.85rem;">Official RAGAS tutorial dataset. Contains <code style="color:var(--cyan); font-size:0.8rem;">question, contexts, answer, ground_truth</code> — perfectly structured for all RAGAS metrics out of the box.</p>
+      <p style="font-size:0.85rem;">Auto-generated QA pairs from our ingested EDGAR documents using RAGAS <code style="color:var(--cyan); font-size:0.8rem;">TestsetGenerator</code>. Produces <code style="color:var(--cyan); font-size:0.8rem;">question, contexts, answer, ground_truth</code> — domain-matched to our exact filing corpus.</p>
     </div>
   </div>
 </section>
@@ -672,7 +672,7 @@
       </div>
       <div class="comparison-row">
         <span class="cr-icon">🌐</span>
-        <div class="cr-text">Requires searching 4+ different systems (Confluence, Google Docs, Notion, SharePoint)</div>
+        <div class="cr-text">Requires manually reading 150+ page 10-K filings to find a single data point</div>
       </div>
       <div class="comparison-row">
         <span class="cr-icon">⏱️</span>
@@ -737,7 +737,7 @@
       <li><a href="aws.html">AWS (Stretch)</a></li>
       <li><a href="roadmap.html">Roadmap</a></li>
     </ul>
-    <p class="footer-info">RAGixAI — Enterprise Knowledge Base with RAG &amp; Evaluation · Capstone Project 2025–2026</p>
+    <p class="footer-info">RAGixAI — SEC EDGAR Financial Intelligence with RAG &amp; Evaluation · Capstone Project 2025–2026</p>
   </div>
 </footer>
 

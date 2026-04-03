@@ -287,11 +287,11 @@
   <div style="position:relative; z-index:2; max-width:800px;">
     <div class="section-tag" style="margin-bottom:20px;">Problem Statement</div>
     <h1 style="margin-bottom:16px;">
-      The <span class="gradient-text-warm">Information Overload</span> Crisis
+      The <span class="gradient-text-warm">SEC Filing Overload</span> Crisis
     </h1>
-    <div class="big-stat-banner">$47B+</div>
+    <div class="big-stat-banner">36M+</div>
     <p style="font-size:1.2rem; max-width:600px; margin:0 auto 32px;">
-      lost annually to poor knowledge management across enterprises
+      SEC filings on EDGAR — dense, complex, and nearly impossible to query at scale
     </p>
     <a href="#stats" class="btn btn-outline">
       📉 Explore the Data Below ↓
@@ -309,28 +309,28 @@
   <div class="stats-counter-grid hidden">
     <div class="stat-counter-cell stat-c1">
       <div class="stat-counter-num" style="color: #FDA4AF;">
-        <span class="counter" data-target="1" data-suffix=".8">0</span>
+        <span class="counter" data-target="3" data-suffix=".5">0</span>
         <span style="font-size:1.2rem;">hrs</span>
       </div>
-      <div class="stat-counter-label">Wasted per employee<br />per day searching for info</div>
+      <div class="stat-counter-label">To read a single 10-K<br />annual report end-to-end</div>
     </div>
     <div class="stat-counter-cell stat-c2">
       <div class="stat-counter-num gradient-text">
-        <span class="counter" data-target="50000" data-suffix="+">0+</span>
+        <span class="counter" data-target="150" data-suffix="+">0+</span>
       </div>
-      <div class="stat-counter-label">Pages of unstructured docs<br />across 4 different platforms</div>
+      <div class="stat-counter-label">Pages in an average 10-K<br />filing (some exceed 300)</div>
     </div>
     <div class="stat-counter-cell stat-c3">
       <div class="stat-counter-num" style="background: var(--gradient-cool); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip:text;">
-        <span class="counter" data-target="73" data-suffix="%">0%</span>
+        <span class="counter" data-target="6900" data-suffix="+">0+</span>
       </div>
-      <div class="stat-counter-label">Of employees who can't find<br />information quickly</div>
+      <div class="stat-counter-label">Public companies filing<br />with the SEC annually</div>
     </div>
     <div class="stat-counter-cell stat-c4">
       <div class="stat-counter-num gradient-text-purple">
-        $<span class="counter" data-target="28000" data-suffix="">0</span>
+        <span class="counter" data-target="36" data-suffix="M+">0M+</span>
       </div>
-      <div class="stat-counter-label">Per employee per year<br />in lost productivity</div>
+      <div class="stat-counter-label">Total filings in the<br />EDGAR database</div>
     </div>
   </div>
 </section>
@@ -342,29 +342,29 @@
   <div class="section-header hidden">
     <div class="section-tag">The Root Cause</div>
     <h2>Why <span class="gradient-text-warm">Traditional Search</span> Fails</h2>
-    <p>Keyword-based search was built for a different era. It simply cannot handle the complexity of enterprise knowledge.</p>
+    <p>Keyword-based search was built for a different era. It simply cannot handle the density and complexity of SEC financial filings.</p>
   </div>
 
   <div class="cards-grid-4 hidden">
     <div class="failure-card delay-1">
       <div class="failure-icon">🔤</div>
-      <h3>Keyword Mismatch</h3>
-      <p style="font-size:0.88rem;">Employees ask questions in natural language but search engines require exact keyword matches. "How do I onboard a vendor?" returns nothing because the doc says "supplier registration process."</p>
+      <h3>Dense Financial Language</h3>
+      <p style="font-size:0.88rem;">Analysts ask questions in plain English but 10-K filings use complex legal and accounting language. "What are the revenue drivers?" won't match "net revenue attributable to product segment growth."</p>
     </div>
     <div class="failure-card delay-2">
       <div class="failure-icon">🧩</div>
-      <h3>No Context Understanding</h3>
-      <p style="font-size:0.88rem;">Traditional search can't understand that a question about "Q3 numbers" relates to multiple documents. It returns a list of links, not a coherent answer with context.</p>
+      <h3>Cross-Filing Context</h3>
+      <p style="font-size:0.88rem;">A question about a company's risk exposure spans dozens of sections across multiple filings. Traditional search returns a list of document links — not a synthesized, cited answer.</p>
     </div>
     <div class="failure-card delay-3">
       <div class="failure-icon">📎</div>
-      <h3>No Source Citations</h3>
-      <p style="font-size:0.88rem;">Even when information is found, employees can't verify it. There's no link between the answer and the authoritative source document that confirms accuracy.</p>
+      <h3>No Source Traceability</h3>
+      <p style="font-size:0.88rem;">Financial professionals must cite specific filing sections and page numbers. Generic search provides no link between the answer and the exact EDGAR document section that supports it.</p>
     </div>
     <div class="failure-card delay-4">
       <div class="failure-icon">🌫️</div>
       <h3>AI Hallucinations</h3>
-      <p style="font-size:0.88rem;">Basic LLM chatbots without retrieval confidently fabricate answers. In an enterprise context, this is catastrophic — employees act on wrong information.</p>
+      <p style="font-size:0.88rem;">Basic LLM chatbots without retrieval confidently fabricate financial figures. In investment, compliance, or legal contexts this is catastrophic — decisions made on wrong numbers.</p>
     </div>
   </div>
 </section>
@@ -372,41 +372,41 @@
 <!-- The Pain Points -->
 <section class="section" style="padding-top:20px;">
   <div class="section-header hidden">
-    <div class="section-tag">Enterprise Reality</div>
+    <div class="section-tag">Financial Reality</div>
     <h2>The Real <span class="gradient-text">Pain Points</span></h2>
-    <p>Specific, measurable problems our target company faces every day</p>
+    <p>Specific, measurable problems analysts and investors face when working with SEC filings every day</p>
   </div>
 
   <div class="cards-grid-3 hidden">
     <div class="pain-card delay-1">
-      <div class="pain-emoji">📁</div>
-      <h3 style="margin-bottom:10px;">Siloed Knowledge Systems</h3>
-      <p style="font-size:0.88rem;">Content spread across Confluence, Google Docs, Notion, and SharePoint with no unified search. Employees need 4 browser tabs just to start a search.</p>
+      <div class="pain-emoji">📄</div>
+      <h3 style="margin-bottom:10px;">Overwhelming Filing Volume</h3>
+      <p style="font-size:0.88rem;">A single 10-K can exceed 300 pages. Analysts covering 10+ companies must manually read thousands of pages per quarter — an impossible task at scale.</p>
     </div>
     <div class="pain-card delay-2">
-      <div class="pain-emoji">🔄</div>
-      <h3 style="margin-bottom:10px;">Stale & Contradictory Docs</h3>
-      <p style="font-size:0.88rem;">Multiple versions of the same document with conflicting information. No way to know which is authoritative without asking someone, which wastes even more time.</p>
+      <div class="pain-emoji">🔍</div>
+      <h3 style="margin-bottom:10px;">No Semantic Search on EDGAR</h3>
+      <p style="font-size:0.88rem;">EDGAR's full-text search is keyword-only. Searching for "supply chain risk" won't find filings that discuss "logistics disruptions" — missing critical disclosures.</p>
     </div>
     <div class="pain-card delay-3">
-      <div class="pain-emoji">🆕</div>
-      <h3 style="margin-bottom:10px;">Onboarding Bottleneck</h3>
-      <p style="font-size:0.88rem;">New employees take 3–6 months to become fully productive because institutional knowledge isn't accessible. They repeatedly ask the same questions to busy senior staff.</p>
+      <div class="pain-emoji">📊</div>
+      <h3 style="margin-bottom:10px;">Cross-Filing Comparison</h3>
+      <p style="font-size:0.88rem;">Comparing risk factors or revenue trends across multiple companies requires downloading and manually reading dozens of filings. There is no unified query interface.</p>
     </div>
     <div class="pain-card delay-2">
-      <div class="pain-emoji">📞</div>
-      <h3 style="margin-bottom:10px;">Expert Dependency</h3>
-      <p style="font-size:0.88rem;">Critical knowledge locked in the heads of a few senior employees. When they're unavailable or leave, entire teams are blocked. Key-person dependency is a major risk.</p>
-    </div>
-    <div class="pain-card delay-3">
       <div class="pain-emoji">⚖️</div>
-      <h3 style="margin-bottom:10px;">Compliance Risk</h3>
-      <p style="font-size:0.88rem;">Employees unknowingly acting on outdated policies. Legal and compliance documentation isn't surfaced when it matters, creating regulatory exposure.</p>
+      <h3 style="margin-bottom:10px;">Compliance & Audit Risk</h3>
+      <p style="font-size:0.88rem;">Compliance teams must cite the exact filing section and page for every regulatory finding. Manual search makes this slow and error-prone — a serious legal liability.</p>
+    </div>
+    <div class="pain-card delay-3">
+      <div class="pain-emoji">💰</div>
+      <h3 style="margin-bottom:10px;">Investment Due Diligence</h3>
+      <p style="font-size:0.88rem;">Investors running due diligence need answers fast. "What are this company's major risk factors compared to last year?" can take hours — RAGixAI answers in seconds.</p>
     </div>
     <div class="pain-card delay-4">
-      <div class="pain-emoji">💡</div>
-      <h3 style="margin-bottom:10px;">Innovation Lag</h3>
-      <p style="font-size:0.88rem;">Teams reinvent solutions already built internally because they can't discover existing work. R&D is duplicated. Institutional learning doesn't compound.</p>
+      <div class="pain-emoji">🤖</div>
+      <h3 style="margin-bottom:10px;">Hallucination in Finance</h3>
+      <p style="font-size:0.88rem;">Generic LLMs invent financial figures. A fabricated revenue number or debt ratio cited in an investment memo is not just wrong — it's potentially illegal.</p>
     </div>
   </div>
 </section>
@@ -418,7 +418,7 @@
   <div class="section-header hidden">
     <div class="section-tag">Market Timing</div>
     <h2>Why <span class="gradient-text">RAG?</span> Why <span class="gradient-text">Now?</span></h2>
-    <p>Four technological forces have converged to make this the right moment to build RAGixAI</p>
+    <p>Four forces have converged to make RAG over SEC EDGAR filings not just possible — but urgently needed</p>
   </div>
 
   <div class="cards-grid-4 hidden">
@@ -450,7 +450,7 @@
   <div class="section-header hidden">
     <div class="section-tag">Market Opportunity</div>
     <h2>Enterprise AI Market <span class="gradient-text">Growth</span></h2>
-    <p>The enterprise knowledge management AI market is exploding — from $2.4B to $23.6B by 2027</p>
+    <p>The financial AI and document intelligence market is exploding — from $2.4B to $23.6B by 2027</p>
   </div>
 
   <div class="glass-card hidden" style="padding:40px;">
@@ -526,36 +526,36 @@
 <section class="section" style="padding-top:20px;">
   <div class="section-header hidden">
     <div class="section-tag">Financial Impact</div>
-    <h2>What This <span class="gradient-text-warm">Costs Companies</span></h2>
+    <h2>What This <span class="gradient-text-warm">Costs Analysts</span></h2>
   </div>
 
   <div class="cost-breakdown hidden">
     <div class="cost-item delay-1">
       <div style="font-size:2rem;">⏱️</div>
       <div>
-        <div class="cost-amount">$28,000</div>
-        <div style="font-size:0.85rem; color:var(--white-60);">Per employee per year in lost productivity<br />(1.8 hrs/day × 250 work days × $62/hr avg)</div>
+        <div class="cost-amount">~$350</div>
+        <div style="font-size:0.85rem; color:var(--white-60);">Analyst cost per 10-K read<br />(3.5 hrs × $100/hr avg analyst rate)</div>
       </div>
     </div>
     <div class="cost-item delay-2">
-      <div style="font-size:2rem;">👥</div>
+      <div style="font-size:2rem;">📁</div>
       <div>
-        <div class="cost-amount">$7M+</div>
-        <div style="font-size:0.85rem; color:var(--white-60);">Annual cost for a 250-person tech company<br />just from information search inefficiency</div>
+        <div class="cost-amount">$35K+</div>
+        <div style="font-size:0.85rem; color:var(--white-60);">Annual cost per analyst covering 100 companies<br />just from manual filing review time</div>
       </div>
     </div>
     <div class="cost-item delay-3">
-      <div style="font-size:2rem;">🚀</div>
+      <div style="font-size:2rem;">⚠️</div>
       <div>
-        <div class="cost-amount">3–6 months</div>
-        <div style="font-size:0.85rem; color:var(--white-60);">Longer new hire ramp-up due to inaccessible<br />institutional knowledge and documentation</div>
+        <div class="cost-amount">Missed Risk</div>
+        <div style="font-size:0.85rem; color:var(--white-60);">Critical risk disclosures buried on page 180<br />that manual review often misses entirely</div>
       </div>
     </div>
     <div class="cost-item delay-4">
-      <div style="font-size:2rem;">⚠️</div>
+      <div style="font-size:2rem;">⚖️</div>
       <div>
         <div class="cost-amount">$4.5M avg</div>
-        <div style="font-size:0.85rem; color:var(--white-60);">Data breach cost when compliance docs<br />aren't surfaced at critical decision points</div>
+        <div style="font-size:0.85rem; color:var(--white-60);">Regulatory fine when compliance filings<br />aren't surfaced at critical decision points</div>
       </div>
     </div>
   </div>
@@ -564,8 +564,8 @@
     <div class="callout callout-purple" style="display:inline-block; padding:24px 40px;">
       <h3 style="margin-bottom:8px;">RAGixAI's Projected ROI</h3>
       <p style="font-size:1rem; margin:0;">
-        Reduce search time by <strong style="color:var(--emerald);">60–80%</strong> →
-        Save <strong style="color:var(--emerald);">$4M–$5.6M</strong> annually for a 250-person company
+        Reduce filing review time by <strong style="color:var(--emerald);">90%+</strong> →
+        Save <strong style="color:var(--emerald);">$30K+</strong> per analyst per year
       </p>
     </div>
     <div style="margin-top:24px;">
@@ -587,7 +587,7 @@
       <li><a href="aws.html">AWS</a></li>
       <li><a href="roadmap.html">Roadmap</a></li>
     </ul>
-    <p class="footer-info">RAGixAI — Enterprise Knowledge Base with RAG &amp; Evaluation · Capstone Project 2025–2026</p>
+    <p class="footer-info">RAGixAI — SEC EDGAR Financial Intelligence with RAG &amp; Evaluation · Capstone Project 2025–2026</p>
   </div>
 </footer>
 

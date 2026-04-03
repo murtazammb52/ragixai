@@ -554,8 +554,8 @@
       <rect x="10" y="60" width="130" height="100" rx="12" fill="rgba(124,58,237,0.1)" stroke="rgba(124,58,237,0.5)" stroke-width="1.5"/>
       <text x="75" y="100" text-anchor="middle" fill="#A78BFA" font-size="24">📄</text>
       <text x="75" y="122" text-anchor="middle" fill="white" font-size="11" font-weight="700">DOCUMENTS</text>
-      <text x="75" y="137" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9">PDF · Confluence · Notion</text>
-      <text x="75" y="150" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9">Google Docs · SharePoint</text>
+      <text x="75" y="137" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9">10-K · 10-Q · 8-K</text>
+      <text x="75" y="150" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9">EDGAR API · Local Corpus</text>
       <!-- Num badge -->
       <circle cx="135" cy="65" r="11" fill="url(#lineGrad)"/>
       <text x="135" y="69" text-anchor="middle" fill="white" font-size="9" font-weight="700">1</text>
@@ -747,27 +747,27 @@
     <!-- Detail Panels -->
     <div id="detail-1" class="stage-detail-panel hidden-panel">
       <h3>📄 Stage 1: Document Sources</h3>
-      <p style="margin-bottom:16px;">RAGixAI ingests from four enterprise knowledge platforms simultaneously using dedicated connectors.</p>
+      <p style="margin-bottom:16px;">RAGixAI ingests SEC EDGAR filings via two complementary sources — the live EDGAR REST API and the local HuggingFace EDGAR corpus.</p>
       <div class="cards-grid-4">
         <div class="glass-card text-center" style="padding:16px;">
-          <div style="font-size:1.8rem; margin-bottom:8px;">📘</div>
-          <div style="font-size:0.85rem; font-weight:700; margin-bottom:4px;">Confluence</div>
-          <div class="badge badge-blue">REST API</div>
+          <div style="font-size:1.8rem; margin-bottom:8px;">🏛️</div>
+          <div style="font-size:0.85rem; font-weight:700; margin-bottom:4px;">10-K Annual Reports</div>
+          <div class="badge badge-blue">EDGAR REST API</div>
         </div>
         <div class="glass-card text-center" style="padding:16px;">
-          <div style="font-size:1.8rem; margin-bottom:8px;">📗</div>
-          <div style="font-size:0.85rem; font-weight:700; margin-bottom:4px;">Google Docs</div>
-          <div class="badge badge-emerald">Drive API</div>
+          <div style="font-size:1.8rem; margin-bottom:8px;">📋</div>
+          <div style="font-size:0.85rem; font-weight:700; margin-bottom:4px;">10-Q Quarterly Reports</div>
+          <div class="badge badge-emerald">EDGAR REST API</div>
         </div>
         <div class="glass-card text-center" style="padding:16px;">
-          <div style="font-size:1.8rem; margin-bottom:8px;">📙</div>
-          <div style="font-size:0.85rem; font-weight:700; margin-bottom:4px;">Notion</div>
-          <div class="badge badge-purple">Notion API</div>
+          <div style="font-size:1.8rem; margin-bottom:8px;">📢</div>
+          <div style="font-size:0.85rem; font-weight:700; margin-bottom:4px;">8-K Event Reports</div>
+          <div class="badge badge-purple">EDGAR REST API</div>
         </div>
         <div class="glass-card text-center" style="padding:16px;">
-          <div style="font-size:1.8rem; margin-bottom:8px;">📕</div>
-          <div style="font-size:0.85rem; font-weight:700; margin-bottom:4px;">PDF Files</div>
-          <div class="badge badge-amber">pypdf / unstructured</div>
+          <div style="font-size:1.8rem; margin-bottom:8px;">📦</div>
+          <div style="font-size:0.85rem; font-weight:700; margin-bottom:4px;">EDGAR Corpus</div>
+          <div class="badge badge-amber">eloukas/edgar-corpus</div>
         </div>
       </div>
     </div>
@@ -824,7 +824,7 @@
           <div class="code-dot code-dot-green"></div>
           <span class="code-title">prompt_template.py</span>
         </div>
-        <pre style="font-size:0.82rem; line-height:1.6; color:#E2E8F0;">SYSTEM: You are an enterprise knowledge assistant.
+        <pre style="font-size:0.82rem; line-height:1.6; color:#E2E8F0;">SYSTEM: You are a financial document intelligence assistant specializing in SEC EDGAR filings.
 Answer ONLY using the provided context chunks.
 If the answer is not in the context, say "I don't have
 information about that in the knowledge base."
@@ -962,7 +962,7 @@ ASSISTANT:</pre>
       </table>
     </div>
     <p style="margin-top:12px; font-size:0.85rem; padding:12px 16px; background:rgba(6,182,212,0.06); border:1px solid rgba(6,182,212,0.2); border-radius:var(--border-radius-sm);">
-      <strong style="color:var(--cyan);">Evaluation Plan:</strong> We will benchmark retrieval latency and hybrid search quality across these options on the MS MARCO v2.1 and SQuAD 2.0 datasets before selecting the final store.
+      <strong style="color:var(--cyan);">Evaluation Plan:</strong> We will benchmark retrieval latency and hybrid search quality across these options on the EDGAR Corpus and FinanceBench datasets before selecting the final store.
     </p>
   </div>
 
@@ -1143,7 +1143,7 @@ ASSISTANT:</pre>
       <li><a href="roadmap.html">Roadmap</a></li>
     </ul>
     <p class="footer-info">
-      RAGixAI — Enterprise Knowledge Base with RAG &amp; Evaluation &nbsp;·&nbsp;
+      RAGixAI — SEC EDGAR Financial Intelligence with RAG &amp; Evaluation &nbsp;·&nbsp;
       Capstone Project 2025–2026 &nbsp;·&nbsp; Built with Claude Code
     </p>
   </div>
