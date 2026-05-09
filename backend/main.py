@@ -2,6 +2,7 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from loguru import logger
 
@@ -27,8 +28,17 @@ app.include_router(evaluate.router, prefix="/api", tags=["evaluate"])
 app.include_router(history.router, prefix="/api", tags=["history"])
 app.include_router(judge.router, prefix="/api", tags=["judge"])
 
-# Serve chat UI at /chat
+# Serve documentation page at /documentation
 frontend_dir = Path(__file__).parent.parent / "frontend"
+
+@app.get("/documentation")
+def serve_docs():
+    docs_path = frontend_dir / "docs.html"
+    if docs_path.exists():
+        return FileResponse(str(docs_path), media_type="text/html")
+    return {"error": "docs.html not found"}
+
+# Serve chat UI at /chat
 if frontend_dir.exists():
     app.mount("/chat", StaticFiles(directory=str(frontend_dir), html=True), name="chat")
 
@@ -55,6 +65,7 @@ def root():
         "name": "RAGixAI",
         "description": "SEC EDGAR Financial RAG System",
         "chat_ui": "/chat",
+        "documentation": "/documentation",
         "api_docs": "/docs",
         "health": "/api/health",
     }
