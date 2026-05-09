@@ -704,43 +704,265 @@ pattern = r<span class="st">"\b"</span> + re.escape(alias) + r<span class="st">"
       <div class="files"><span class="fbadge">.claude/commands/</span><span class="fbadge">.claude/hooks/</span><span class="fbadge">.claude/settings.json</span><span class="fbadge">CLAUDE.md</span></div>
       <p>RAGixAI was built entirely through Claude Code — Anthropic's agentic coding tool — operating in full autonomous mode. Every pipeline stage, the evaluation framework, RBAC system, and this documentation were implemented through natural-language instructions with Claude Code executing multi-step plans, writing files, running tests, and committing changes.</p>
 
-      <h3>Why Claude Code for development?</h3>
-      <div class="why"><div class="why-label">Design Rationale</div>
-        <p><strong>Multi-file autonomous execution:</strong> Features like LLM-as-Judge span 6+ files (schema, core module, API router, main.py, CLI script, A/B test integration). Claude Code implements all of them in sequence without human copy-paste between files — it reads existing code, understands dependencies, and maintains consistency across the entire change set.<br/><br/>
-        <strong>Live debugging:</strong> When errors occurred (HNSW corruption, Windows mmap OOM, RAGAS API changes), Claude Code diagnosed by reading log files, forming hypotheses, and applying targeted fixes — often within the same session that discovered the error.<br/><br/>
-        <strong>Plan mode:</strong> Complex features were designed in Plan Mode, producing a file-by-file implementation plan with exact code sketches before any file was modified. This prevented architectural mistakes that would have required large rewrites.</p>
+      <!-- ── AGENT ARCHITECTURE ── -->
+      <h3>Agent Architecture</h3>
+      <p>Claude Code is not a single model issuing one reply — it is an <strong>orchestrator + specialist subagent</strong> system. The main Claude instance manages the conversation and delegates focused tasks to subagents, each of which has its own tool set and runs in its own context window. This architecture prevents context overflow on large codebases and keeps each subagent's result clean and targeted.</p>
+
+      <div class="why"><div class="why-label">Why an orchestrator–subagent split?</div>
+        <p>A single model reading every file in a project would exhaust its context window on a codebase of this size (~40 Python files, 800+ lines each). The orchestrator holds the high-level task in mind and issues precise instructions — "find all places that call <code>run_judge_evaluation</code>" — while the Explore agent returns only the matched lines. The orchestrator never reads noise; the subagent never loses the big picture.</p>
       </div>
 
-      <h3>14 Slash Commands</h3>
-      <p>Custom slash commands in <code>.claude/commands/</code> expose every pipeline operation as a one-word command from any Claude Code session — no script paths, flags, or Python environment knowledge required.</p>
+      <h4>Main Orchestrator (Claude Sonnet)</h4>
+      <p>The root agent running in the Claude Code session. It has access to the full tool set — file read/write/edit, Bash, Glob, Grep, web search, and the <strong>Agent</strong> tool for spawning subagents. It plans work, synthesizes results from subagents, and makes all architectural decisions. It maintains the conversation history and cross-session memory.</p>
+
+      <h4>Explore Subagent</h4>
+      <p>A read-only search specialist spawned for codebase exploration tasks: "find all files that import <code>judge_row</code>", "locate where <code>CONFIG_MODES</code> is defined", "which files reference the BM25 index". The Explore agent has Glob, Grep, and Read tools but <em>cannot write files</em> — its results can't accidentally mutate the codebase. Used when a targeted lookup would take 3+ tool calls from the orchestrator.</p>
+      <p>Example: when verifying that the LLM-as-Judge schema was wired in correctly, the orchestrator spawned Explore with: <em>"Search breadth: medium. Find all files that import DimensionScore, JudgeResult, or JudgeAggregateResult."</em> Explore returned exact file:line references in one shot.</p>
+
+      <h4>General-Purpose Subagent</h4>
+      <p>A subagent with the full tool set (including write/edit) used for multi-step implementation tasks that should not pollute the orchestrator's context with intermediate output. For RAGixAI, general-purpose agents were used to: implement the complete RAGAS Windows fix across 4 files, build the LLM-as-Judge CLI script, and rewrite the FinanceBench loader after schema changes.</p>
+
+      <h4>Plan Mode (Architectural Design)</h4>
+      <p>Before any complex multi-file feature is implemented, Claude Code enters <strong>Plan Mode</strong> — a structured design phase. In Plan Mode, Claude reads all relevant existing files, identifies dependencies, and produces a file-by-file implementation plan with exact code sketches, function signatures, and field names. No files are modified during planning. The user reviews the plan and approves or adjusts it before execution begins.</p>
+      <div class="why"><div class="why-label">Why Plan Mode matters</div>
+        <p>The LLM-as-Judge feature spans 8 files: <code>llm_judge.py</code>, <code>api/judge.py</code>, <code>models/schemas.py</code>, <code>evaluation/ab_test.py</code>, <code>api/evaluate.py</code>, <code>main.py</code>, <code>scripts/run_judge.py</code>, <code>scripts/run_ab_test.py</code>. Without a plan, implementing file 6 might contradict decisions made in file 2. Plan Mode locks the contract (schema field names, function signatures, API routes) before any code runs, making the 8-file change set internally consistent on the first attempt.</p>
+      </div>
+      <p>The plan for LLM-as-Judge is preserved at <code>C:\Users\murta\.claude\plans\unified-squishing-hejlsberg.md</code> and specifies exact Pydantic model fields, the judge prompt template, scoring bins for the heuristic fallback, and API route names — all agreed before a single file was touched.</p>
+
+      <h4>Background Monitor</h4>
+      <p>The <strong>Monitor</strong> tool runs a shell command as an event stream — each stdout line becomes a notification in the orchestrator's conversation. Used in RAGixAI to watch long-running background processes: index rebuilds (281 batches, ~45 min), evaluation runs (7 configs × 20 QA pairs, ~90 min), and smoke tests. The orchestrator sets a Monitor, continues other work (e.g., writing documentation), and resumes when the monitored process emits a terminal signal.</p>
+      <pre style="font-size:0.78rem;line-height:1.5;">Monitor command used for index rebuild:
+  tail -f build_index_resume.log | grep -E --line-buffered \
+    "BM25 index built|IndexError|Error|Traceback|Killed"</pre>
+      <p>The filter covers both the success signal (<code>BM25 index built</code>) and all failure signatures — a monitor that only watches for success stays silent through a crash, making it impossible to distinguish "still running" from "crashed".</p>
+
+      <h4>Autonomous Mode</h4>
+      <p>Claude Code was configured to operate in full autonomous mode via a persistent memory entry (<code>feedback_autonomy.md</code>): <em>"Proceed without asking for confirmation; no approval prompts."</em> This memory is loaded at session start, giving Claude Code standing authorization to read, write, edit, run scripts, and commit — without pausing for each tool call. The result is uninterrupted multi-step execution: a feature request becomes a committed, tested implementation in one session without manual approvals at each step.</p>
+
+      <h4>Persistent Memory System</h4>
+      <p>Claude Code maintains a file-based memory system at <code>C:\Users\murta\.claude\projects\D--code-ragixai\memory\</code>. Memories are categorized into four types:</p>
       <table>
-        <thead><tr><th>Command</th><th>What It Does</th><th>Underlying Script</th></tr></thead>
+        <thead><tr><th>Type</th><th>What It Stores</th><th>Example</th></tr></thead>
         <tbody>
-          <tr><td><code>/ingest-docs</code></td><td>Download SEC EDGAR filings for specified companies and years</td><td>scripts/run_ingest.py</td></tr>
-          <tr><td><code>/chunk-docs</code></td><td>Chunk all ingested documents with the recursive strategy</td><td>scripts/run_chunk.py</td></tr>
-          <tr><td><code>/build-index</code></td><td>Build ChromaDB HNSW + BM25 indexes from chunks</td><td>scripts/run_build_index.py</td></tr>
-          <tr><td><code>/embed-docs</code></td><td>Rebuild the vector index from scratch</td><td>scripts/run_build_index.py --reset</td></tr>
-          <tr><td><code>/backfill</code></td><td>Ingest 2020–2023 filings to cover FinanceBench's date range</td><td>run_ingest.py --years 2020-2023</td></tr>
-          <tr><td><code>/pipeline</code></td><td>Run full end-to-end pipeline: ingest → chunk → index → verify</td><td>Chains all three scripts</td></tr>
-          <tr><td><code>/query-rag</code></td><td>One-off RAG query from CLI with config selection</td><td>scripts/run_query.py</td></tr>
-          <tr><td><code>/evaluate-rag</code></td><td>RAGAS evaluation on one config vs FinanceBench</td><td>scripts/run_evaluate.py</td></tr>
-          <tr><td><code>/judge</code></td><td>LLM-as-Judge evaluation: 4 dimensions, per-question reasoning</td><td>scripts/run_judge.py</td></tr>
-          <tr><td><code>/ab-test-configs</code></td><td>Head-to-head evaluation across all 7 retrieval configs</td><td>scripts/run_ab_test.py</td></tr>
-          <tr><td><code>/deploy-local</code></td><td>Start FastAPI server + confirm Ollama is running</td><td>uvicorn backend.main:app</td></tr>
-          <tr><td><code>/server</code></td><td>Server management: start, stop, restart</td><td>uvicorn / taskkill</td></tr>
-          <tr><td><code>/health</code></td><td>System health check with per-component fix guidance</td><td>curl /api/health</td></tr>
-          <tr><td><code>/status</code></td><td>Full snapshot: ChromaDB count, Ollama ping, config summary</td><td>Python + curl</td></tr>
+          <tr><td><strong>user</strong></td><td>Developer's environment, tools, expertise level</td><td>"Uses Anaconda/conda Python at C:\Users\murta\anaconda3\python.exe — never use system python"</td></tr>
+          <tr><td><strong>feedback</strong></td><td>Behavioral rules from corrections or confirmations</td><td>"Proceed without asking for confirmation; autonomous mode"</td></tr>
+          <tr><td><strong>project</strong></td><td>Goals, decisions, deadlines, constraints</td><td>"Index rebuild in progress — do not launch eval until chroma_docs = 8976"</td></tr>
+          <tr><td><strong>reference</strong></td><td>Pointers to external resources</td><td>"FinanceBench dataset: PatronusAI/financebench on HuggingFace"</td></tr>
+        </tbody>
+      </table>
+      <p>The <code>MEMORY.md</code> index is loaded into every session's context. Individual memory files are read on demand. This means Claude Code carries institutional knowledge across sessions: it knows the Anaconda path, the autonomous mode preference, which evaluation thresholds apply, and where to find the gold dataset — without being told again.</p>
+      <p>The <strong>CLAUDE.md</strong> file (checked into the repo) functions as a project-level knowledge base — pipeline order, troubleshooting table, all 7 retrieval config definitions, RBAC key table, and the Python interpreter path. Any developer (or new Claude session) opening this repo gets the full operating context immediately.</p>
+
+      <!-- ── SKILLS / SLASH COMMANDS ── -->
+      <h3>14 Slash Commands (Skills)</h3>
+      <p>Slash commands are defined as Markdown files in <code>.claude/commands/</code>. Each file has a YAML frontmatter <code>description</code> field and a body containing instructions and the shell command to run. The special token <code>$ARGUMENTS</code> is replaced at invocation time with whatever text the user typed after the command name. This lets one command definition handle both parameterless and parameterized invocations.</p>
+      <pre style="font-size:0.78rem;line-height:1.5;"><span style="color:var(--amber);">File: .claude/commands/evaluate-rag.md</span>
+---
+description: Run RAGAS evaluation on a RAG config against FinanceBench gold dataset
+---
+...
+Run from repo root:
+C:\Users\murta\anaconda3\python.exe scripts/run_evaluate.py --config $ARGUMENTS --dataset financebench --n 50
+
+Usage:
+  /evaluate-rag              → config defaults, 50 samples
+  /evaluate-rag config_a     → specific config
+  /evaluate-rag config_d --n 20  → quick 20-sample test</pre>
+
+      <div class="why"><div class="why-label">Why slash commands over plain scripts?</div>
+        <p>Scripts require knowing: the correct Python interpreter path (<code>C:\Users\murta\anaconda3\python.exe</code>, not <code>python</code>), the repo root working directory, the argument names and order, and the environment-specific flags. A slash command encapsulates all of that. Any developer — or a new Claude Code session with no prior context — can type <code>/evaluate-rag config_d --n 20</code> and get the right result. The commands are also self-documenting: Claude Code shows the <code>description</code> field when listing available commands.</p>
+      </div>
+
+      <h4>Pipeline Management Commands</h4>
+      <table>
+        <thead><tr><th>Command</th><th>Description</th><th>Key Parameters</th><th>Script</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>/ingest-docs</code></td>
+            <td>Download SEC EDGAR 10-K/10-Q/8-K filings via REST API into <code>data/raw/edgar/</code>. Already-downloaded files are skipped — safe to re-run incrementally.</td>
+            <td><code>AAPL,MSFT</code> (company filter), <code>--years 2020,2021</code>, <code>--max-filings 10</code></td>
+            <td>scripts/run_ingest.py</td>
+          </tr>
+          <tr>
+            <td><code>/chunk-docs</code></td>
+            <td>Split all raw filing texts into overlapping chunks stored in <code>data/processed/chunks/chunks_recursive.jsonl</code>. Each chunk carries ticker, company, year, section, chunk_index metadata.</td>
+            <td><code>recursive</code> (default), <code>fixed</code>, <code>semantic</code></td>
+            <td>scripts/run_chunk.py --strategy</td>
+          </tr>
+          <tr>
+            <td><code>/build-index</code></td>
+            <td>Embed all chunks into ChromaDB (HNSW dense index) and build the in-memory BM25 sparse index. Without <code>--reset</code>, uses MD5 chunk ID deduplication to skip already-indexed chunks — safe to resume after an interrupted run.</td>
+            <td><code>--reset</code> (wipe and rebuild from scratch)</td>
+            <td>scripts/run_build_index.py</td>
+          </tr>
+          <tr>
+            <td><code>/embed-docs</code></td>
+            <td>Rebuild the vector index from scratch (equivalent to <code>/build-index --reset</code>). Each embedding model uses its own ChromaDB collection, so switching is non-destructive.</td>
+            <td>None</td>
+            <td>scripts/run_build_index.py --reset</td>
+          </tr>
+          <tr>
+            <td><code>/backfill</code></td>
+            <td>Ingest historical filings for 2020–2023 across all 10 tracked companies. Required because FinanceBench questions target these years. Uses <code>--max-filings 10</code> — critical because SEC EDGAR returns the N most recent filings before year filtering; with max-filings 3, the year filter eliminates all results.</td>
+            <td>Company subset, year range</td>
+            <td>run_ingest.py --years 2020,2021,2022,2023 --max-filings 10</td>
+          </tr>
+          <tr>
+            <td><code>/pipeline</code></td>
+            <td>Full end-to-end pipeline: ingest → chunk → build-index → verify health. Use for fresh setup or corpus reset. Prints time estimates per stage (ingest: 5–15 min network; chunk: 2–5 min; index: 10–20 min CPU).</td>
+            <td>None</td>
+            <td>Chains all three scripts</td>
+          </tr>
         </tbody>
       </table>
 
-      <h3>Three Hooks</h3>
-      <p>Hooks in <code>.claude/hooks/</code> run automatically on every relevant tool call — no manual invocation needed.</p>
+      <h4>Query &amp; Evaluation Commands</h4>
       <table>
-        <thead><tr><th>Hook</th><th>Trigger</th><th>What It Does</th><th>Why It Exists</th></tr></thead>
+        <thead><tr><th>Command</th><th>Description</th><th>Key Parameters</th><th>Script</th></tr></thead>
         <tbody>
-          <tr><td>guard_secrets.py</td><td>PreToolUse: Bash</td><td>Blocks <code>git add .env</code>, <code>git add .</code>, <code>git add -A</code></td><td>Prevents accidental commit of API keys, environment variables, and credentials to the repository</td></tr>
-          <tr><td>check_syntax.py</td><td>PostToolUse: Edit/Write</td><td>Runs <code>python -m py_compile</code> on every saved <code>.py</code> file immediately after each edit</td><td>Catches syntax errors the instant they are introduced — before they can break an import chain or a running server</td></tr>
-          <tr><td>requirements_reminder.py</td><td>PostToolUse: Edit/Write</td><td>Prints a pip install reminder whenever <code>requirements.txt</code> changes</td><td>Prevents "ModuleNotFoundError" from newly added dependencies that weren't installed</td></tr>
+          <tr>
+            <td><code>/query-rag</code></td>
+            <td>One-off RAG query from CLI. Returns the generated answer, cited source chunks (company, year, score), and end-to-end latency. Useful for spot-checking retrieval quality without starting the API server.</td>
+            <td><code>"question text"</code>, <code>--config config_a</code> through <code>config_g</code></td>
+            <td>scripts/run_query.py</td>
+          </tr>
+          <tr>
+            <td><code>/evaluate-rag</code></td>
+            <td>Run RAGAS evaluation against FinanceBench gold dataset. Computes 5 automated metrics: faithfulness, answer_relevancy, context_precision, context_recall, answer_correctness. Outputs per-metric scores and PASS/FAIL vs defined thresholds.</td>
+            <td><code>config_d</code> (default), <code>--n 20</code> sample size</td>
+            <td>scripts/run_evaluate.py --dataset financebench</td>
+          </tr>
+          <tr>
+            <td><code>/judge</code></td>
+            <td>LLM-as-Judge evaluation using Ollama. Scores answers on 4 financial-RAG-specific dimensions (faithfulness, completeness, citation_quality, hallucination_free), each 1–5 normalized to 0–1. Heuristic fallback fires automatically if Ollama is unavailable or returns non-JSON output. Shows per-row reasoning sentences.</td>
+            <td><code>config_d</code> (default), <code>--n 20</code></td>
+            <td>scripts/run_judge.py</td>
+          </tr>
+          <tr>
+            <td><code>/ab-test-configs</code></td>
+            <td>Head-to-head evaluation across all 7 retrieval configurations on the same FinanceBench sample. Outputs a ranked matrix with all RAGAS metrics + latency. With <code>--judge</code>, adds LLM-as-Judge scores and selects composite winner using <code>ragas_score + judge_overall × 2</code> weighting.</td>
+            <td><code>--n 20</code>, <code>--configs config_a,config_d</code>, <code>--judge</code></td>
+            <td>scripts/run_ab_test.py</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Server &amp; Operations Commands</h4>
+      <table>
+        <thead><tr><th>Command</th><th>Description</th><th>What It Checks</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>/deploy-local</code></td>
+            <td>Start the RAGixAI FastAPI server with hot-reload. Serves chat UI at <code>/chat</code>, Swagger docs at <code>/docs</code>, health endpoint at <code>/api/health</code>.</td>
+            <td>uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload</td>
+          </tr>
+          <tr>
+            <td><code>/server</code></td>
+            <td>Full server lifecycle management: start on port 8000, verify the process started, surface common issues (connection refused → server not started; chroma_docs: 0 → run /build-index; ollama_ok: false → run ollama serve).</td>
+            <td>uvicorn process, port 8000 availability</td>
+          </tr>
+          <tr>
+            <td><code>/health</code></td>
+            <td>Check all subsystem health via <code>GET /api/health</code>. Shows chroma_docs, bm25_docs, ollama_ok, embed_model, ollama_model — with per-field fix guidance if any is wrong.</td>
+            <td>ChromaDB count, BM25 count, Ollama ping, model names</td>
+          </tr>
+          <tr>
+            <td><code>/status</code></td>
+            <td>Full system snapshot: server health, corpus file count, ChromaDB collection sizes, available Ollama models. Useful at session start to verify the system is ready before querying or evaluating.</td>
+            <td>Health API + ChromaDB + Ollama list + chunk files</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- ── HOOKS ── -->
+      <h3>Three Automation Hooks</h3>
+      <p>Hooks are Python scripts in <code>.claude/hooks/</code>, registered in <code>.claude/settings.json</code>. Claude Code calls them automatically — no invocation needed. Each hook receives a JSON payload on <code>stdin</code> describing the tool call that just fired (or is about to fire). Exit code semantics determine the hook's effect:</p>
+      <table>
+        <thead><tr><th>Exit Code</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td><code>0</code></td><td>Proceed — tool call is allowed (PostToolUse: informational output shown to Claude)</td></tr>
+          <tr><td><code>1</code></td><td>Error — tool call ran but hook detected a problem; message shown to Claude as feedback</td></tr>
+          <tr><td><code>2</code></td><td>Block — PreToolUse only; cancels the tool call entirely before it executes</td></tr>
+        </tbody>
+      </table>
+
+      <h4>Hook 1 — guard_secrets.py</h4>
+      <p><strong>Trigger:</strong> <code>PreToolUse: Bash</code> — fires before every Bash command Claude Code issues.<br/>
+      <strong>Purpose:</strong> Prevent accidental commit of <code>.env</code> (which contains API keys, Ollama model names, and RBAC secrets) to git.</p>
+      <p>The hook reads the <code>command</code> field from the stdin JSON and checks it against four dangerous regex patterns:</p>
+      <pre style="font-size:0.78rem;line-height:1.5;">DANGEROUS_PATTERNS = [
+    r"git\s+add\s+\.env\b",      # explicit: git add .env
+    r"git\s+add\s+-A\b",         # stages everything including .env
+    r"git\s+add\s+\.\b",         # stages current directory
+    r"git\s+commit\s+.*--all\b", # --all flag stages untracked files
+]</pre>
+      <p>Any match causes the hook to print a descriptive error and exit with code <code>2</code> — the Bash command is blocked before git touches the filesystem. A secondary check runs on all <code>git commit</code> commands: it calls <code>git diff --cached --name-only</code> and blocks if <code>.env</code> appears in the staged file list (catches cases where <code>.env</code> was staged manually in a prior step).</p>
+      <div class="why"><div class="why-label">Why a hard block over a warning?</div>
+        <p>Warnings are ignored under time pressure. A hard block (exit 2) forces a deliberate override — Claude Code cannot proceed with the unsafe command and must find an alternative path (specific file staging: <code>git add backend/main.py</code>). The <code>.env</code> is in <code>.gitignore</code>, but gitignore only prevents <em>untracked</em> files from being auto-staged; it does not block an explicit <code>git add .env</code> or <code>git add -A</code>.</p>
+      </div>
+
+      <h4>Hook 2 — check_syntax.py</h4>
+      <p><strong>Trigger:</strong> <code>PostToolUse: Edit | Write</code> — fires after every file edit or write.<br/>
+      <strong>Purpose:</strong> Catch Python syntax errors immediately, before they can propagate to an import chain or crash the running server.</p>
+      <p>The hook checks if the edited file path ends in <code>.py</code>, then runs the Python compiler on it:</p>
+      <pre style="font-size:0.78rem;line-height:1.5;">result = subprocess.run(
+    [sys.executable, "-m", "py_compile", file_path],
+    capture_output=True, text=True,
+)
+if result.returncode != 0:
+    print(f"[hook] SYNTAX ERROR in {file_path}")
+    print(result.stderr.strip())
+    sys.exit(1)  # surfaces error as feedback to Claude</pre>
+      <p>On success it prints <code>[hook] Syntax OK — backend/pipeline/retriever.py</code>. On failure it prints the full compiler error (line number, character position, the offending token) and exits 1 — Claude Code sees this as immediate feedback and corrects the file in the next step, in the same tool call sequence. Non-Python files (HTML, JSON, Markdown) are passed through with exit 0.</p>
+      <div class="why"><div class="why-label">Why compile-time check over runtime discovery?</div>
+        <p>A syntax error in <code>backend/pipeline/retriever.py</code> is only discovered at <em>import time</em> — when the server starts or when a test imports the module. By then, Claude Code may have moved on to other files. The hook makes every edit a micro-test: if the file doesn't parse, Claude Code knows before touching the next file. This is especially important for cascading changes (e.g., adding a schema field that must be updated in 6 files — a syntax error in file 2 should not be discovered after file 6 is written).</p>
+      </div>
+
+      <h4>Hook 3 — requirements_reminder.py</h4>
+      <p><strong>Trigger:</strong> <code>PostToolUse: Edit | Write</code> — fires after every file edit or write.<br/>
+      <strong>Purpose:</strong> Remind Claude Code (and the developer) to run <code>pip install -r requirements.txt</code> when a new dependency has been added.</p>
+      <p>The hook checks if the modified file path ends in <code>requirements.txt</code> and, if so, prints:</p>
+      <pre style="font-size:0.78rem;line-height:1.5;">[hook] requirements.txt changed — remember to reinstall:
+  pip install -r requirements.txt</pre>
+      <p>This is informational (exit 0) — it does not block anything. The reminder appears inline in Claude Code's tool output immediately after the file is saved, making it impossible to miss.</p>
+      <div class="why"><div class="why-label">Why a reminder hook over running pip automatically?</div>
+        <p>Auto-installing packages on every requirements.txt edit could install a half-written file (if Claude Code saves midway through adding three packages). The hook is deliberately passive — it flags the need without acting on it, letting the developer choose when to run the install (e.g., after all dependency changes are finalized).</p>
+      </div>
+
+      <h4>Hook Configuration (settings.json)</h4>
+      <pre style="font-size:0.78rem;line-height:1.5;">{
+  "permissions": {
+    "allow": ["Bash(*)", "Read(*)", "Write(*)", "Edit(*)", "Glob(*)", "Grep(*)", "WebSearch(*)", "WebFetch(*)"]
+  },
+  "hooks": {
+    "PreToolUse": [
+      { "matcher": "Bash",
+        "hooks": [{ "type": "command", "command": "python .claude/hooks/guard_secrets.py" }] }
+    ],
+    "PostToolUse": [
+      { "matcher": "Edit|Write",
+        "hooks": [{ "type": "command", "command": "python .claude/hooks/check_syntax.py" }] },
+      { "matcher": "Edit|Write",
+        "hooks": [{ "type": "command", "command": "python .claude/hooks/requirements_reminder.py" }] }
+    ]
+  }
+}</pre>
+      <p>The <code>permissions.allow</code> block grants Claude Code standing authorization for all primary tools — no per-call approval prompts. Combined with the autonomous mode memory, this enables uninterrupted multi-step execution. The hook matchers use simple string matching (<code>Bash</code>) or alternation (<code>Edit|Write</code>); both PostToolUse hooks run on every matching event (they chain, not compete).</p>
+
+      <!-- ── AGENTIC WORKFLOW EXAMPLE ── -->
+      <h3>Example Agentic Workflow — LLM-as-Judge Feature</h3>
+      <p>To illustrate the full agentic loop, here is how the LLM-as-Judge feature was implemented:</p>
+      <table>
+        <thead><tr><th>Step</th><th>Agent/Tool Used</th><th>What Happened</th></tr></thead>
+        <tbody>
+          <tr><td>1. Design</td><td>Plan Mode</td><td>User described the feature. Claude entered Plan Mode, read all existing files (<code>ragas_eval.py</code>, <code>schemas.py</code>, <code>ab_test.py</code>, <code>main.py</code>), and produced a file-by-file implementation plan covering 8 files with exact Pydantic fields, the 4-dimension judge prompt, scoring bins, and API route names.</td></tr>
+          <tr><td>2. Schema</td><td>Edit tool + check_syntax hook</td><td>Added 5 new Pydantic models to <code>schemas.py</code>. check_syntax.py ran immediately after — <code>[hook] Syntax OK</code>.</td></tr>
+          <tr><td>3. Core logic</td><td>Write tool + check_syntax hook</td><td>Created <code>backend/evaluation/llm_judge.py</code> (230 lines) with judge_row, run_judge_evaluation, _call_ollama_judge, _parse_judge_response, _build_dimension_score, _heuristic_judge. Syntax check passed.</td></tr>
+          <tr><td>4. API router</td><td>Write + Edit + check_syntax hook</td><td>Created <code>backend/api/judge.py</code>, edited <code>backend/main.py</code> to mount the router. Two syntax checks, both passed.</td></tr>
+          <tr><td>5. Verify wiring</td><td>Explore subagent</td><td>Spawned Explore to confirm all import paths resolve: "Find all files that import from backend.evaluation.llm_judge." Returned 3 files, all correct.</td></tr>
+          <tr><td>6. CLI script</td><td>Write + check_syntax hook</td><td>Created <code>scripts/run_judge.py</code> with argparse, tabular output, PASS/FAIL threshold display.</td></tr>
+          <tr><td>7. A/B integration</td><td>Edit + check_syntax hook</td><td>Added <code>run_judge: bool = False</code> parameter to <code>run_ab_test()</code>, judge loop after RAGAS loop, composite winner logic.</td></tr>
+          <tr><td>8. Commit</td><td>Bash (git) + guard_secrets hook</td><td><code>git add backend/evaluation/llm_judge.py backend/api/judge.py ...</code> (specific files). guard_secrets.py ran, found no <code>.env</code> patterns, exited 0. Commit created.</td></tr>
         </tbody>
       </table>
 
