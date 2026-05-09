@@ -1,7 +1,11 @@
 """CLI: python scripts/run_judge.py --config config_d --dataset financebench --n 20"""
+import os
 import argparse
 import sys
 from pathlib import Path
+
+os.environ.setdefault("RAGAS_DO_NOT_TRACK", "1")
+os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 

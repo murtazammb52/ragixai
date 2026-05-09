@@ -61,7 +61,7 @@ def run_evaluation(config: str = "config_d", dataset: str = "financebench", samp
             "question": qa.question,
             "answer": result.answer,
             "contexts": [c.text for c in result.citations] or ["No context retrieved"],
-            "ground_truths": [qa.ground_truth],
+            "ground_truth": qa.ground_truth,  # RAGAS 0.4.x: singular string, not list
         })
 
     if not rows:
@@ -94,14 +94,18 @@ def _load_dataset(dataset: str, sample_size: int):
 
 def _compute_ragas_scores(rows: list[dict]) -> dict:
     try:
+        import os
+        # RAGAS 0.4.x on Windows: analytics module spawns a subprocess that crashes
+        # unless tracking is disabled. Also hide GPU — RAGAS only needs CPU for scoring.
+        os.environ.setdefault("RAGAS_DO_NOT_TRACK", "1")
+
         from ragas import evaluate
-        from ragas.metrics.collections import (
-            faithfulness,
-            answer_relevancy,
-            context_precision,
-            context_recall,
-            answer_correctness,
-        )
+        # RAGAS 0.4.x: singleton instances live in ragas.metrics._* modules
+        from ragas.metrics._faithfulness import faithfulness
+        from ragas.metrics._answer_relevance import answer_relevancy
+        from ragas.metrics._context_precision import context_precision
+        from ragas.metrics._context_recall import context_recall
+        from ragas.metrics._answer_correctness import answer_correctness
         from datasets import Dataset
         from langchain_community.llms import Ollama
         from langchain_community.embeddings import OllamaEmbeddings
@@ -109,15 +113,24 @@ def _compute_ragas_scores(rows: list[dict]) -> dict:
         llm = Ollama(model=settings.ollama_model, base_url=settings.ollama_base_url)
         embeddings = OllamaEmbeddings(model=settings.ollama_model, base_url=settings.ollama_base_url)
 
+        metrics = [faithfulness, answer_relevancy, context_precision, context_recall, answer_correctness]
         ragas_ds = Dataset.from_list(rows)
         result = evaluate(
             ragas_ds,
-            metrics=[faithfulness, answer_relevancy, context_precision, context_recall, answer_correctness],
+            metrics=metrics,
             llm=llm,
             embeddings=embeddings,
             raise_exceptions=False,
         )
-        return dict(result)
+        # EvaluationResult[key] returns List[float] in RAGAS 0.4.x — take nanmean per metric
+        out = {}
+        for m in metrics:
+            try:
+                vals = result[m.name]
+                out[m.name] = float(np.nanmean(vals)) if vals else 0.0
+            except Exception:
+                out[m.name] = 0.0
+        return out
     except Exception as e:
         logger.error(f"RAGAS evaluation failed: {e}")
         logger.info("Falling back to heuristic scores")

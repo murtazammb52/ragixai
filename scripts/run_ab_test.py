@@ -1,7 +1,13 @@
 """CLI: python scripts/run_ab_test.py --n 20 [--configs config_a,config_d]"""
+import os
 import argparse
 import sys
 from pathlib import Path
+
+# Prevent RAGAS analytics from spawning a subprocess that crashes on Windows
+os.environ.setdefault("RAGAS_DO_NOT_TRACK", "1")
+os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
+# Note: CUDA_VISIBLE_DEVICES is NOT blanked here — Ollama uses GPU for generation
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
