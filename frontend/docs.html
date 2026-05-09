@@ -294,7 +294,7 @@
         </div>
         <div class="card cyan">
           <div class="card-title">Embeddings</div>
-          <div class="card-body">sentence-transformers/all-MiniLM-L6-v2<br/>384-dim · CPU-only<br/>Optional: Cohere Embed v3</div>
+          <div class="card-body">sentence-transformers/all-MiniLM-L6-v2<br/>384-dim · CPU-only · ~22M params</div>
         </div>
         <div class="card emerald">
           <div class="card-title">Vector Store</div>
@@ -538,17 +538,6 @@ self._model = SentenceTransformer(
         forces a direct load path that bypasses mmap.</p>
       </div>
 
-      <h3>Optional: Cohere Embed v3</h3>
-      <p>
-        Config E uses <strong>Cohere Embed v3</strong> (1024-dim, English) via the Cohere free tier
-        (1000 calls/month). When enabled, chunks are stored in a separate ChromaDB collection
-        (<code>ragixai_cohere</code>) so both embedding models can coexist without interference.
-      </p>
-      <div class="code-block"><span class="cm"># .env</span>
-EMBED_MODEL=cohere
-COHERE_API_KEY=your-key-here
-<span class="cm"># Collection: ragixai_cohere (vs ragixai_local for sentence-transformers)</span></div>
-
       <h3>ChromaDB Vector Store</h3>
       <p>
         ChromaDB is used as a persistent local vector database. Each chunk gets a deterministic
@@ -581,12 +570,11 @@ tokenized_corpus = [doc.lower().split() <span class="kw">for</span> doc <span cl
 _bm25_index = BM25Okapi(tokenized_corpus)
 _bm25_doc_ids = all_ids  <span class="cm"># parallel list mapping BM25 rank → ChromaDB ID</span></div>
 
-      <h3>ChromaDB Collections</h3>
+      <h3>ChromaDB Collection</h3>
       <table>
-        <thead><tr><th>Collection</th><th>Embedding Model</th><th>Dimension</th><th>Activated by</th></tr></thead>
+        <thead><tr><th>Collection</th><th>Embedding Model</th><th>Dimension</th><th>Index Type</th></tr></thead>
         <tbody>
-          <tr><td><code>ragixai_local</code></td><td>all-MiniLM-L6-v2</td><td>384</td><td><code>EMBED_MODEL=local</code> (default)</td></tr>
-          <tr><td><code>ragixai_cohere</code></td><td>Cohere Embed v3</td><td>1024</td><td><code>EMBED_MODEL=cohere</code></td></tr>
+          <tr><td><code>ragixai_local</code></td><td>sentence-transformers/all-MiniLM-L6-v2</td><td>384</td><td>HNSW · cosine similarity</td></tr>
         </tbody>
       </table>
 
@@ -661,8 +649,8 @@ bm25_weight  = <span class="num">0.4</span>  <span class="cm"># lighter weight o
           <tr><td><strong>B</strong></td><td>BM25 only</td><td>None</td><td>N/A</td><td>Keyword baseline</td></tr>
           <tr><td><strong>C</strong></td><td>Hybrid RRF</td><td>None</td><td>MiniLM-L6</td><td>Fusion without reranker</td></tr>
           <tr><td><strong>D</strong></td><td>Hybrid RRF</td><td>CrossEncoder</td><td>MiniLM-L6</td><td><strong>Default — best free-tier</strong></td></tr>
-          <tr><td><strong>E</strong></td><td>Hybrid RRF</td><td>CrossEncoder</td><td>Cohere v3</td><td>Requires API key</td></tr>
-          <tr><td><strong>F</strong></td><td>Hybrid RRF</td><td>CrossEncoder</td><td>MiniLM-L6</td><td>Alternate LLM baseline</td></tr>
+          <tr><td><strong>E</strong></td><td>Hybrid RRF</td><td>CrossEncoder</td><td>MiniLM-L6</td><td>Ablation variant of D</td></tr>
+          <tr><td><strong>F</strong></td><td>Hybrid RRF</td><td>CrossEncoder</td><td>MiniLM-L6</td><td>Ablation variant of D</td></tr>
           <tr><td><strong>G</strong></td><td>Dense only</td><td>CrossEncoder</td><td>MiniLM-L6</td><td>Dense + rerank ablation</td></tr>
         </tbody>
       </table>
@@ -1109,7 +1097,7 @@ Return ONLY valid JSON, no other text:
           <tr><td><code>/ingest-docs</code></td><td>Download SEC EDGAR filings</td><td>scripts/run_ingest.py</td></tr>
           <tr><td><code>/chunk-docs</code></td><td>Chunk ingested documents (3 strategies)</td><td>scripts/run_chunk.py</td></tr>
           <tr><td><code>/build-index</code></td><td>Build ChromaDB + BM25 indexes</td><td>scripts/run_build_index.py</td></tr>
-          <tr><td><code>/embed-docs</code></td><td>Switch embedding model and rebuild</td><td>scripts/run_build_index.py --reset</td></tr>
+          <tr><td><code>/embed-docs</code></td><td>Rebuild the vector index from scratch</td><td>scripts/run_build_index.py --reset</td></tr>
           <tr><td><code>/backfill</code></td><td>Ingest 2020–2023 filings for FinanceBench</td><td>run_ingest.py --years 2020–2023</td></tr>
           <tr><td><code>/pipeline</code></td><td>Run full end-to-end pipeline</td><td>ingest → chunk → build-index</td></tr>
           <tr><td><code>/query-rag</code></td><td>One-off RAG query from CLI</td><td>scripts/run_query.py</td></tr>
