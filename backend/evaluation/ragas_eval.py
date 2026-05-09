@@ -146,7 +146,7 @@ def _heuristic_scores(rows: list[dict]) -> dict:
         answer = row["answer"].lower()
         question = row["question"].lower()
         contexts = " ".join(row["contexts"]).lower()
-        ground_truth = row["ground_truths"][0].lower() if row["ground_truths"] else ""
+        ground_truth = row["ground_truth"].lower() if row.get("ground_truth") else ""
 
         q_words = set(question.split()) - {"what", "how", "why", "when", "the", "is", "was", "are", "were", "a", "an"}
         ctx_words = set(contexts.split())
