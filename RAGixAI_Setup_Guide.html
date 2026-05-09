@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>RAGixAI — Setup & Startup Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #1a1a2e;
+    background: #fff;
+    max-width: 850px;
+    margin: 0 auto;
+    padding: 40px 50px;
+  }
+
+  /* ── Cover ── */
+  .cover {
+    text-align: center;
+    padding: 60px 0 50px;
+    border-bottom: 3px solid #2d2d8e;
+    margin-bottom: 40px;
+  }
+  .cover .badge {
+    display: inline-block;
+    background: #2d2d8e;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+  }
+  .cover h1 {
+    font-size: 36px;
+    font-weight: 700;
+    color: #1a1a2e;
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+  .cover h1 span { color: #2d2d8e; }
+  .cover .subtitle {
+    font-size: 15px;
+    color: #555;
+    margin-bottom: 30px;
+  }
+  .cover .meta {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    font-size: 12px;
+    color: #777;
+  }
+  .cover .meta strong { color: #333; display: block; font-size: 13px; }
+
+  /* ── Section headings ── */
+  h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #2d2d8e;
+    margin: 36px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #e8e8f5;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h2 .num {
+    background: #2d2d8e;
+    color: #fff;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin: 18px 0 8px;
+  }
+
+  p { margin-bottom: 10px; color: #333; }
+
+  /* ── Code blocks ── */
+  pre {
+    background: #1a1a2e;
+    color: #e8e8f5;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin: 10px 0 16px;
+    overflow-x: auto;
+    position: relative;
+  }
+  pre .comment { color: #6272a4; }
+  pre .cmd { color: #50fa7b; }
+  pre .path { color: #ffb86c; }
+  pre .val { color: #f1fa8c; }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: #eef0fb;
+    color: #2d2d8e;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  /* ── Info boxes ── */
+  .box {
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 12px 0 18px;
+    font-size: 12.5px;
+    line-height: 1.6;
+  }
+  .box-info  { background: #eef4ff; border-left: 4px solid #2d2d8e; }
+  .box-warn  { background: #fff8e8; border-left: 4px solid #f59f00; }
+  .box-ok    { background: #eafaf1; border-left: 4px solid #2ecc71; }
+  .box-tip   { background: #f5f0ff; border-left: 4px solid #9b59b6; }
+  .box strong { display: block; margin-bottom: 4px; font-size: 13px; }
+
+  /* ── Steps ── */
+  .steps { counter-reset: step; }
+  .step {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    align-items: flex-start;
+  }
+  .step-num {
+    counter-increment: step;
+    background: #eef0fb;
+    color: #2d2d8e;
+    font-weight: 700;
+    font-size: 13px;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .step-body { flex: 1; }
+  .step-body p { margin-bottom: 6px; }
+
+  /* ── Checklist ── */
+  .checklist { list-style: none; padding: 0; margin: 8px 0 16px; }
+  .checklist li {
+    padding: 6px 0 6px 28px;
+    position: relative;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 12.5px;
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li::before {
+    content: "□";
+    position: absolute;
+    left: 0;
+    color: #2d2d8e;
+    font-size: 16px;
+    top: 4px;
+  }
+
+  /* ── Table ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 18px;
+    font-size: 12.5px;
+  }
+  th {
+    background: #2d2d8e;
+    color: #fff;
+    padding: 8px 12px;
+    text-align: left;
+    font-weight: 600;
+  }
+  td { padding: 8px 12px; border-bottom: 1px solid #eee; }
+  tr:nth-child(even) td { background: #f8f8fd; }
+
+  /* ── URL pill ── */
+  .url {
+    display: inline-block;
+    background: #1a1a2e;
+    color: #50fa7b;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin: 2px 0;
+  }
+
+  /* ── Pipeline diagram ── */
+  .pipeline {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0;
+    margin: 16px 0;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .pipeline .stage {
+    background: #2d2d8e;
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+  .pipeline .arrow {
+    color: #2d2d8e;
+    font-size: 18px;
+    padding: 0 6px;
+  }
+
+  /* ── Divider ── */
+  hr { border: none; border-top: 1px solid #eee; margin: 30px 0; }
+
+  /* ── Print ── */
+  @media print {
+    body { padding: 20px 30px; }
+    pre { break-inside: avoid; }
+    h2 { break-before: auto; }
+    .cover { break-after: page; }
+  }
+
+  .footer {
+    margin-top: 50px;
+    padding-top: 20px;
+    border-top: 2px solid #e8e8f5;
+    text-align: center;
+    font-size: 11px;
+    color: #999;
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════ COVER ══════════════════════════════ -->
+<div class="cover">
+  <div class="badge">Setup & Startup Guide</div>
+  <h1>RAGix<span>AI</span></h1>
+  <div class="subtitle">SEC EDGAR Financial RAG System — Complete Setup Reference</div>
+  <div class="meta">
+    <div><strong>LLM</strong>Ollama · llama3.2:1b (local)</div>
+    <div><strong>Vector Store</strong>ChromaDB (local)</div>
+    <div><strong>Embeddings</strong>sentence-transformers</div>
+    <div><strong>Server Port</strong>8000</div>
+  </div>
+</div>
+
+<div class="box box-info">
+  <strong>When to use this guide</strong>
+  Use this guide whenever you start fresh on a new machine, after a crash, or when you want to reset and rebuild the system from scratch. It walks through every step in order.
+</div>
+
+
+<!-- ══════════════════════════════ SECTION 1 ══════════════════════════════ -->
+<h2><span class="num">1</span> Prerequisites — Install Once</h2>
+
+<p>These are installed once and never need to be repeated.</p>
+
+<h3>1.1 — Ollama (Local LLM Runtime)</h3>
+<p>Ollama runs LLMs locally. Download and install the Windows installer:</p>
+<pre><span class="comment"># 1. Download OllamaSetup.exe from https://ollama.com
+# 2. Run the installer — it installs as a background Windows service
+# 3. Verify it is running:</span>
+<span class="cmd">ollama list</span>
+<span class="comment"># Should show an empty table (no models yet) — that is fine</span></pre>
+
+<h3>1.2 — Anaconda (Python Environment)</h3>
+<p>Already installed at <code>C:\Users\murta\anaconda3</code>. No action needed.</p>
+
+<h3>1.3 — Pull the LLM Model</h3>
+<p>Pull the 1B model — small enough for your MX450 GPU (2GB VRAM):</p>
+<pre><span class="cmd">ollama pull llama3.2:1b</span>
+<span class="comment"># Downloads ~650 MB — do this once. Takes 1–5 min on a good connection.</span>
+<span class="comment"># Verify:</span>
+<span class="cmd">ollama list</span>
+<span class="comment"># Expected output:
+# NAME               ID         SIZE    MODIFIED
+# llama3.2:1b        ...        1.3 GB  ...</span></pre>
+
+<div class="box box-ok">
+  <strong>✓ Prerequisites complete</strong>
+  Ollama is installed, running as a Windows service, and the model is downloaded. You only need to do this section once ever.
+</div>
+
+
+<!-- ══════════════════════════════ SECTION 2 ══════════════════════════════ -->
+<h2><span class="num">2</span> First-Time Python Environment Setup</h2>
+
+<p>This section sets up the <code>ragixai</code> conda environment with all required packages. <strong>Do this once.</strong> After the environment exists, skip to Section 3.</p>
+
+<div class="box box-warn">
+  <strong>⚠ Important — Run all commands from the project root</strong>
+  Open Anaconda Prompt (or any terminal with conda activated) and <code>cd</code> to <code>D:\code\ragixai</code> before running any command below.
+</div>
+
+<pre><span class="comment"># Open: Start Menu → Anaconda Prompt (Anaconda3)
+# Then navigate to the project folder:</span>
+<span class="cmd">cd D:\code\ragixai</span></pre>
+
+<h3>2.1 — Create the Conda Environment</h3>
+<pre><span class="comment"># Creates a Python 3.11 environment named "ragixai"
+# Stored at: D:\envs\ragixai  (on D drive to save C drive space)</span>
+<span class="cmd">conda create --prefix D:\envs\ragixai python=3.11 -y</span>
+
+<span class="comment"># Activate it:</span>
+<span class="cmd">conda activate D:\envs\ragixai</span>
+<span class="comment"># Your prompt should now show: (D:\envs\ragixai) ...</span></pre>
+
+<h3>2.2 — Install Python Dependencies</h3>
+<pre><span class="comment"># Install all required packages (takes 5–15 min first time):</span>
+<span class="cmd">pip install -r requirements.txt</span>
+<span class="comment"># This installs: fastapi, chromadb, sentence-transformers, ollama,
+# rank-bm25, ragas, langchain, torch, uvicorn, and more.</span></pre>
+
+<div class="box box-ok">
+  <strong>✓ Environment ready</strong>
+  The <code>ragixai</code> conda environment is now set up. You never need to recreate it unless you explicitly delete it.
+</div>
+
+
+<!-- ══════════════════════════════ SECTION 3 ══════════════════════════════ -->
+<h2><span class="num">3</span> Data Pipeline — Build the Index</h2>
+
+<p>Run this section <strong>once</strong> to download SEC filings and build the ChromaDB vector index. If <code>data/chroma_db/</code> already has data (680+ documents), you can skip to Section 4.</p>
+
+<div class="pipeline">
+  <div class="stage">1. Ingest</div>
+  <div class="arrow">→</div>
+  <div class="stage">2. Chunk</div>
+  <div class="arrow">→</div>
+  <div class="stage">3. Build Index</div>
+  <div class="arrow">→</div>
+  <div class="stage">✓ Ready</div>
+</div>
+
+<div class="box box-warn">
+  <strong>⚠ Activate environment first</strong>
+  Make sure the ragixai environment is active before running any pipeline script.
+  <code>conda activate D:\envs\ragixai</code>
+</div>
+
+<h3>Step 1 — Ingest SEC EDGAR Filings</h3>
+<p>Downloads 10-K annual reports directly from the SEC EDGAR API for the specified companies.</p>
+<pre><span class="comment"># Download 10-K filings for Apple and Microsoft (recommended starting set):</span>
+<span class="cmd">python scripts/run_ingest.py --companies AAPL,MSFT</span>
+
+<span class="comment"># Or download for all default companies (AAPL, MSFT, AMZN, GOOGL, META, NVDA, TSLA, JPM, BAC, WMT):</span>
+<span class="cmd">python scripts/run_ingest.py</span>
+
+<span class="comment"># Files are saved to: data/raw/edgar/AAPL/, data/raw/edgar/MSFT/, etc.
+# A manifest.json tracks all downloaded filings.</span></pre>
+
+<div class="box box-info">
+  <strong>Common flags</strong>
+  <code>--companies AAPL,MSFT,GOOGL</code> — specific companies only<br>
+  <code>--max-filings 3</code> — limit to 3 filings per company (faster for testing)<br>
+  <code>--years 2023,2024</code> — specific years only
+</div>
+
+<h3>Step 2 — Chunk the Documents</h3>
+<p>Splits the raw filings into overlapping text segments for retrieval.</p>
+<pre><span class="comment"># Use recursive chunking (recommended — best balance of quality and speed):</span>
+<span class="cmd">python scripts/run_chunk.py --strategy recursive</span>
+
+<span class="comment"># Output saved to: data/processed/chunks/chunks_recursive.jsonl
+# Other strategies: "fixed" (token-based) or "semantic" (similarity-based)</span></pre>
+
+<h3>Step 3 — Build the Vector Index</h3>
+<p>Embeds all chunks using sentence-transformers and stores them in ChromaDB.</p>
+<pre><span class="comment"># Build the index (downloads embedding model ~90MB on first run):</span>
+<span class="cmd">python scripts/run_build_index.py</span>
+
+<span class="comment"># To completely reset and rebuild from scratch, add --reset:</span>
+<span class="cmd">python scripts/run_build_index.py --reset</span>
+
+<span class="comment"># Index is saved to: data/chroma_db/
+# When complete you should see: "Indexed N chunks into ragixai_local"</span></pre>
+
+<div class="box box-ok">
+  <strong>✓ Data pipeline complete</strong>
+  ChromaDB now contains all embedded document chunks. The BM25 sparse index is built automatically when the server starts.
+</div>
+
+
+<!-- ══════════════════════════════ SECTION 4 ══════════════════════════════ -->
+<h2><span class="num">4</span> Daily Startup — Every Session</h2>
+
+<p>Follow these steps every time you open your laptop and want to use RAGixAI.</p>
+
+<div class="box box-tip">
+  <strong>Quick checklist — do these in order</strong>
+  <ul class="checklist" style="margin:8px 0 0;">
+    <li>Ollama service is running (usually auto-starts on Windows login)</li>
+    <li>Anaconda Prompt is open and in the project folder</li>
+    <li>Conda environment is activated</li>
+    <li>FastAPI server is started</li>
+  </ul>
+</div>
+
+<h3>Step A — Verify Ollama is Running</h3>
+<pre><span class="comment"># Open any terminal (not necessarily Anaconda Prompt) and run:</span>
+<span class="cmd">ollama list</span>
+<span class="comment"># Expected: shows llama3.2:1b in the list
+# If you get "connection refused": open Start Menu and search "Ollama" to launch it</span>
+
+<span class="comment"># Also verify the model is available:</span>
+<span class="cmd">ollama ps</span>
+<span class="comment"># Will show active model if one is loaded (may be empty until first query — that's fine)</span></pre>
+
+<h3>Step B — Open Project in Anaconda Prompt</h3>
+<pre><span class="comment"># Start Menu → Anaconda Prompt (Anaconda3)
+# Then:</span>
+<span class="cmd">cd D:\code\ragixai</span>
+<span class="cmd">conda activate D:\envs\ragixai</span>
+<span class="comment"># Prompt now shows: (D:\envs\ragixai) D:\code\ragixai></span></pre>
+
+<h3>Step C — Start the FastAPI Server</h3>
+<pre><span class="comment"># Start the server (keep this terminal open — do not close it):</span>
+<span class="cmd">uvicorn backend.main:app --host 0.0.0.0 --port 8000</span>
+
+<span class="comment"># You will see startup messages like:
+# INFO:     RAGixAI starting up...
+# INFO:     BM25 index built with 680 documents
+# INFO:     Server ready — Chat UI: http://localhost:8000/chat
+# INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)</span></pre>
+
+<div class="box box-warn">
+  <strong>⚠ Keep the terminal open</strong>
+  The server runs in the foreground. If you close the terminal, the server stops. Open a second terminal for any other commands.
+</div>
+
+<h3>Step D — Open the Chat UI</h3>
+<p>Open your browser and go to:</p>
+<div style="margin: 10px 0;">
+  <span class="url">http://localhost:8000/chat/</span>
+</div>
+<p>You should see the RAGixAI chat interface. Type any question about Apple or Microsoft financials.</p>
+
+
+<!-- ══════════════════════════════ SECTION 5 ══════════════════════════════ -->
+<h2><span class="num">5</span> Key URLs & Endpoints</h2>
+
+<table>
+  <tr>
+    <th>URL</th>
+    <th>What It Does</th>
+  </tr>
+  <tr>
+    <td><code>http://localhost:8000/chat/</code></td>
+    <td>Chat UI — ask questions, view citations</td>
+  </tr>
+  <tr>
+    <td><code>http://localhost:8000/api/health</code></td>
+    <td>System health — shows doc count, model, index size</td>
+  </tr>
+  <tr>
+    <td><code>http://localhost:8000/docs</code></td>
+    <td>Interactive API documentation (Swagger UI)</td>
+  </tr>
+  <tr>
+    <td><code>http://localhost:8000/api/chat</code></td>
+    <td>POST endpoint for RAG queries (JSON)</td>
+  </tr>
+  <tr>
+    <td><code>http://localhost:8000/api/evaluate</code></td>
+    <td>POST endpoint for RAGAS evaluation</td>
+  </tr>
+</table>
+
+
+<!-- ══════════════════════════════ SECTION 6 ══════════════════════════════ -->
+<h2><span class="num">6</span> Running a Test Query (CLI)</h2>
+
+<p>You can test the RAG pipeline from the command line without the browser:</p>
+
+<pre><span class="comment"># Make sure the server is running first (Step C above), then in a NEW terminal:</span>
+<span class="cmd">conda activate D:\envs\ragixai</span>
+<span class="cmd">cd D:\code\ragixai</span>
+
+<span class="comment"># Run a query using Config A (dense retrieval, no reranking):</span>
+<span class="cmd">python scripts/run_query.py --question "What were Apple's total net sales in FY2024?"</span>
+
+<span class="comment"># Run using Config D (hybrid retrieval + reranking — best quality):</span>
+<span class="cmd">python scripts/run_query.py --question "What is Microsoft's cloud revenue?" --config config_d</span></pre>
+
+
+<!-- ══════════════════════════════ SECTION 7 ══════════════════════════════ -->
+<h2><span class="num">7</span> RAG Configuration Modes</h2>
+
+<table>
+  <tr>
+    <th>Config</th>
+    <th>Retrieval</th>
+    <th>Reranking</th>
+    <th>Best For</th>
+  </tr>
+  <tr>
+    <td><strong>Config A</strong></td>
+    <td>Dense (ChromaDB cosine)</td>
+    <td>None</td>
+    <td>Baseline / fastest</td>
+  </tr>
+  <tr>
+    <td><strong>Config B</strong></td>
+    <td>BM25 (keyword)</td>
+    <td>None</td>
+    <td>Exact term matching</td>
+  </tr>
+  <tr>
+    <td><strong>Config C</strong></td>
+    <td>Hybrid (BM25 + Dense)</td>
+    <td>None</td>
+    <td>Good general recall</td>
+  </tr>
+  <tr>
+    <td><strong>Config D</strong></td>
+    <td>Hybrid (BM25 + Dense)</td>
+    <td>Cross-encoder</td>
+    <td>Best quality (recommended)</td>
+  </tr>
+  <tr>
+    <td><strong>Config E</strong></td>
+    <td>Cohere Embed v3</td>
+    <td>Cross-encoder</td>
+    <td>Best embeddings (needs API key)</td>
+  </tr>
+  <tr>
+    <td><strong>Config F</strong></td>
+    <td>Dense</td>
+    <td>Cross-encoder</td>
+    <td>Dense + reranked</td>
+  </tr>
+  <tr>
+    <td><strong>Config G</strong></td>
+    <td>BM25</td>
+    <td>Cross-encoder</td>
+    <td>Keyword + reranked</td>
+  </tr>
+</table>
+
+
+<!-- ══════════════════════════════ SECTION 8 ══════════════════════════════ -->
+<h2><span class="num">8</span> Troubleshooting</h2>
+
+<h3>Server won't start — "Address already in use"</h3>
+<pre><span class="comment"># Find and kill the process using port 8000:
+# In Anaconda Prompt (Windows):</span>
+<span class="cmd">netstat -ano | findstr :8000</span>
+<span class="comment"># Note the PID number in the last column, then:</span>
+<span class="cmd">taskkill /F /PID &lt;PID_NUMBER&gt;</span>
+<span class="comment"># Then restart the server normally.</span></pre>
+
+<h3>Ollama not responding / connection refused</h3>
+<pre><span class="comment"># Check if Ollama service is running:</span>
+<span class="cmd">ollama list</span>
+<span class="comment"># If it errors: Start Menu → search "Ollama" → click to launch
+# Or: open a new terminal and run "ollama serve" to start manually</span></pre>
+
+<h3>Slow responses (over 2 minutes)</h3>
+<div class="box box-warn">
+  <strong>Root cause</strong>
+  Your GPU (NVIDIA MX450) has 2GB VRAM. If the model doesn't fit fully in VRAM, it falls back to CPU which is very slow. Always use <code>llama3.2:1b</code>, not the 3B model.
+</div>
+<pre><span class="comment"># Confirm the .env file has the 1B model:</span>
+<span class="comment"># Open D:\code\ragixai\.env and check:</span>
+<span class="val">OLLAMA_MODEL=llama3.2:1b</span>
+
+<span class="comment"># Also confirm Ollama is using GPU:</span>
+<span class="cmd">ollama ps</span>
+<span class="comment"># Look for "GPU" or "CPU/GPU" in the PROCESSOR column</span></pre>
+
+<h3>ChromaDB is empty (0 documents)</h3>
+<pre><span class="comment"># Re-run the full data pipeline (Section 3):</span>
+<span class="cmd">python scripts/run_ingest.py --companies AAPL,MSFT</span>
+<span class="cmd">python scripts/run_chunk.py --strategy recursive</span>
+<span class="cmd">python scripts/run_build_index.py --reset</span></pre>
+
+<h3>Chat UI shows blank page or 404</h3>
+<pre><span class="comment"># Make sure you have the trailing slash:</span>
+<span class="comment"># ✗  http://localhost:8000/chat</span>
+<span class="comment"># ✓  http://localhost:8000/chat/</span>
+<span class="comment"># Also confirm the server is running (Step C)</span></pre>
+
+<h3>Import errors when starting server</h3>
+<pre><span class="comment"># Make sure the ragixai conda environment is activated:</span>
+<span class="cmd">conda activate D:\envs\ragixai</span>
+<span class="comment"># Then try starting the server again.</span>
+<span class="comment"># If specific packages are missing:</span>
+<span class="cmd">pip install -r requirements.txt</span></pre>
+
+
+<!-- ══════════════════════════════ SECTION 9 ══════════════════════════════ -->
+<h2><span class="num">9</span> File & Directory Reference</h2>
+
+<table>
+  <tr>
+    <th>Path</th>
+    <th>What It Contains</th>
+  </tr>
+  <tr>
+    <td><code>D:\code\ragixai\</code></td>
+    <td>Project root — run all commands from here</td>
+  </tr>
+  <tr>
+    <td><code>backend\</code></td>
+    <td>FastAPI server, RAG pipeline, API routes</td>
+  </tr>
+  <tr>
+    <td><code>frontend\index.html</code></td>
+    <td>Chat UI (served at /chat/)</td>
+  </tr>
+  <tr>
+    <td><code>scripts\</code></td>
+    <td>CLI tools for ingest, chunk, index, query, evaluate</td>
+  </tr>
+  <tr>
+    <td><code>data\raw\edgar\</code></td>
+    <td>Downloaded SEC 10-K filings (text files)</td>
+  </tr>
+  <tr>
+    <td><code>data\processed\chunks\</code></td>
+    <td>Chunked documents (JSONL)</td>
+  </tr>
+  <tr>
+    <td><code>data\chroma_db\</code></td>
+    <td>ChromaDB vector store — do NOT delete unless resetting</td>
+  </tr>
+  <tr>
+    <td><code>.env</code></td>
+    <td>Configuration (model names, paths, API keys)</td>
+  </tr>
+  <tr>
+    <td><code>requirements.txt</code></td>
+    <td>Python package list</td>
+  </tr>
+  <tr>
+    <td><code>D:\envs\ragixai\</code></td>
+    <td>Conda Python environment (1.7GB)</td>
+  </tr>
+</table>
+
+
+<!-- ══════════════════════════════ SUMMARY ══════════════════════════════ -->
+<hr>
+
+<h2><span class="num" style="background:#2ecc71;">✓</span> Quick Reference — Current Working State</h2>
+
+<table>
+  <tr><th>Component</th><th>Status</th><th>Details</th></tr>
+  <tr><td>Ollama</td><td>✓ Running</td><td>Windows service, auto-starts on boot</td></tr>
+  <tr><td>LLM Model</td><td>✓ Downloaded</td><td>llama3.2:1b (1.3 GB, GPU-accelerated)</td></tr>
+  <tr><td>Python Env</td><td>✓ Ready</td><td>D:\envs\ragixai — all packages installed</td></tr>
+  <tr><td>ChromaDB</td><td>✓ Indexed</td><td>680 documents (AAPL + MSFT 10-Ks, 2024–2025)</td></tr>
+  <tr><td>FastAPI Server</td><td>Manual start</td><td>Run uvicorn command each session</td></tr>
+  <tr><td>Chat UI</td><td>Auto (via server)</td><td>http://localhost:8000/chat/</td></tr>
+</table>
+
+<div class="footer">
+  RAGixAI · SEC EDGAR Financial RAG System · Generated May 2026<br>
+  To print as PDF: File → Print → Save as PDF (set paper to A4, enable Background graphics)
+</div>
+
+</body>
+</html>

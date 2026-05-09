@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>RAGixAI — Implementation Plan</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono&display=swap');
+  :root {
+    --bg: #0D0D1A; --card: #16182A; --border: #2A2D45;
+    --purple: #7C3AED; --purpleL: #A78BFA;
+    --cyan: #06B6D4; --emerald: #10B981; --amber: #F59E0B; --coral: #F43F5E;
+    --white: #FFFFFF; --gray: #9CA3AF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--white); font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.7; padding: 48px; max-width: 960px; margin: 0 auto; }
+  @media print {
+    body { background: white; color: #111; padding: 20px; }
+    .header-bar { background: linear-gradient(90deg, #7C3AED, #3B82F6, #06B6D4) !important; }
+    table { border-collapse: collapse; }
+    pre, code { background: #f3f4f6 !important; color: #111 !important; }
+    th { background: #e5e7eb !important; color: #111 !important; }
+    td { color: #333 !important; }
+    h1,h2,h3 { color: #111 !important; }
+    p, li { color: #333 !important; }
+    .tag { background: #e5e7eb !important; color: #7C3AED !important; }
+  }
+
+  .header-bar { height: 6px; background: linear-gradient(90deg, var(--purple), #3B82F6, var(--cyan)); border-radius: 3px; margin-bottom: 40px; }
+  .title-section { margin-bottom: 40px; }
+  .tag { display: inline-block; background: rgba(124,58,237,0.15); color: var(--purpleL); font-size: 11px; font-weight: 700; letter-spacing: 2px; padding: 4px 12px; border-radius: 100px; margin-bottom: 12px; text-transform: uppercase; }
+  h1 { font-size: 36px; font-weight: 700; color: var(--purpleL); margin-bottom: 8px; }
+  .subtitle { color: var(--gray); font-size: 15px; }
+
+  h2 { font-size: 20px; font-weight: 700; color: var(--purpleL); margin: 40px 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 15px; font-weight: 600; color: var(--cyan); margin: 24px 0 10px; }
+  p { color: var(--gray); margin-bottom: 12px; }
+
+  ul, ol { padding-left: 20px; margin-bottom: 14px; }
+  li { color: var(--gray); margin-bottom: 5px; }
+  strong { color: var(--white); }
+
+  pre { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 20px; overflow-x: auto; margin: 16px 0; }
+  code { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: #93C5FD; }
+  p code, li code { background: rgba(167,139,250,0.12); color: var(--purpleL); padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 16px 0 24px; }
+  th { background: #1E1B3A; color: var(--purpleL); font-weight: 700; font-size: 12px; padding: 10px 14px; text-align: left; border: 1px solid var(--border); }
+  td { padding: 10px 14px; border: 1px solid var(--border); color: var(--gray); font-size: 13px; }
+  tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+  tr:hover td { background: rgba(124,58,237,0.06); }
+  td strong { color: var(--emerald); }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin: 16px 0; }
+  .card-purple { border-color: var(--purpleL); }
+  .card-cyan { border-color: var(--cyan); }
+  .card-emerald { border-color: var(--emerald); }
+
+  .arch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 16px 0; }
+  .arch-item { background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--purple); border-radius: 6px; padding: 12px 16px; }
+  .arch-item .label { font-size: 11px; font-weight: 700; color: var(--cyan); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .arch-item .value { color: var(--white); font-size: 13px; }
+
+  .step { display: flex; gap: 14px; margin-bottom: 12px; align-items: flex-start; }
+  .step-num { min-width: 28px; height: 28px; background: var(--purple); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+  .step-text { color: var(--gray); padding-top: 4px; }
+
+  .footer-bar { height: 6px; background: linear-gradient(90deg, var(--purple), #3B82F6, var(--cyan)); border-radius: 3px; margin-top: 60px; }
+  .footer-note { text-align: center; color: var(--gray); font-size: 12px; margin-top: 16px; }
+</style>
+</head>
+<body>
+<div class="header-bar"></div>
+
+<div class="title-section">
+  <div class="tag">Capstone Project · 2025–2026</div>
+  <h1>RAGixAI — Implementation Plan</h1>
+  <p class="subtitle">End-to-end RAG system for SEC EDGAR financial intelligence · Generated 2026-05-01</p>
+</div>
+
+<h2>Context</h2>
+<p>The repo currently contains only a static documentation website and PPTX generator — no actual backend code exists. We are building the full RAG system from scratch: a Python FastAPI backend (the RAG engine) + a new <code>chat.html</code> page (the chat UI) that fits the existing dark glass-morphism design. The system answers SEC financial queries by retrieving from ingested EDGAR filings stored in a local ChromaDB vector store.</p>
+
+<h2>Architecture Decisions</h2>
+<div class="arch-grid">
+  <div class="arch-item"><div class="label">Server</div><div class="value">One FastAPI server (port 8000) — serves both <code>/api/*</code> and <code>/chat</code> static UI</div></div>
+  <div class="arch-item"><div class="label">LLM</div><div class="value">Ollama — fully local, no API key needed (Llama 3.2 / Mistral)</div></div>
+  <div class="arch-item"><div class="label">Embeddings</div><div class="value">sentence-transformers/all-MiniLM-L6-v2 (local, free) · Cohere v3 optional</div></div>
+  <div class="arch-item"><div class="label">Vector Store</div><div class="value">ChromaDB — disk persistence at <code>data/chroma_db/</code></div></div>
+  <div class="arch-item"><div class="label">Sparse Retrieval</div><div class="value">BM25 via rank_bm25 — in-memory, rebuilt from ChromaDB on startup</div></div>
+  <div class="arch-item"><div class="label">Reranker</div><div class="value">cross-encoder/ms-marco-MiniLM-L-6-v2 (local, ~85MB)</div></div>
+  <div class="arch-item"><div class="label">Initial Corpus</div><div class="value">10 companies (AAPL, MSFT, AMZN, GOOGL, META, NVDA, TSLA, JPM, BAC, WMT) via HuggingFace eloukas/edgar-corpus</div></div>
+  <div class="arch-item"><div class="label">Frontend</div><div class="value">Single <code>chat.html</code> matching dark glass-morphism site design — vanilla JS, no build step</div></div>
+</div>
+
+<h2>Directory Structure</h2>
+<pre><code>ragixai/
+├── backend/
+│   ├── main.py               ← FastAPI app: routers + StaticFiles mount
+│   ├── config.py             ← Pydantic Settings (all env vars)
+│   ├── api/                  ← health.py, chat.py, ingest.py, evaluate.py
+│   ├── pipeline/             ← ingest, chunker, embedder, indexer, retriever, reranker, generator
+│   ├── evaluation/           ← financebench_loader, ragas_eval, ab_test
+│   ├── models/               ← schemas.py, db.py (ChromaDB + BM25 singleton)
+│   └── utils/                ← timer.py
+├── frontend/
+│   └── chat.html             ← Chat UI
+├── data/
+│   ├── raw/edgar/            ← Downloaded 10-K text files
+│   ├── processed/chunks/     ← .jsonl chunk files
+│   └── chroma_db/            ← ChromaDB persistence
+├── scripts/                  ← run_ingest, run_chunk, run_build_index, run_query, run_evaluate, run_ab_test
+├── .claude/commands/         ← 8 Claude Code skill files
+├── requirements.txt
+├── .env.example
+└── CLAUDE.md</code></pre>
+
+<h2>API Endpoints</h2>
+<table>
+<tr><th>Method</th><th>Path</th><th>Purpose</th></tr>
+<tr><td>GET</td><td><code>/api/health</code></td><td>Liveness + chroma doc count + model info</td></tr>
+<tr><td>POST</td><td><code>/api/chat</code></td><td>Main RAG query: <code>{question, config}</code> → <code>{answer, citations, latency_ms}</code></td></tr>
+<tr><td>POST</td><td><code>/api/ingest</code></td><td>Trigger background ingest: <code>{companies, max_filings}</code></td></tr>
+<tr><td>GET</td><td><code>/api/ingest/status/{job_id}</code></td><td>Poll ingest progress</td></tr>
+<tr><td>POST</td><td><code>/api/evaluate</code></td><td>Run RAGAS eval → 6 metrics</td></tr>
+<tr><td>POST</td><td><code>/api/ab-test</code></td><td>Run all 7 configs → comparison table</td></tr>
+</table>
+
+<h2>Data Flow</h2>
+<h3>Offline Pipeline (run once)</h3>
+<pre><code>HuggingFace eloukas/edgar-corpus (streaming, 10 companies)
+  → pipeline/ingest.py    → data/raw/edgar/*.txt
+  → pipeline/chunker.py   → data/processed/chunks/*.jsonl
+  → pipeline/embedder.py  → vectors in memory
+  → pipeline/indexer.py   → ChromaDB (data/chroma_db/)</code></pre>
+<p>Embeddings are created <strong>once at ingest time</strong> and stored. BM25 index rebuilt from ChromaDB on startup (~2s for 10 companies).</p>
+
+<h3>Online Pipeline (per query, ~2–3s)</h3>
+<pre><code>User question
+  → embed query (1 forward pass, ~50ms)
+  → Dense ANN (ChromaDB) + BM25 → RRF merge → top-20 chunks
+  → CrossEncoder rerank → top-5 chunks
+  → Ollama (local LLM) + prompt template → answer + [1][2][3] citations
+  → JSON response to chat.html</code></pre>
+
+<h2>7 A/B Test Configurations</h2>
+<table>
+<tr><th>Config</th><th>Embedding</th><th>Retrieval</th><th>Reranker</th><th>Notes</th></tr>
+<tr><td>A</td><td>MiniLM</td><td>Dense only</td><td>None</td><td>Baseline</td></tr>
+<tr><td>B</td><td>MiniLM</td><td>BM25 only</td><td>None</td><td>Sparse only</td></tr>
+<tr><td>C</td><td>MiniLM</td><td>Hybrid</td><td>None</td><td>Hybrid, no rerank</td></tr>
+<tr><td>D</td><td>MiniLM</td><td>Hybrid</td><td>CrossEncoder</td><td>Free-tier winner</td></tr>
+<tr><td><strong>E</strong></td><td><strong>Cohere v3</strong></td><td><strong>Hybrid</strong></td><td><strong>CrossEncoder</strong></td><td><strong>Optimal (needs Cohere key)</strong></td></tr>
+<tr><td>F</td><td>MiniLM</td><td>Hybrid</td><td>CrossEncoder</td><td>LLM comparison baseline</td></tr>
+<tr><td>G</td><td>MiniLM</td><td>Dense</td><td>CrossEncoder</td><td>Dense + rerank</td></tr>
+</table>
+
+<h2>Evaluation (RAGAS + LLM-as-Judge)</h2>
+<table>
+<tr><th>Dataset</th><th>Size</th><th>Purpose</th></tr>
+<tr><td>FinanceBench (PatronusAI/financebench)</td><td>150 QA pairs</td><td>Gold standard — expert-annotated from real SEC filings</td></tr>
+<tr><td>RAGAS Testset</td><td>~100 QA pairs</td><td>Auto-generated from ingested EDGAR docs</td></tr>
+</table>
+<p>RAGAS uses an LLM internally as judge (scores Faithfulness &amp; Answer Relevancy). Configured to use Ollama locally — no external API needed. Six metrics tracked: Faithfulness, Answer Relevancy, Context Precision, Context Recall, Answer Correctness, Response Latency (p95).</p>
+
+<h2>Claude Code Skills</h2>
+<table>
+<tr><th>Skill</th><th>Script</th><th>What it does</th></tr>
+<tr><td><code>/ingest-docs</code></td><td>run_ingest.py</td><td>Download 10 companies' 10-Ks from HuggingFace</td></tr>
+<tr><td><code>/chunk-docs</code></td><td>run_chunk.py</td><td>Chunk all raw docs (default: recursive)</td></tr>
+<tr><td><code>/embed-docs</code></td><td>(via build-index)</td><td>Embed chunks + upsert into ChromaDB</td></tr>
+<tr><td><code>/build-index</code></td><td>run_build_index.py</td><td>Build/rebuild ChromaDB vector collection</td></tr>
+<tr><td><code>/query-rag</code></td><td>run_query.py</td><td>One-off CLI query with printed citations</td></tr>
+<tr><td><code>/evaluate-rag</code></td><td>run_evaluate.py</td><td>Run RAGAS on FinanceBench (6 metrics)</td></tr>
+<tr><td><code>/ab-test-configs</code></td><td>run_ab_test.py</td><td>Compare all 7 configs, print matrix</td></tr>
+<tr><td><code>/deploy-local</code></td><td>uvicorn</td><td>Start FastAPI server on localhost:8000</td></tr>
+</table>
+
+<h2>Build Order</h2>
+<div class="card card-purple">
+  <div class="step"><div class="step-num">1</div><div class="step-text"><strong>Foundation</strong> — requirements.txt, .env.example, CLAUDE.md, config.py, schemas.py, db.py</div></div>
+  <div class="step"><div class="step-num">2</div><div class="step-text"><strong>Offline Pipeline</strong> — ingest.py → chunker.py → embedder.py → indexer.py + CLI scripts</div></div>
+  <div class="step"><div class="step-num">3</div><div class="step-text"><strong>Online Pipeline</strong> — retriever.py (dense+BM25+RRF) → reranker.py → generator.py + run_query.py</div></div>
+  <div class="step"><div class="step-num">4</div><div class="step-text"><strong>API Layer</strong> — health.py → chat.py → ingest.py → evaluate.py → main.py</div></div>
+  <div class="step"><div class="step-num">5</div><div class="step-text"><strong>Chat UI</strong> — frontend/chat.html (dark glass-morphism, sidebar + config dropdown + citations)</div></div>
+  <div class="step"><div class="step-num">6</div><div class="step-text"><strong>Evaluation</strong> — financebench_loader.py → ragas_eval.py → ab_test.py + eval scripts</div></div>
+  <div class="step"><div class="step-num">7</div><div class="step-text"><strong>Skills</strong> — 8 × .claude/commands/*.md slash command files</div></div>
+</div>
+
+<h2>Pre-requisites</h2>
+<ol>
+  <li>Install <strong>Ollama</strong> from <code>https://ollama.com</code> → run <code>ollama pull llama3.2</code></li>
+  <li>Create a virtual env: <code>python -m venv venv && venv\Scripts\activate</code></li>
+  <li>Install deps: <code>pip install -r requirements.txt</code></li>
+  <li>Copy <code>.env.example</code> to <code>.env</code>, set <code>OLLAMA_MODEL=llama3.2</code></li>
+  <li>Run <code>/ingest-docs</code> then <code>/build-index</code> before first query</li>
+  <li><em>(Optional — Config E)</em> Add <code>COHERE_API_KEY</code> in <code>.env</code> — free tier at cohere.com</li>
+</ol>
+
+<h2>Verification Checklist</h2>
+<table>
+<tr><th>Check</th><th>Command / Action</th><th>Expected</th></tr>
+<tr><td>Index is built</td><td>GET /api/health</td><td><code>{"status":"ok","chroma_docs": N}</code></td></tr>
+<tr><td>CLI query works</td><td><code>python scripts/run_query.py --question "Apple FY2023 net sales?"</code></td><td>Answer + 5 citations printed</td></tr>
+<tr><td>Chat UI loads</td><td>Open <code>http://localhost:8000/chat</code></td><td>Dark chat UI, can send messages</td></tr>
+<tr><td>RAGAS eval runs</td><td><code>python scripts/run_evaluate.py --config config_d --n 20</code></td><td>Table of 6 metrics</td></tr>
+<tr><td>A/B test runs</td><td><code>python scripts/run_ab_test.py --n 10</code></td><td>7-config comparison table</td></tr>
+</table>
+
+<div class="footer-bar"></div>
+<p class="footer-note">RAGixAI — Capstone Project 2025–2026 · Built with Claude Code</p>
+</body>
+</html>
