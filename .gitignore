@@ -14,10 +14,12 @@ dist/
 build/
 *.egg
 
-# Data (large generated files — rebuild with scripts)
-data/chroma_db/
+# Data — raw filings not committed (too large, re-download with /ingest-docs)
 data/raw/
-data/processed/
+
+# Chunks committed to git (17 MB) — teammates skip download+chunking
+# ChromaDB committed via Git LFS (170 MB) — teammates skip the 60-min embedding build
+# data/processed/ and data/chroma_db/ are intentionally NOT ignored here
 
 # Logs
 *.log

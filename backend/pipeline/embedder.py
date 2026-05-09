@@ -27,11 +27,24 @@ class BaseEmbedder(ABC):
 
 class SentenceTransformerEmbedder(BaseEmbedder):
     def __init__(self, model_name: str | None = None):
+        import os
+        import torch
         from sentence_transformers import SentenceTransformer
+
+        # Avoid multi-process tokenizer workers — reduces Windows page-file pressure
+        os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
+        # Prevent torch from pre-allocating a large CUDA cache when only CPU is needed
+        os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "max_split_size_mb:128")
+
         name = model_name or settings.embed_model_name
         logger.info(f"Loading SentenceTransformer: {name}")
-        self._model = SentenceTransformer(name)
-        self._dim = self._model.get_sentence_embedding_dimension()
+        self._model = SentenceTransformer(
+            name,
+            device="cpu",
+            model_kwargs={"torch_dtype": torch.float32},
+        )
+        get_dim = getattr(self._model, "get_embedding_dimension", None) or self._model.get_sentence_embedding_dimension
+        self._dim = get_dim()
 
     def embed_documents(self, texts: list[str]) -> list[list[float]]:
         vecs = self._model.encode(texts, batch_size=32, show_progress_bar=False, normalize_embeddings=True)
