@@ -181,17 +181,42 @@
     <!-- ══════ OVERVIEW ══════ -->
     <div id="panel-overview" class="panel active">
       <h2>System Overview</h2>
-      <p>RAGixAI is a <strong>local-first Retrieval-Augmented Generation system</strong> over SEC EDGAR financial filings. It takes natural-language questions about public company financials and returns precise, cited answers grounded exclusively in the retrieved filing text — not the model's training data.</p>
+      <p>RAGixAI is a <strong>local-first Retrieval-Augmented Generation system</strong> over SEC EDGAR financial filings. It takes natural-language questions about public company financials and returns precise, cited answers grounded exclusively in the retrieved filing text — not the model's training data. The system runs entirely on consumer hardware: a laptop with a 2 GB GPU processes queries end-to-end with no cloud API dependencies.</p>
 
       <h3>Why RAG, not fine-tuning?</h3>
       <div class="why"><div class="why-label">Design Rationale</div>
-        <p>SEC filings are published every quarter. Fine-tuning a model requires re-running full training whenever data changes — expensive (requires A100-class GPUs) and slow (days of training). RAG separates the knowledge store from the model: adding new filings means updating ChromaDB, not retraining anything. Fine-tuned models also hallucinate financial numbers with high confidence because they interpolate training data; RAG anchors every answer to retrieved text and enforces citation, making hallucinations detectable and refutable.</p>
+        <p><strong>Knowledge currency:</strong> SEC filings are published quarterly. A fine-tuned model's knowledge cutoff is its training date — adding the latest 10-Q requires re-running GPU training (days, A100-class hardware, thousands of dollars). RAG's knowledge store is a ChromaDB collection: adding a new filing takes 5 minutes of ingest + embed. The model never changes; only the corpus does.<br/><br/>
+        <strong>Hallucination control:</strong> A fine-tuned model "knows" financial data from training and can generate plausible-sounding but wrong numbers with high confidence — it interpolates from the training distribution. RAG physically cannot generate a fact that isn't in a retrieved chunk, and every claim is anchored to a cited source that can be audited. For financial data (where an incorrect revenue figure has legal and investment consequences), this is essential.<br/><br/>
+        <strong>No GPU training required:</strong> Fine-tuning even a small 7B model requires multi-day runs on A100s. RAG requires only inference — the smaller task that fits on consumer hardware.</p>
       </div>
 
       <h3>Why local-first?</h3>
       <div class="why"><div class="why-label">Design Rationale</div>
-        <p>Financial analysis workflows often involve sensitive internal context even when the filings themselves are public. Running entirely on-device eliminates data egress, removes per-token API costs, and avoids internet dependency during inference. The entire stack (embedder, reranker, generator, vector store) runs on consumer hardware — a laptop GPU with 2 GB VRAM is sufficient.</p>
+        <p><strong>Data privacy:</strong> Financial analysts often annotate queries with internal context ("what are the risk factors for AAPL relative to our portfolio position?"). Sending this to a cloud API violates data governance policies in many financial institutions. Running entirely on-device means no data leaves the machine.<br/><br/>
+        <strong>Cost:</strong> The evaluation harness runs 7 configs × 20 QA pairs = 140 calls in a single test run. At GPT-4 pricing (~$0.03/call), that is $4.20 per run. With unlimited local Ollama calls, each run costs $0. At development velocity (dozens of evaluation runs), this compounds significantly.<br/><br/>
+        <strong>Latency:</strong> Cloud API round-trips add 500ms–2s of network latency. Local inference via Ollama on a GPU adds ~1s of compute latency with no network jitter. For an interactive chat UI, local inference feels more responsive despite the smaller model.</p>
       </div>
+
+      <h3>Request Flow — What Happens on Every Query</h3>
+      <p>A single user question triggers the following sequence. Each stage is a separate module with no shared state — failures are localized and the pipeline can be diagnosed stage by stage.</p>
+      <table>
+        <thead><tr><th>#</th><th>Stage</th><th>Input</th><th>Output</th><th>Time</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td><strong>Guardrail (topic)</strong></td><td>Raw question string</td><td>PASS or HTTP 400 with reason</td><td>&lt;1ms</td></tr>
+          <tr><td>2</td><td><strong>Guardrail (RBAC scope)</strong></td><td>Question + allowed_tickers from API key</td><td>PASS or HTTP 403 with denied tickers listed</td><td>&lt;1ms</td></tr>
+          <tr><td>3</td><td><strong>Embed query</strong></td><td>Question string</td><td>384-dim float32 vector</td><td>~30ms</td></tr>
+          <tr><td>4</td><td><strong>Dense retrieve</strong></td><td>Query vector + ticker filter</td><td>Top-20 chunks (HNSW lookup)</td><td>~50ms</td></tr>
+          <tr><td>5</td><td><strong>BM25 retrieve</strong></td><td>Tokenized query + ticker filter</td><td>Top-20 chunks (linear scan)</td><td>~10ms</td></tr>
+          <tr><td>6</td><td><strong>RRF fusion</strong></td><td>Two ranked lists</td><td>Top-20 merged chunks</td><td>&lt;1ms</td></tr>
+          <tr><td>7</td><td><strong>Cross-encoder rerank</strong></td><td>20 (query, chunk) pairs</td><td>Top-5 chunks by joint relevance score</td><td>~200ms</td></tr>
+          <tr><td>8</td><td><strong>Post-retrieval ticker filter</strong></td><td>5 chunks + allowed_tickers</td><td>5 chunks (out-of-scope companies removed)</td><td>&lt;1ms</td></tr>
+          <tr><td>9</td><td><strong>Prompt construction</strong></td><td>5 chunks + question</td><td>Formatted prompt (~2,000 tokens)</td><td>&lt;1ms</td></tr>
+          <tr><td>10</td><td><strong>Ollama generate</strong></td><td>Prompt</td><td>Raw LLM response with [N] citations</td><td>~1,000ms</td></tr>
+          <tr><td>11</td><td><strong>Normalize + cite</strong></td><td>Raw response</td><td>Final answer string + ScoredChunk citations</td><td>&lt;1ms</td></tr>
+          <tr><td>12</td><td><strong>History write</strong></td><td>Question + answer + metadata</td><td>SQLite row (async)</td><td>~2ms</td></tr>
+        </tbody>
+      </table>
+      <p>Total p95 latency target: <strong>&lt;3,000ms</strong> end-to-end. The generator (Ollama, ~1s) and embedder (~30ms) dominate. The reranker adds ~200ms — justified because it raises answer_correctness by 5–8 percentage points over reranker-free configs in A/B testing.</p>
 
       <h3>Full Pipeline</h3>
       <div class="flow">
@@ -205,16 +230,29 @@
         <div class="pipe a">Guardrails</div><div class="arrow">→</div>
         <div class="pipe r">FastAPI / Chat UI</div>
       </div>
+      <p><strong>Offline stages</strong> (run once, or when corpus changes): Ingest → Chunk → Embed + Index. These produce the ChromaDB + BM25 indexes that persist on disk and are loaded at server startup.<br/>
+      <strong>Online stages</strong> (run per query): Guardrails → Dense Retrieve + BM25 Retrieve → RRF Fusion → Rerank → Generate → Normalize.</p>
 
       <h3>Technology Stack</h3>
       <div class="cards">
-        <div class="card purple"><div class="card-title">LLM — Generation</div><div class="card-body">Ollama · llama3.2 (3B params)<br/>Temp 0.1 · 250 token max<br/>Local GPU inference (MX450)</div></div>
-        <div class="card cyan"><div class="card-title">Embeddings</div><div class="card-body">sentence-transformers/all-MiniLM-L6-v2<br/>22M params · 384 dimensions · CPU</div></div>
-        <div class="card emerald"><div class="card-title">Vector Store</div><div class="card-body">ChromaDB (PersistentClient)<br/>HNSW index · cosine similarity<br/>8,976 chunks · ragixai_local</div></div>
-        <div class="card amber"><div class="card-title">Sparse Index</div><div class="card-body">BM25Okapi (rank_bm25)<br/>In-memory · built from ChromaDB<br/>Fused with dense via RRF (k=60)</div></div>
-        <div class="card coral"><div class="card-title">Reranker</div><div class="card-body">cross-encoder/ms-marco-MiniLM-L-6-v2<br/>85 MB · 6-layer BERT · CPU<br/>Top-20 candidates → top-5</div></div>
-        <div class="card purple"><div class="card-title">API &amp; Framework</div><div class="card-body">FastAPI + Pydantic v2<br/>6 routers · Bearer token RBAC<br/>SQLite session history</div></div>
+        <div class="card purple"><div class="card-title">LLM — Generation</div><div class="card-body">Ollama · llama3.2 (3B params, 4-bit quant)<br/>Temp 0.1 · 250 token max · num_predict=250<br/>Local GPU inference (MX450, 2 GB VRAM)<br/>~1.8 GB VRAM footprint at 4-bit</div></div>
+        <div class="card cyan"><div class="card-title">Embeddings</div><div class="card-body">sentence-transformers/all-MiniLM-L6-v2<br/>22M params · 384 dimensions · CPU<br/>Batch size 32 · ~5s per batch at build time<br/>model_kwargs torch_dtype fix for Windows mmap</div></div>
+        <div class="card emerald"><div class="card-title">Vector Store</div><div class="card-body">ChromaDB 0.5.x (PersistentClient)<br/>HNSW index · cosine distance metric<br/>8,976 chunks · collection: ragixai_local<br/>Persisted to data/chroma_db/chroma.sqlite3</div></div>
+        <div class="card amber"><div class="card-title">Sparse Index</div><div class="card-body">BM25Okapi (rank_bm25 library)<br/>In-memory · rebuilt on every server start<br/>Fused with dense via RRF (k=60)<br/>Weights: 0.6 dense + 0.4 BM25</div></div>
+        <div class="card coral"><div class="card-title">Reranker</div><div class="card-body">cross-encoder/ms-marco-MiniLM-L-6-v2<br/>85 MB · 6-layer BERT · CPU inference<br/>Top-20 candidates → top-5 · ~200ms<br/>Lazy-loaded (singleton, first query only)</div></div>
+        <div class="card purple"><div class="card-title">API &amp; Framework</div><div class="card-body">FastAPI 0.110+ + Pydantic v2<br/>6 routers · Bearer token RBAC · CORS<br/>SQLite session history (aiosqlite)<br/>Static file serving for Chat UI + Docs</div></div>
       </div>
+
+      <h3>Hardware Requirements</h3>
+      <table>
+        <thead><tr><th>Component</th><th>Device</th><th>Memory Used</th><th>Why That Device</th></tr></thead>
+        <tbody>
+          <tr><td>llama3.2 (3B, 4-bit)</td><td>GPU (MX450)</td><td>~1.8 GB VRAM</td><td>Inference speed — GPU is ~5× faster than CPU for attention computation</td></tr>
+          <tr><td>all-MiniLM-L6-v2 embedder</td><td>CPU</td><td>~90 MB RAM</td><td>VRAM already allocated to Ollama; CPU embedding adds ~30ms which is acceptable</td></tr>
+          <tr><td>CrossEncoder reranker</td><td>CPU</td><td>~85 MB RAM</td><td>Same reason — keeps VRAM for Ollama; 200ms CPU rerank vs 1s generator makes this the right trade-off</td></tr>
+          <tr><td>ChromaDB HNSW + BM25</td><td>RAM</td><td>~50 MB RAM</td><td>Both indexes fit easily in RAM; ChromaDB persists to SQLite, BM25 is rebuilt in memory on start</td></tr>
+        </tbody>
+      </table>
 
       <h3>Corpus</h3>
       <div class="metrics">
@@ -225,18 +263,29 @@
         <div class="metric"><div class="metric-val">2020–26</div><div class="metric-label">Year Range</div></div>
       </div>
       <table>
-        <thead><tr><th>Ticker</th><th>Company</th><th>Filing Types</th></tr></thead>
+        <thead><tr><th>Ticker</th><th>Company</th><th>Filing Types</th><th>CIK</th><th>Avg Chunks / Filing</th></tr></thead>
         <tbody>
-          <tr><td><strong>AAPL</strong></td><td>Apple Inc.</td><td>10-K, 10-Q, 8-K</td></tr>
-          <tr><td><strong>MSFT</strong></td><td>Microsoft Corporation</td><td>10-K, 10-Q, 8-K</td></tr>
-          <tr><td><strong>AMZN</strong></td><td>Amazon.com Inc.</td><td>10-K, 10-Q, 8-K</td></tr>
-          <tr><td><strong>GOOGL</strong></td><td>Alphabet Inc.</td><td>10-K, 10-Q, 8-K</td></tr>
-          <tr><td><strong>META</strong></td><td>Meta Platforms Inc.</td><td>10-K, 10-Q, 8-K</td></tr>
-          <tr><td><strong>NVDA</strong></td><td>NVIDIA Corporation</td><td>10-K, 10-Q, 8-K</td></tr>
-          <tr><td><strong>TSLA</strong></td><td>Tesla Inc.</td><td>10-K, 10-Q, 8-K</td></tr>
-          <tr><td><strong>JPM</strong></td><td>JPMorgan Chase &amp; Co.</td><td>10-K, 10-Q, 8-K</td></tr>
-          <tr><td><strong>BAC</strong></td><td>Bank of America Corp.</td><td>10-K, 10-Q, 8-K</td></tr>
-          <tr><td><strong>WMT</strong></td><td>Walmart Inc.</td><td>10-K, 10-Q, 8-K</td></tr>
+          <tr><td><strong>AAPL</strong></td><td>Apple Inc.</td><td>10-K, 10-Q, 8-K</td><td>320193</td><td>~220</td></tr>
+          <tr><td><strong>MSFT</strong></td><td>Microsoft Corporation</td><td>10-K, 10-Q, 8-K</td><td>789019</td><td>~210</td></tr>
+          <tr><td><strong>AMZN</strong></td><td>Amazon.com Inc.</td><td>10-K, 10-Q, 8-K</td><td>1018724</td><td>~240</td></tr>
+          <tr><td><strong>GOOGL</strong></td><td>Alphabet Inc.</td><td>10-K, 10-Q, 8-K</td><td>1652044</td><td>~200</td></tr>
+          <tr><td><strong>META</strong></td><td>Meta Platforms Inc.</td><td>10-K, 10-Q, 8-K</td><td>1326801</td><td>~190</td></tr>
+          <tr><td><strong>NVDA</strong></td><td>NVIDIA Corporation</td><td>10-K, 10-Q, 8-K</td><td>1045810</td><td>~185</td></tr>
+          <tr><td><strong>TSLA</strong></td><td>Tesla Inc.</td><td>10-K, 10-Q, 8-K</td><td>1318605</td><td>~175</td></tr>
+          <tr><td><strong>JPM</strong></td><td>JPMorgan Chase &amp; Co.</td><td>10-K, 10-Q, 8-K</td><td>19617</td><td>~230</td></tr>
+          <tr><td><strong>BAC</strong></td><td>Bank of America Corp.</td><td>10-K, 10-Q, 8-K</td><td>70858</td><td>~200</td></tr>
+          <tr><td><strong>WMT</strong></td><td>Walmart Inc.</td><td>10-K, 10-Q, 8-K</td><td>104169</td><td>~180</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Evaluation Infrastructure</h3>
+      <p>RAGixAI has a two-track evaluation framework that runs over the FinanceBench gold dataset (150 expert-annotated QA pairs from real SEC filings, 2020–2023).</p>
+      <table>
+        <thead><tr><th>Track</th><th>Tool</th><th>What It Measures</th><th>Output Type</th></tr></thead>
+        <tbody>
+          <tr><td>Automated metrics</td><td>RAGAS 0.4.3</td><td>faithfulness, answer_relevancy, context_precision, context_recall, answer_correctness</td><td>Float scores 0–1 (no explanations)</td></tr>
+          <tr><td>Interpretable scoring</td><td>LLM-as-Judge (Ollama)</td><td>faithfulness, completeness, citation_quality, hallucination_free</td><td>Score + one-sentence reasoning per dimension</td></tr>
+          <tr><td>Configuration comparison</td><td>A/B test harness</td><td>All 7 retrieval configs on the same sample</td><td>Ranked matrix + composite winner</td></tr>
         </tbody>
       </table>
     </div>
@@ -244,97 +293,201 @@
     <!-- ══════ INGEST ══════ -->
     <div id="panel-ingest" class="panel">
       <h2>Stage 1 — Data Ingestion</h2>
-      <div class="files"><span class="fbadge">backend/pipeline/ingest.py</span><span class="fbadge">scripts/run_ingest.py</span></div>
-      <p>The ingestion layer downloads SEC regulatory filings directly from the SEC EDGAR REST API, extracts plain text, and writes each document with structured metadata to disk.</p>
+      <div class="files"><span class="fbadge">backend/pipeline/ingest.py</span><span class="fbadge">scripts/run_ingest.py</span><span class="fbadge">data/raw/edgar/</span><span class="fbadge">data/raw/edgar/manifest.json</span></div>
+      <p>The ingestion layer downloads SEC regulatory filings directly from the official SEC EDGAR REST API, strips HTML, normalizes whitespace, and writes structured plain-text documents to disk. This is the first and only stage with a network dependency — all downstream stages work from local files.</p>
 
       <h3>What is SEC EDGAR?</h3>
-      <p>EDGAR (Electronic Data Gathering, Analysis, and Retrieval) is the SEC's public filing database. Every US-listed public company must submit financial disclosures here. The API at <code>data.sec.gov</code> provides programmatic access to filing indices and full document text with no authentication required.</p>
+      <p>EDGAR (Electronic Data Gathering, Analysis, and Retrieval) is the SEC's mandatory public filing database. Every US-listed public company must submit quarterly and annual reports here within defined deadlines. The REST API at <code>data.sec.gov</code> provides programmatic access to filing metadata and full document text with no authentication, no API key, and no rate limit beyond 10 requests/second. The SEC requires only a descriptive User-Agent header identifying the application and a contact email.</p>
 
       <h3>Why the EDGAR API directly?</h3>
       <div class="why"><div class="why-label">Design Rationale</div>
-        <p><strong>Primary reason: freshness and completeness.</strong> HuggingFace financial datasets (e.g., FinancialPhraseBank, EDGAR-CORPUS) are static snapshots. New quarterly filings never appear in them. Going directly to EDGAR means we can always fetch the latest 10-Q the day it is filed. It also gives us full document text — not excerpts — which is critical for retrieval coverage. The SEC's rate limit is 10 requests/second, well within what a batch ingest process needs.</p>
+        <p><strong>Freshness:</strong> Financial datasets on HuggingFace (EDGAR-CORPUS, FinancialPhraseBank, SEC-BERT corpora) are static snapshots frozen at a release date — they do not include filings after that date. Going directly to EDGAR allows ingesting a 10-Q the day it is filed. For an evaluation system that needs to match FinanceBench's 2020–2023 range exactly, controlling the exact filing scope is essential.<br/><br/>
+        <strong>Completeness:</strong> Pre-packaged datasets often extract only specific sections (Item 1, Item 7) or truncate large filings. The EDGAR API provides the full primary document — all sections, all footnotes, all tables — which is necessary for retrieval coverage of obscure financial line items.<br/><br/>
+        <strong>No licensing restrictions:</strong> EDGAR data is public domain under US government copyright exemption. HuggingFace datasets may carry additional license terms depending on how they were processed. Direct EDGAR access has no such ambiguity.</p>
       </div>
 
       <h3>Filing Types and Why Each Matters</h3>
       <table>
-        <thead><tr><th>Form</th><th>Filed</th><th>What It Contains</th><th>Why We Include It</th></tr></thead>
+        <thead><tr><th>Form</th><th>Filed</th><th>Typical Size</th><th>What It Contains</th><th>Why We Include It</th></tr></thead>
         <tbody>
-          <tr><td><strong>10-K</strong></td><td>Annually</td><td>Full-year financial statements, MD&amp;A, risk factors, business overview</td><td>Most comprehensive source of annual revenue, net income, EPS, segment data</td></tr>
-          <tr><td><strong>10-Q</strong></td><td>Quarterly</td><td>Unaudited quarterly financials, management commentary</td><td>Enables questions about specific quarters, seasonal trends, interim results</td></tr>
-          <tr><td><strong>8-K</strong></td><td>Material events</td><td>Earnings announcements, acquisitions, executive changes, guidance updates</td><td>Contains earnings guidance and press releases not in 10-K/10-Q</td></tr>
+          <tr><td><strong>10-K</strong></td><td>Annually (60–90 days after fiscal year end)</td><td>80–200 pages</td><td>Audited full-year financial statements (income statement, balance sheet, cash flow statement), MD&amp;A narrative, risk factors, business segment descriptions, executive compensation</td><td>Most comprehensive source of annual revenue, net income, EPS, operating margin, segment data, and management discussion — the primary source for FinanceBench questions</td></tr>
+          <tr><td><strong>10-Q</strong></td><td>Quarterly (40–45 days after quarter end)</td><td>30–80 pages</td><td>Unaudited quarterly financials, condensed balance sheet, management commentary on the quarter</td><td>Enables questions about specific quarters and sequential trends; critical for "Q3 FY2022 revenue" style questions</td></tr>
+          <tr><td><strong>8-K</strong></td><td>Within 4 business days of material event</td><td>5–20 pages</td><td>Earnings announcements, acquisition disclosures, executive leadership changes, guidance updates, dividend declarations</td><td>Contains earnings guidance and press release language not included in 10-K/10-Q; important for "guidance for fiscal 2024" questions</td></tr>
         </tbody>
       </table>
 
-      <h3>CIK Number Registry</h3>
-      <p>Every EDGAR filer has a unique Central Index Key (CIK). These are hardcoded in the ingester since they never change for an established company. The CIK is zero-padded to 10 digits for API calls.</p>
+      <h3>CIK Number Registry and API Authentication</h3>
+      <p>Every EDGAR filer has a unique Central Index Key (CIK) — a 1-to-10-digit number assigned at registration that never changes. The ingester hardcodes CIKs for all 10 tracked companies because they are stable identifiers that make the CIK lookup offline and instantaneous. For API calls, the CIK is zero-padded to 10 digits. The only authentication mechanism is a descriptive User-Agent header identifying the application:</p>
       <div class="code">TICKER_TO_CIK = {
     <span class="st">"AAPL"</span>: <span class="st">"320193"</span>,   <span class="st">"MSFT"</span>: <span class="st">"789019"</span>,   <span class="st">"AMZN"</span>: <span class="st">"1018724"</span>,
     <span class="st">"GOOGL"</span>: <span class="st">"1652044"</span>,  <span class="st">"META"</span>: <span class="st">"1326801"</span>,  <span class="st">"NVDA"</span>: <span class="st">"1045810"</span>,
     <span class="st">"TSLA"</span>: <span class="st">"1318605"</span>,  <span class="st">"JPM"</span>: <span class="st">"19617"</span>,    <span class="st">"BAC"</span>: <span class="st">"70858"</span>,
     <span class="st">"WMT"</span>: <span class="st">"104169"</span>,
 }
-<span class="cm"># Request header required by SEC — identifies the application and contact</span>
-EDGAR_HEADERS = {<span class="st">"User-Agent"</span>: <span class="st">"RAGixAI capstone murtazammb@gmail.com"</span>}</div>
+EDGAR_HEADERS = {
+    <span class="st">"User-Agent"</span>: <span class="st">"RAGixAI capstone murtazammb@gmail.com"</span>,
+    <span class="st">"Accept-Encoding"</span>: <span class="st">"gzip, deflate"</span>,
+}</div>
+      <p>The User-Agent is required by SEC policy — requests without it are blocked. The contact email allows the SEC to reach out if automated access patterns cause issues. This is the only "authentication" the API uses.</p>
 
-      <h3>Download Flow</h3>
-      <ol>
-        <li>Fetch <code>data.sec.gov/submissions/CIK{id}.json</code> — returns full filing history with form types, accession numbers, dates</li>
-        <li>Filter by form type (<code>10-K</code>, <code>10-Q</code>, <code>8-K</code>) and target year range</li>
-        <li>Fetch filing index from <code>sec.gov/Archives/edgar/data/{cik}/{accession}/</code></li>
-        <li>Extract the primary document (largest <code>.txt</code> or <code>.htm</code> file in the filing package)</li>
-        <li>Strip HTML tags, normalize whitespace, write to <code>data/raw/edgar/{TICKER}_{year}_{form}.txt</code></li>
-        <li>Append structured metadata to <code>data/raw/edgar/manifest.json</code> for downstream stages</li>
-      </ol>
+      <h3>Download Flow — Step by Step</h3>
+      <p>For each (ticker, target_years, max_filings) combination, the ingester executes a 6-step sequence:</p>
+      <div class="code"><span class="cm"># Step 1: Fetch filing index for the company</span>
+url = <span class="st">f"https://data.sec.gov/submissions/CIK{cik.zfill(10)}.json"</span>
+data = httpx.get(url, headers=EDGAR_HEADERS).json()
+<span class="cm"># Returns: {"name": "Apple Inc.", "filings": {"recent": {</span>
+<span class="cm">#   "form": ["10-K","10-Q","10-Q",...],</span>
+<span class="cm">#   "accessionNumber": ["0000320193-23-000077",...],</span>
+<span class="cm">#   "filingDate": ["2023-11-03",...],</span>
+<span class="cm">#   "primaryDocument": ["aapl-20230930.htm",...]</span>
+<span class="cm"># }}}</span>
 
-      <div class="warn"><p><strong>Rate limiting:</strong> A <code>time.sleep(0.15)</code> between requests keeps us at ~6 req/s — well below the 10 req/s SEC limit. Exceeding it causes a 429 block for ~15 minutes.</p></div>
+<span class="cm"># Step 2: Filter to target form types and years (max_filings limits per-form count)</span>
+filtered = [(acc, date, doc) <span class="kw">for</span> form, acc, date, doc <span class="kw">in</span> zip(forms, accs, dates, docs)
+            <span class="kw">if</span> form == <span class="st">"10-K"</span> <span class="kw">and</span> date[:4] <span class="kw">in</span> target_years][:max_filings]
+
+<span class="cm"># Step 3: Build the filing document URL from accession number</span>
+acc_clean = acc_number.replace(<span class="st">"-"</span>, <span class="st">""</span>)  <span class="cm"># "0000320193-23-000077" → "000032019323000077"</span>
+doc_url = <span class="st">f"https://www.sec.gov/Archives/edgar/data/{cik}/{acc_clean}/{primary_doc}"</span>
+
+<span class="cm"># Step 4: Skip if already downloaded (idempotent)</span>
+out_path = raw_dir / <span class="st">f"{ticker}_{year}_{form_type}.txt"</span>
+<span class="kw">if</span> out_path.exists():
+    logger.info(<span class="st">f"Skipping {out_path.name} — already downloaded"</span>)
+    <span class="kw">continue</span>
+
+<span class="cm"># Step 5: Fetch, strip HTML, normalize whitespace</span>
+html = httpx.get(doc_url, headers=EDGAR_HEADERS).text
+soup = BeautifulSoup(html, <span class="st">"lxml"</span>)
+text = soup.get_text(separator=<span class="st">"\n"</span>)
+text = re.sub(<span class="st">r"\n{3,}"</span>, <span class="st">"\n\n"</span>, text)  <span class="cm"># collapse excess blank lines</span>
+out_path.write_text(text, encoding=<span class="st">"utf-8"</span>)
+
+<span class="cm"># Step 6: Append metadata to manifest.json</span>
+manifest.append({<span class="st">"doc_id"</span>: <span class="st">f"{ticker}_{year}_{form}"</span>, <span class="st">"ticker"</span>: ticker,
+                  <span class="st">"company_name"</span>: company_name, <span class="st">"year"</span>: year,
+                  <span class="st">"form_type"</span>: form, <span class="st">"path"</span>: str(out_path)})</div>
+
+      <h3>Idempotency — Safe to Re-run</h3>
+      <p>Before fetching any document, the ingester checks if the output file already exists at <code>data/raw/edgar/{TICKER}_{year}_{form}.txt</code>. If it does, the download is skipped entirely — no HTTP request is made. This makes ingestion safe to re-run after a partial failure or network timeout: previously downloaded files are preserved and only missing files are fetched. Running <code>/ingest-docs</code> twice has the same result as running it once.</p>
+
+      <h3>The --max-filings Subtlety</h3>
+      <div class="warn"><p><strong>Critical parameter:</strong> The SEC EDGAR submissions endpoint returns the N most recently filed documents of any type, sorted by date descending, before any year filtering is applied. With <code>--max-filings 3</code> and <code>--years 2020</code>: the API returns the 3 most recent 10-K filings (2024, 2023, 2022), then the year filter discards all three because none match 2020. Result: 0 files downloaded, no error message. The fix is <code>--max-filings 10</code> — fetch enough filings that the year filter can find matches for historical years.</p></div>
+
+      <h3>Manifest Structure</h3>
+      <p>The <code>manifest.json</code> file is the handoff artifact between ingestion and chunking. It is a JSON array where each entry describes one downloaded filing. The chunker reads this file to find which files to process and what metadata to attach to each chunk.</p>
+      <div class="code">[
+  {
+    <span class="st">"doc_id"</span>: <span class="st">"AAPL_2023_10-K"</span>,
+    <span class="st">"ticker"</span>: <span class="st">"AAPL"</span>,
+    <span class="st">"company_name"</span>: <span class="st">"Apple Inc."</span>,
+    <span class="st">"year"</span>: <span class="num">2023</span>,
+    <span class="st">"form_type"</span>: <span class="st">"10-K"</span>,
+    <span class="st">"path"</span>: <span class="st">"data/raw/edgar/AAPL_2023_10-K.txt"</span>
+  },
+  ...
+]</div>
+
+      <h3>Rate Limiting</h3>
+      <div class="warn"><p>A <code>time.sleep(0.15)</code> delay runs between every HTTP request, limiting throughput to ~6 req/s — well below the 10 req/s SEC limit. Exceeding the limit causes a 429 "Too Many Requests" response and a 15-minute block. The sleep also reduces memory pressure during batch downloads by preventing simultaneous large HTML file parsing.</p></div>
 
       <h3>CLI</h3>
       <div class="code">C:\Users\murta\anaconda3\python.exe scripts/run_ingest.py \
     --companies AAPL,MSFT,AMZN,GOOGL,META,NVDA,TSLA,JPM,BAC,WMT \
     --years 2020,2021,2022,2023,2024 \
-    --max-filings 10</div>
+    --max-filings 10
+<span class="cm"># Output: data/raw/edgar/*.txt files + data/raw/edgar/manifest.json
+# Time: 5–15 min depending on network speed
+# Safe to re-run: existing files are skipped, only missing files fetched</span></div>
     </div>
 
     <!-- ══════ CHUNK ══════ -->
     <div id="panel-chunk" class="panel">
       <h2>Stage 2 — Document Chunking</h2>
-      <div class="files"><span class="fbadge">backend/pipeline/chunker.py</span><span class="fbadge">scripts/run_chunk.py</span></div>
-      <p>A 10-K filing is 80–200 pages of dense text — far too large to embed or include in any LLM context. Chunking splits documents into overlapping segments that are small enough to embed and retrieve individually while retaining enough context to answer a question.</p>
+      <div class="files"><span class="fbadge">backend/pipeline/chunker.py</span><span class="fbadge">scripts/run_chunk.py</span><span class="fbadge">data/processed/chunks/chunks_recursive.jsonl</span></div>
+      <p>A 10-K filing is 80–200 pages of dense text — roughly 40,000–100,000 tokens. This is far larger than any embedding model's input window (256 tokens for all-MiniLM-L6-v2) or any LLM's context budget (the generator uses 5 chunks × ~500 tokens = ~2,500 tokens for context). Chunking splits each document into overlapping segments that are individually embeddable and retrievable while retaining enough surrounding text to answer a question without needing adjacent chunks.</p>
 
       <h3>Why overlapping chunks?</h3>
       <div class="why"><div class="why-label">Design Rationale</div>
-        <p>A key financial fact (e.g., a revenue figure) often appears at a sentence boundary. Without overlap, that sentence might be split across two chunks and appear in neither fully. An overlap of 50 tokens ensures that any sentence near a boundary appears complete in at least one chunk, improving retrieval recall without duplicating much text.</p>
+        <p>Financial facts are sentence-spanning: "Net income for fiscal year 2023 was $96.9 billion, compared to $99.8 billion in fiscal year 2022, a decrease of 3%." This sentence must appear complete in at least one chunk for the retriever to find it. Without overlap, a chunk boundary might split this sentence — the figure $96.9 billion appears in one chunk, the comparison to $99.8 billion in the next, and a query about "year-over-year net income change" retrieves neither completely. With 50-token overlap, any sentence within 50 tokens of a chunk boundary appears in full in the adjacent chunk as well, ensuring complete sentence coverage.</p>
       </div>
 
-      <h3>Chunking Strategy: Recursive Character (default)</h3>
-      <p><strong>What it is:</strong> LangChain's <code>RecursiveCharacterTextSplitter</code> splits text using a priority hierarchy of separators: paragraph breaks (<code>\n\n</code>) first, then line breaks (<code>\n</code>), then sentence ends (<code>. </code>), then word boundaries (<code> </code>), and finally character-level splits as a last resort. It never splits mid-sentence unless there is no other option.</p>
-      <div class="why"><div class="why-label">Why Recursive over Fixed-Size or Semantic</div>
-        <p><strong>vs. Fixed-Size:</strong> Fixed-size chunking (splitting at exactly N tokens using tiktoken) frequently bisects sentences mid-word because it has no concept of linguistic structure. A financial sentence like "Net income increased 23% to $29.7 billion" split in half loses context from both halves. Recursive splitting preserves sentence and paragraph integrity whenever the text allows it.<br/><br/>
-        <strong>vs. Semantic:</strong> Semantic chunking embeds every sentence and inserts boundaries where cosine similarity drops below a threshold. It produces the most topically coherent chunks but is ~10× slower (requires a forward pass per sentence) and produces variable-length chunks that are harder to reason about. For a 9,000-chunk corpus built once, the extra build time is acceptable — but the unpredictable chunk sizes make retrieval less stable. Recursive chunking gives consistent ~512-token chunks with good linguistic quality.</p>
-      </div>
+      <h3>Three Chunking Strategies</h3>
+
+      <h4>Strategy 1: Recursive Character (Default)</h4>
+      <p><strong>What it is:</strong> LangChain's <code>RecursiveCharacterTextSplitter</code> tries each separator in priority order. If a paragraph boundary (<code>\n\n</code>) produces a chunk of acceptable size, it uses that. If the resulting piece is still too large, it recurses with the next separator (<code>\n</code>, then <code>". "</code>, then <code>" "</code>, then character-level as a last resort). It never splits mid-sentence unless there is genuinely no other option within the character budget.</p>
       <div class="code"><span class="kw">class</span> <span class="fn">RecursiveCharChunker</span>:
-    separators  = [<span class="st">"\n\n"</span>, <span class="st">"\n"</span>, <span class="st">". "</span>, <span class="st">" "</span>, <span class="st">""</span>]  <span class="cm"># tried in order</span>
-    chunk_size  = <span class="num">512</span> * <span class="num">4</span>  <span class="cm"># ≈ 2048 chars ≈ 512 tokens (4 chars/token heuristic)</span>
-    chunk_overlap = <span class="num">50</span> * <span class="num">4</span>   <span class="cm"># ≈ 200 chars ≈ 50 tokens overlap</span></div>
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, chunk_size=<span class="num">512</span>, overlap=<span class="num">50</span>):
+        self.splitter = RecursiveCharacterTextSplitter(
+            chunk_size=chunk_size * <span class="num">4</span>,    <span class="cm"># 512 tokens × 4 chars/token ≈ 2048 chars</span>
+            chunk_overlap=overlap * <span class="num">4</span>,   <span class="cm"># 50 tokens × 4 chars/token ≈ 200 chars</span>
+            separators=[<span class="st">"\n\n"</span>, <span class="st">"\n"</span>, <span class="st">". "</span>, <span class="st">" "</span>, <span class="st">""</span>],
+        )
+
+    <span class="kw">def</span> <span class="fn">chunk</span>(self, text, metadata):
+        parts = self.splitter.split_text(text)
+        <span class="kw">return</span> [
+            {<span class="st">"text"</span>: p, <span class="st">"metadata"</span>: {**metadata, <span class="st">"chunk_index"</span>: i, <span class="st">"strategy"</span>: <span class="st">"recursive"</span>}}
+            <span class="kw">for</span> i, p <span class="kw">in</span> enumerate(parts)
+            <span class="kw">if</span> len(p.strip()) > <span class="num">50</span>  <span class="cm"># filter trivially short fragments</span>
+        ]</div>
+
+      <h4>Strategy 2: Fixed-Size</h4>
+      <p><strong>What it is:</strong> Uses <code>tiktoken</code> (OpenAI's tokenizer, <code>cl100k_base</code> encoding) to split at exact token boundaries. Always produces chunks of exactly the specified size in tokens — no size variance, no sentence awareness. Useful for comparison experiments because chunk size is perfectly controlled.</p>
+      <div class="code"><span class="kw">class</span> <span class="fn">FixedSizeChunker</span>:
+    <span class="kw">def</span> <span class="fn">chunk</span>(self, text, metadata):
+        tokens = self.enc.encode(text)   <span class="cm"># tiktoken, cl100k_base</span>
+        <span class="kw">for</span> start <span class="kw">in</span> range(<span class="num">0</span>, len(tokens), self.chunk_size - self.overlap):
+            chunk_tokens = tokens[start:start + self.chunk_size]
+            chunk_text = self.enc.decode(chunk_tokens)  <span class="cm"># may split mid-word</span></div>
+
+      <h4>Strategy 3: Semantic</h4>
+      <p><strong>What it is:</strong> Embeds each sentence with <code>all-MiniLM-L6-v2</code> and inserts a chunk boundary wherever the cosine similarity between adjacent sentence embeddings drops below 0.5. Produces topically coherent chunks — each chunk covers one "topic" without straddling a topic shift. Requires a forward pass per sentence, making build time ~10× longer than recursive.</p>
+      <div class="code"><span class="kw">class</span> <span class="fn">SemanticChunker</span>:
+    threshold = <span class="num">0.5</span>  <span class="cm"># cosine similarity drop → new chunk</span>
+    min_sentences = <span class="num">3</span>  <span class="cm"># chunks must have ≥ 3 sentences before splitting</span>
+
+    <span class="kw">def</span> <span class="fn">chunk</span>(self, text, metadata):
+        sentences = re.split(<span class="st">r"(?&lt;=[.!?])\s+"</span>, text)
+        embeddings = model.encode(sentences, batch_size=<span class="num">32</span>)
+        <span class="kw">for</span> i <span class="kw">in</span> range(<span class="num">1</span>, len(sentences)):
+            sim = np.dot(embeddings[i-<span class="num">1</span>], embeddings[i])  <span class="cm"># cosine (normalized)</span>
+            <span class="kw">if</span> sim < self.threshold <span class="kw">and</span> len(current) >= <span class="num">3</span>:
+                <span class="cm"># insert boundary here</span></div>
+
+      <div class="why"><div class="why-label">Why Recursive is the default</div>
+        <p><strong>vs. Fixed-Size:</strong> Fixed splitting bisects financial sentences mid-clause because it has no concept of sentence structure. "Net income increased 23% to $29.7 billion, driven by strong iPhone sales [SPLIT] in Greater China" — the crucial qualifier "in Greater China" appears isolated in the next chunk and doesn't help answer "what drove net income growth." Recursive splitting keeps the sentence intact unless the overall chunk would exceed the character budget.<br/><br/>
+        <strong>vs. Semantic:</strong> Semantic chunking is semantically superior but practically problematic: variable-length chunks (some 200 tokens, some 900 tokens) make it hard to predict retrieval coverage; build time is ~10× longer; and the quality improvement over recursive is modest for well-structured financial filings that already have consistent paragraph boundaries. Recursive gives consistent chunk sizes and paragraph-level coherence for one-time build cost.</p>
+      </div>
 
       <h3>Why 512 tokens / 50-token overlap?</h3>
       <div class="why"><div class="why-label">Parameter Rationale</div>
-        <p><strong>Chunk size 512 tokens:</strong> all-MiniLM-L6-v2 has a 256-token maximum input window. Chunks at ~512 tokens (estimated via the 4 chars/token heuristic) are typically ~400–480 actual tokens — within the model's window while containing enough text to carry a complete financial disclosure (one paragraph to one table row). Smaller chunks (128–256 tokens) increase recall but reduce the coherence of each chunk; larger chunks (1024+) exceed the model window and dilute the embedding with off-topic content.<br/><br/>
-        <strong>Overlap 50 tokens:</strong> This is ~10% of the chunk size — the standard recommendation in the LangChain documentation for financial text. It ensures boundary sentences appear whole in at least one chunk without duplicating more than 10% of the corpus.</p>
+        <p><strong>Chunk size — 512 tokens (≈ 2,048 characters):</strong> all-MiniLM-L6-v2 has a 256-token maximum input. Inputs longer than 256 tokens are truncated — the model sees only the first 256 tokens of a chunk and ignores the rest. Using the 4 chars/token heuristic (1 char ≈ 0.25 tokens for English text), a 2,048-char chunk is ~512 tokens before tokenization, typically yielding ~400–480 actual tokens — within the embedding model's window.<br/><br/>
+        A 512-token chunk (2,048 chars) typically contains 1–3 paragraphs of financial text — enough to cover a complete table row (revenue by segment by year) or a full risk factor description. Smaller chunks (128 tokens) require multiple chunks to answer a compound question; larger chunks (1,024+ tokens) exceed the embedding window and dilute the embedding with off-topic sentences.<br/><br/>
+        <strong>Overlap — 50 tokens (≈ 200 characters):</strong> 10% of chunk size, the standard recommendation in LangChain documentation for financial text. This ensures any sentence within 50 tokens of a boundary appears complete in at least one adjacent chunk, covering boundary-straddling facts. It adds ~10% storage overhead to the corpus (18.4 MB instead of ~16.7 MB without overlap) — acceptable.</p>
       </div>
 
+      <h3>Chunk ID Generation</h3>
+      <p>Every chunk gets a deterministic <strong>MD5 hash ID</strong> computed from its text content. The MD5 is computed at indexing time (not chunking time) because the ID needs to be stable across re-chunking runs for the resumable indexer to skip already-indexed chunks. Two chunks with identical text get the same ID — a harmless deduplication that prevents the same passage from being indexed twice if it appears in multiple filings.</p>
+      <div class="code"><span class="cm"># In indexer.py — IDs computed just before ChromaDB upsert</span>
+chunk_ids = [hashlib.md5(c[<span class="st">"text"</span>].encode()).hexdigest() <span class="kw">for</span> c <span class="kw">in</span> chunk_batch]</div>
+
       <h3>Chunk Metadata Schema</h3>
-      <p>Every chunk carries four metadata fields persisted in ChromaDB. The <code>ticker</code> field is the primary RBAC filter key — every retrieval query for a scoped analyst filters on this field.</p>
+      <p>Every chunk carries six metadata fields written to the JSONL file and persisted into ChromaDB. The <code>ticker</code> field is the primary RBAC enforcement key — every retrieval query for a scoped analyst includes <code>where={"ticker": {"$in": allowed_tickers}}</code> in the ChromaDB query, making unauthorized data physically unretrievable regardless of semantic similarity.</p>
       <div class="code">{
-    <span class="st">"text"</span>:     <span class="st">"Revenue increased 8% year-over-year to $383.3 billion..."</span>,
+    <span class="st">"text"</span>: <span class="st">"Revenue increased 8% year-over-year to $383.3 billion..."</span>,
     <span class="st">"metadata"</span>: {
-        <span class="st">"doc_id"</span>:      <span class="st">"AAPL_2023_10K"</span>,
-        <span class="st">"ticker"</span>:      <span class="st">"AAPL"</span>,     <span class="cm"># used for RBAC filtering at retrieval</span>
-        <span class="st">"year"</span>:        <span class="num">2023</span>,
-        <span class="st">"section"</span>:     <span class="st">"10-K"</span>,
-        <span class="st">"chunk_index"</span>: <span class="num">42</span>
+        <span class="st">"doc_id"</span>:      <span class="st">"AAPL_2023_10-K"</span>,   <span class="cm"># source filing identifier</span>
+        <span class="st">"ticker"</span>:      <span class="st">"AAPL"</span>,              <span class="cm"># ChromaDB filter key for RBAC</span>
+        <span class="st">"company"</span>:     <span class="st">"Apple Inc."</span>,        <span class="cm"># human-readable for citations</span>
+        <span class="st">"year"</span>:        <span class="num">2023</span>,                <span class="cm"># for temporal filtering</span>
+        <span class="st">"section"</span>:     <span class="st">"10-K"</span>,              <span class="cm"># filing form type</span>
+        <span class="st">"chunk_index"</span>: <span class="num">42</span>                  <span class="cm"># position within source document</span>
     }
 }</div>
+
+      <h3>Output Files</h3>
+      <p>All chunks are written to a single JSONL file: <code>data/processed/chunks/chunks_recursive.jsonl</code>. One chunk per line; each line is a self-contained JSON object. The filename includes the strategy name, allowing multiple strategies to coexist on disk (chunks_recursive.jsonl, chunks_fixed.jsonl, chunks_semantic.jsonl) without overwriting each other. The indexer reads the file matching the current <code>CHUNK_STRATEGY</code> setting in <code>.env</code>.</p>
 
       <h3>Corpus Output</h3>
       <div class="metrics">
@@ -343,6 +496,13 @@ EDGAR_HEADERS = {<span class="st">"User-Agent"</span>: <span class="st">"RAGixAI
         <div class="metric"><div class="metric-val">50</div><div class="metric-label">Overlap Tokens</div></div>
         <div class="metric"><div class="metric-val">18.4 MB</div><div class="metric-label">JSONL on Disk</div></div>
       </div>
+
+      <h3>CLI</h3>
+      <div class="code">C:\Users\murta\anaconda3\python.exe scripts/run_chunk.py --strategy recursive
+<span class="cm"># Output: data/processed/chunks/chunks_recursive.jsonl
+# Time: 2–5 min for full corpus
+# Note: each run fully replaces the output file (not incremental)
+# After chunking, run: scripts/run_build_index.py --reset</span></div>
     </div>
 
     <!-- ══════ INDEX ══════ -->
@@ -403,9 +563,68 @@ pending = [(c, cid) <span class="kw">for</span> c, cid <span class="kw">in</span
       <div class="code">tokenized_corpus = [doc.lower().split() <span class="kw">for</span> doc <span class="kw">in</span> all_texts]
 _bm25_index = BM25Okapi(tokenized_corpus)  <span class="cm"># built in-memory, rebuilt on server restart</span></div>
 
+      <h3>Batch Embedding Strategy</h3>
+      <p>Embedding all 8,976 chunks one at a time would require 8,976 separate model forward passes. Instead, the indexer accumulates chunks in batches of 32 and calls <code>model.encode(batch)</code> once per batch. SentenceTransformers handles padding all texts to the same length within the batch, runs one forward pass, and returns a <code>(32, 384)</code> float32 matrix. This gives ~8–12× throughput improvement over single-item inference because the model's matrix multiplications are GPU/CPU-cache-efficient at batch size ≥ 8.</p>
+      <div class="code">BATCH_SIZE = <span class="num">32</span>
+
+<span class="kw">for</span> i <span class="kw">in</span> range(<span class="num">0</span>, len(pending), BATCH_SIZE):
+    batch = pending[i : i + BATCH_SIZE]
+    texts = [c[<span class="st">"text"</span>] <span class="kw">for</span> c, _ <span class="kw">in</span> batch]
+    ids = [cid <span class="kw">for</span> _, cid <span class="kw">in</span> batch]
+    embeddings = embedder.embed_batch(texts)      <span class="cm"># shape: (32, 384)</span>
+    collection.upsert(
+        ids=ids,
+        embeddings=embeddings.tolist(),
+        documents=texts,
+        metadatas=[c[<span class="st">"metadata"</span>] <span class="kw">for</span> c, _ <span class="kw">in</span> batch],
+    )</div>
+      <div class="note"><p><strong>Why 32 and not 64 or 128?</strong> Larger batches use more RAM proportionally. At batch=32, each embedding step holds 32 × 2,048 chars (~65 KB text) + 32 × 384 × 4 bytes (~50 KB float32) in memory simultaneously. At batch=128, that triples. On a machine with 8 GB RAM shared with the OS and a running server, batch=32 is conservative — it never causes paging or OOM even during a full rebuild alongside other processes.</p></div>
+
+      <h3>HNSW Index Parameters</h3>
+      <p>ChromaDB manages HNSW internally using hnswlib. The key parameters that affect index quality and build time are:</p>
+      <table>
+        <thead><tr><th>Parameter</th><th>ChromaDB Default</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td><code>M</code></td><td>16</td><td>Number of bidirectional links per node. Higher M → better recall at the cost of more memory and slower insert. At M=16 each node stores up to 32 neighbors, making the graph traversal well-connected without becoming dense.</td></tr>
+          <tr><td><code>ef_construction</code></td><td>100</td><td>Size of the candidate list during index build. Higher values explore more neighbors when inserting a new node, producing a better graph structure — at the cost of O(ef_construction) extra distance calculations per insert. 100 is a good balance; the full 8,976-chunk insert takes ~45 min at this setting on CPU.</td></tr>
+          <tr><td><code>ef</code> (query time)</td><td>10</td><td>Size of the candidate list during search. Higher ef → better recall, slower query. ChromaDB's default of 10 gives ~95% recall@10 on this corpus at under 80ms per query on CPU.</td></tr>
+        </tbody>
+      </table>
+      <div class="note"><p><strong>HNSW insertion slows as the graph grows:</strong> The first 1,000 chunks embed and insert quickly because the graph is sparse and traversal is fast. Around batch 150–200 (chunks 4,800–6,400 of 8,976), insert speed visibly slows — each new node's k-NN search now traverses a well-connected graph where O(log N) path length is longer. This is expected behavior, not a performance bug. A fresh full rebuild from 0 takes approximately 40–50 minutes on this hardware.</p></div>
+
+      <h3>ChromaDB Collection Naming</h3>
+      <p>Each embedding model writes to its own separate ChromaDB collection. This allows switching between models without losing the existing index — both can coexist on disk and only the active one is queried.</p>
+      <table>
+        <thead><tr><th>Collection Name</th><th>Embedding Model</th><th>.env Setting</th><th>Use Case</th></tr></thead>
+        <tbody>
+          <tr><td><code>ragixai_local</code></td><td>sentence-transformers/all-MiniLM-L6-v2</td><td><code>EMBED_MODEL=local</code></td><td>Default — fully offline, no API key, 384-dim vectors</td></tr>
+          <tr><td><code>ragixai_cohere</code></td><td>Cohere Embed v3 (embed-english-v3.0)</td><td><code>EMBED_MODEL=cohere</code></td><td>Config E only — 1,024-dim, better recall on financial text, requires free Cohere API key</td></tr>
+        </tbody>
+      </table>
+      <p>To switch: change <code>EMBED_MODEL</code> in <code>.env</code>, then run <code>/embed-docs</code> (which runs <code>run_build_index.py --reset</code> against the new collection name). The <code>ragixai_local</code> collection is unmodified and can be restored by switching back and running the retriever — no rebuild needed if the collection still exists on disk.</p>
+
+      <h3>Server Startup: BM25 Rebuild</h3>
+      <p>The BM25 index is <strong>not persisted to disk</strong> — it is rebuilt in memory every time the server starts. <code>main.py</code>'s <code>startup()</code> event calls <code>build_bm25_index()</code>, which reads all document texts from ChromaDB (one <code>collection.get()</code> call), tokenizes them (<code>text.lower().split()</code>), and passes the token lists to <code>BM25Okapi()</code>. This takes ~3–8 seconds for 8,976 chunks and produces an in-memory BM25 object that is shared across all request handlers via a module-level singleton.</p>
+      <div class="why"><div class="why-label">Why not persist BM25 to disk?</div>
+        <p>Pickle-serializing a <code>BM25Okapi</code> object for 8,976 chunks produces a ~25 MB file that must be deserialized on startup anyway — the time savings over rebuilding from ChromaDB (which is already loaded) is negligible. Persisting it adds a file I/O path, a deserialization step, and a consistency problem: if the ChromaDB collection is updated (new chunks added), the saved BM25 index is stale. Rebuilding from ChromaDB on each startup guarantees they are always in sync.</p>
+      </div>
+
+      <h3>Storage Layout</h3>
+      <div class="metrics">
+        <div class="metric"><div class="metric-val">8,976</div><div class="metric-label">Indexed Chunks</div></div>
+        <div class="metric"><div class="metric-val">384</div><div class="metric-label">Embedding Dims</div></div>
+        <div class="metric"><div class="metric-val">~13.8 MB</div><div class="metric-label">Float32 Vectors</div></div>
+        <div class="metric"><div class="metric-val">145 MB</div><div class="metric-label">chroma.sqlite3</div></div>
+        <div class="metric"><div class="metric-val">~45 min</div><div class="metric-label">Full Rebuild Time</div></div>
+        <div class="metric"><div class="metric-val">~3–8 s</div><div class="metric-label">BM25 Startup Time</div></div>
+      </div>
+      <div class="note"><p><code>chroma.sqlite3</code> stores vectors as raw binary blobs alongside document text and metadata — hence 145 MB for 8,976 chunks. Because it exceeded GitHub's 100 MB limit, it is tracked via Git LFS (<code>.gitattributes</code>: <code>*.sqlite3 filter=lfs diff=lfs merge=lfs -text</code>). Each git push sends a 1 KB LFS pointer instead of the 145 MB binary.</p></div>
+
       <h3>CLI</h3>
       <div class="code">C:\Users\murta\anaconda3\python.exe scripts/run_build_index.py [--reset] [--resume] [--batch-size 32]
-<span class="cm"># --reset:  delete and rebuild from scratch  |  --resume: skip already-indexed chunks</span></div>
+<span class="cm"># --reset:  delete and rebuild from scratch  |  --resume: skip already-indexed chunks
+# Without flags: reads existing ChromaDB IDs, skips matches, indexes only new chunks
+# After chunking strategy change: always use --reset to avoid mixing strategy artifacts</span></div>
     </div>
 
     <!-- ══════ RETRIEVE ══════ -->
@@ -437,6 +656,59 @@ _bm25_index = BM25Okapi(tokenized_corpus)  <span class="cm"># built in-memory, r
 <span class="kw">for</span> cid <span class="kw">in</span> all_chunk_ids:
     score  = <span class="num">0.6</span> * _rrf_score(dense_rank[cid])   <span class="cm"># dense_weight = 0.6</span>
     score += <span class="num">0.4</span> * _rrf_score(bm25_rank[cid])    <span class="cm"># bm25_weight  = 0.4</span></div>
+
+      <h3>ScoredChunk — The Core Data Type</h3>
+      <p>All three retrieval modes return a list of <code>ScoredChunk</code> objects — a uniform interface that the reranker and generator consume regardless of which retrieval mode produced the candidates.</p>
+      <div class="code"><span class="kw">@dataclass</span>
+<span class="kw">class</span> <span class="fn">ScoredChunk</span>:
+    chunk_id:  str    <span class="cm"># MD5 hash — stable across reruns</span>
+    text:      str    <span class="cm"># raw chunk text, passed to generator as context</span>
+    score:     float  <span class="cm"># retrieval score (cosine sim or RRF composite)</span>
+    doc_id:    str    <span class="cm"># e.g., "AAPL_2023_10-K"</span>
+    company:   str    <span class="cm"># e.g., "Apple Inc."</span>
+    year:      int    <span class="cm"># fiscal year integer</span>
+    section:   str    <span class="cm"># SEC form type (10-K, 10-Q, 8-K)</span>
+    ticker:    str = <span class="st">""</span>  <span class="cm"># populated from ChromaDB metadata</span></div>
+
+      <h3>BM25 Parameters and Ticker Filtering</h3>
+      <p>The BM25Okapi implementation uses default hyperparameters: <code>k1=1.5</code> (term frequency saturation — at k1=1.5, a term appearing 10× in a document contributes about 2.5× more than one that appears once, not 10×) and <code>b=0.75</code> (document length normalization — a document 2× the average length sees its term frequency halved, preventing long documents from dominating purely by having more tokens).</p>
+      <p>BM25 scores all 8,976 chunks simultaneously (full linear scan, not ANN), then returns the top-K by score. A key implementation detail: BM25 operates on text only — it has no concept of metadata. Ticker filtering must happen <em>after</em> BM25 scoring by looking up each scored chunk's ticker from ChromaDB. To ensure enough results remain after the ticker filter, BM25 fetches <code>fetch_k = top_k × 4</code> candidates before filtering:</p>
+      <div class="code">fetch_k = top_k * <span class="num">4</span>  <span class="cm"># e.g., top_k=20 → fetch 80 BM25 candidates</span>
+bm25_scores = _bm25_index.get_scores(query_tokens)
+top_indices = np.argsort(bm25_scores)[:<span class="num">-fetch_k-1</span>:<span class="num">-1</span>]  <span class="cm"># top-80 descending</span>
+
+<span class="cm"># Fetch metadata from ChromaDB to apply ticker filter</span>
+metadata = collection.get(ids=[_chunk_ids[i] <span class="kw">for</span> i <span class="kw">in</span> top_indices], include=[<span class="st">"metadatas"</span>])
+filtered = [
+    (top_indices[j], bm25_scores[top_indices[j]])
+    <span class="kw">for</span> j, m <span class="kw">in</span> enumerate(metadata[<span class="st">"metadatas"</span>])
+    <span class="kw">if</span> m[<span class="st">"ticker"</span>] <span class="kw">in</span> allowed_tickers
+][:top_k]  <span class="cm"># take only top_k after filtering</span></div>
+      <div class="why"><div class="why-label">Why 4× candidate inflation?</div>
+        <p>An AAPL-scoped analyst querying "What was Apple's capex in 2022?" with <code>top_k=20</code>: the corpus has 10 companies. Statistically, about 10% of BM25 top results are AAPL chunks — so the top 20 BM25 results might contain only 2–3 AAPL chunks, giving a near-empty filtered list. Fetching 80 candidates (4× inflation) provides ~8–12 AAPL chunks before filtering — more than enough for top_k=20. The 4× factor is configurable but empirically works well for a 10-company corpus.</p>
+      </div>
+
+      <h3>Dense Retrieval: ChromaDB's Native Ticker Filter</h3>
+      <p>Unlike BM25, ChromaDB supports metadata predicates directly in the HNSW search — the ticker filter runs inside the vector database during ANN traversal, not as post-processing. This means HNSW only considers nodes whose <code>ticker</code> metadata matches the filter, and the HNSW graph naturally returns exactly <code>top_k</code> filtered results without candidate inflation.</p>
+      <div class="code"><span class="cm"># Single-ticker filter (analyst role)</span>
+where={<span class="st">"ticker"</span>: <span class="st">"AAPL"</span>}
+
+<span class="cm"># Multi-ticker filter (admin/viewer, or multi-ticker analyst)</span>
+where={<span class="st">"ticker"</span>: {<span class="st">"$in"</span>: [<span class="st">"AAPL"</span>, <span class="st">"MSFT"</span>, <span class="st">"AMZN"</span>]}}
+
+<span class="cm"># No filter (admin querying all companies)</span>
+<span class="cm"># where= parameter omitted entirely</span></div>
+
+      <h3>Latency Budget by Mode</h3>
+      <table>
+        <thead><tr><th>Retrieval Mode</th><th>Config</th><th>Dense</th><th>BM25</th><th>RRF Merge</th><th>Total Retrieval</th></tr></thead>
+        <tbody>
+          <tr><td>Dense only</td><td>A, G</td><td>50–80 ms</td><td>—</td><td>—</td><td>~70 ms</td></tr>
+          <tr><td>BM25 only</td><td>B</td><td>—</td><td>80–150 ms</td><td>—</td><td>~120 ms</td></tr>
+          <tr><td>Hybrid RRF</td><td>C, D, E, F</td><td>50–80 ms</td><td>80–150 ms</td><td>&lt; 5 ms</td><td>~200 ms</td></tr>
+        </tbody>
+      </table>
+      <p>RRF merge is pure Python dict operations over two pre-sorted lists — negligible. BM25 is slower than dense because it runs an exact linear scan over 8,976 chunks (O(N)) rather than HNSW O(log N). In configs where BM25 is part of the retrieval, the total latency is dominated by BM25, not dense retrieval.</p>
 
       <h3>Why k=60 in RRF?</h3>
       <div class="why"><div class="why-label">Parameter Rationale</div>
@@ -497,7 +769,45 @@ _bm25_index = BM25Okapi(tokenized_corpus)  <span class="cm"># built in-memory, r
     ranked = sorted(zip(scores, candidates), key=<span class="kw">lambda</span> x: x[<span class="num">0</span>], reverse=True)
     <span class="kw">return</span> [chunk <span class="kw">for</span> _, chunk <span class="kw">in</span> ranked[:top_k]]</div>
 
-      <div class="note"><p><strong>GPU strategy:</strong> The reranker runs on CPU to keep the MX450's 2 GB VRAM exclusively for Ollama's llama3.2 inference. CrossEncoder at 85 MB on CPU adds ~200ms — acceptable latency given that Ollama generation takes 1–3s.</p></div>
+      <h3>Lazy Loading and Singleton Pattern</h3>
+      <p>Loading the cross-encoder model from disk takes ~2–4 seconds on first use (model weights are ~85 MB). To avoid this latency on every request, the reranker uses a module-level singleton: the model is loaded once on first call to <code>_get_cross_encoder()</code> and then cached in the module global <code>_model</code>. Subsequent calls return the cached instance immediately.</p>
+      <div class="code">_model: CrossEncoder | <span class="kw">None</span> = <span class="kw">None</span>  <span class="cm"># module-level cache</span>
+
+<span class="kw">def</span> <span class="fn">_get_cross_encoder</span>() -> CrossEncoder:
+    <span class="kw">global</span> _model
+    <span class="kw">if</span> _model <span class="kw">is None</span>:
+        _model = CrossEncoder(
+            <span class="st">"cross-encoder/ms-marco-MiniLM-L-6-v2"</span>,
+            device=<span class="st">"cpu"</span>,           <span class="cm"># keep GPU free for Ollama</span>
+            max_length=<span class="num">512</span>,          <span class="cm"># truncate (query + doc) to 512 tokens</span>
+        )
+    <span class="kw">return</span> _model</div>
+      <div class="why"><div class="why-label">Why lazy load instead of loading at import time?</div>
+        <p>The reranker module is imported when the FastAPI application starts. If model loading ran at import time, every server restart (including hot-reloads triggered by file edits) would wait 2–4 seconds for the model to load before accepting any requests. Lazy loading means the first request that uses the reranker (i.e., configs D, E, F, G) pays the 2–4 second load cost once; all subsequent requests use the cached model and pay ~200ms for the actual inference.</p>
+      </div>
+
+      <h3>Score Semantics: Logits, Not Probabilities</h3>
+      <p>CrossEncoder.predict() returns raw logit scores — unbounded floating-point values, not normalized to [0, 1]. A typical result for 20 candidates might look like:</p>
+      <div class="code"><span class="cm"># Example scores from model.predict() on 20 (query, chunk) pairs:</span>
+[-2.3, 0.8, 4.1, -1.5, 2.7, 0.3, -0.9, 5.2, 1.4, ...]
+<span class="cm"># Higher is more relevant. 5.2 → highly relevant. -2.3 → not relevant.</span>
+<span class="cm"># These are NOT probabilities — do not interpret as "52% relevant".</span></div>
+      <p>The reranker uses these scores only for ranking (sorting descending), not as an absolute relevance threshold. The top-5 are selected regardless of their absolute score values. This means even a mediocre best-match chunk (logit=0.3) will still be included in the top-5 and passed to the generator — the generator's "Answer not found in Corpus" rule handles the case where no retrieved chunk actually contains the answer.</p>
+
+      <h3>Batch Inference: All 20 at Once</h3>
+      <p><code>model.predict(pairs)</code> processes all 20 (query, document) pairs in a single batched forward pass. The cross-encoder concatenates each pair as <code>[CLS] query [SEP] document [SEP]</code>, tokenizes all 20 to the same length (padding to max_length=512), and runs one batched matrix multiplication through all 6 BERT layers. This is ~5× faster than 20 sequential single-item calls because GPU/CPU matrix operations are cache-efficient at batch ≥ 8.</p>
+
+      <h3>Latency Profile</h3>
+      <table>
+        <thead><tr><th>Operation</th><th>Time</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>First request (cold load)</td><td>2–4 s</td><td>Model weights loaded from disk into RAM</td></tr>
+          <tr><td>Subsequent requests (warm)</td><td>150–250 ms</td><td>20 pairs, batch inference on CPU</td></tr>
+          <tr><td>Memory footprint</td><td>~85 MB RAM</td><td>Model parameters in float32 on CPU</td></tr>
+        </tbody>
+      </table>
+
+      <div class="note"><p><strong>GPU strategy:</strong> The reranker runs on CPU to keep the MX450's 2 GB VRAM exclusively for Ollama's llama3.2 inference. CrossEncoder at 85 MB on CPU adds ~200ms — acceptable latency given that Ollama generation takes 1–3s. Running both reranker and Ollama on GPU simultaneously causes OOM and crashes the server.</p></div>
     </div>
 
     <!-- ══════ GENERATE ══════ -->
@@ -539,8 +849,108 @@ _bm25_index = BM25Okapi(tokenized_corpus)  <span class="cm"># built in-memory, r
 Revenue increased <span class="num">8</span>% year-over-year to $<span class="num">383.3</span> billion...</div>
       <div class="note"><p>Showing the source document name and year lets the model include temporal context in its citation ("per the 2023 10-K [1]") without hallucinating dates. The relevance score helps the model prioritize — in practice it cites higher-relevance chunks more consistently when the scores are visible in the prompt.</p></div>
 
+      <h3>Full Prompt Template</h3>
+      <p>The complete prompt sent to Ollama on every request. Five hard constraints address five distinct failure modes observed in early testing:</p>
+      <div class="code">PROMPT_TEMPLATE = <span class="st">"""You are a financial analyst assistant. Answer questions ONLY using
+the SEC filing excerpts provided below.
+
+Rules you MUST follow:
+1. Cite every fact with [1], [2], etc. — inline next to each fact.
+2. If the answer cannot be found in the excerpts, respond EXACTLY:
+   Answer not found in Corpus
+3. Do NOT use any knowledge from outside the provided excerpts.
+4. Do NOT speculate, infer, or add information not explicitly stated.
+5. If the question asks about Company X but excerpts are from Company Y,
+   respond EXACTLY: Answer not found in Corpus
+
+--- SEC Filing Excerpts ---
+{context}
+--- End of Excerpts ---
+
+Question: {question}
+Answer (cite sources with [N]):"""</span></div>
+      <table>
+        <thead><tr><th>Rule</th><th>Failure Mode It Prevents</th><th>Observed Without This Rule</th></tr></thead>
+        <tbody>
+          <tr><td>Rule 1 (cite every fact)</td><td>Uncited hallucination — model states a number without sourcing it</td><td>llama3.2 would write "Apple had $383B in revenue" with no [1] — making hallucination verification impossible</td></tr>
+          <tr><td>Rule 2 (exact refusal string)</td><td>Hedged non-answers — model half-answers with "I couldn't find complete information but..."</td><td>Produced answers that passed faithfulness checks (technically grounded in some context) but were practically useless</td></tr>
+          <tr><td>Rule 3 (no external knowledge)</td><td>Training data leakage — model supplements context with memorized financial data</td><td>llama3.2 would correctly state figures not present in the retrieved chunks because they were in its training data</td></tr>
+          <tr><td>Rule 4 (no speculation)</td><td>Educated guessing — model infers results from partial data</td><td>"Revenue grew 8%, so operating income likely increased proportionally" — plausible but not stated in the excerpts</td></tr>
+          <tr><td>Rule 5 (cross-company guard)</td><td>Company confusion — hybrid retrieval occasionally returns chunks from a related company</td><td>A question about Apple retrieved an Amazon cloud revenue chunk (both discuss "cloud services") and the model used it</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Context Block Construction</h3>
+      <p>The 5 reranked chunks are formatted into the <code>{context}</code> placeholder with numbered citations and source metadata. Showing the source document name and relevance score helps the model cite correctly and prioritize higher-relevance chunks:</p>
+      <div class="code">context_parts = []
+<span class="kw">for</span> i, chunk <span class="kw">in</span> enumerate(top_chunks, <span class="num">1</span>):
+    header = (
+        f<span class="st">"[{i}] (Source: {chunk.company} {chunk.year} {chunk.section}, "</span>
+        f<span class="st">"relevance: {chunk.score:.2f})\n"</span>
+    )
+    context_parts.append(header + chunk.text)
+context = <span class="st">"\n\n"</span>.join(context_parts)</div>
+      <div class="note"><p>The numbered citation format <code>[1]</code>, <code>[2]</code>, etc. in the context block is the same format instructed in the prompt rules. The model sees <code>[1]</code> at the start of each context excerpt and learns to reproduce it inline when referencing that excerpt. Without this explicit numbering, llama3.2 would generate its own citation format inconsistently.</p></div>
+
+      <h3>Ollama API Call</h3>
+      <div class="code"><span class="kw">import</span> ollama
+
+response = ollama.generate(
+    model=settings.ollama_model,   <span class="cm"># default: "llama3.2"</span>
+    prompt=formatted_prompt,
+    options={
+        <span class="st">"temperature"</span>: <span class="num">0.1</span>,          <span class="cm"># near-deterministic factual output</span>
+        <span class="st">"num_predict"</span>: <span class="num">250</span>,          <span class="cm"># max output tokens (~125 words)</span>
+        <span class="st">"stop"</span>: [<span class="st">"--- SEC Filing"</span>, <span class="st">"Question:"</span>],  <span class="cm"># prevent prompt repetition</span>
+    }
+)
+raw_answer = response[<span class="st">"response"</span>].strip()</div>
+      <div class="why"><div class="why-label">Why <code>ollama.generate()</code> not <code>ollama.chat()</code>?</div>
+        <p><code>ollama.chat()</code> uses a turn-based message format (system/user/assistant roles) that is designed for multi-turn conversations. <code>ollama.generate()</code> sends a single raw prompt string and is more predictable for structured single-turn extraction tasks like RAG, where the prompt is entirely self-contained. The <code>stop</code> tokens guard against the model accidentally regenerating parts of the prompt template ("--- SEC Filing Excerpts ---", "Question:") in its output — observed with some llama3.2 versions when the answer was very short.</p>
+      </div>
+
       <h3>Not-Found Normalization</h3>
-      <p>A regex catches the many ways llama3.2 expresses inability to answer ("I cannot find...", "is not mentioned in...", "not provided in the excerpts") and normalizes them all to the canonical string <code>"Answer not found in Corpus"</code>. This prevents partial answers where the model hedges with "I couldn't fully confirm but..." instead of refusing cleanly.</p>
+      <p>A regex catches the many ways llama3.2 expresses inability to answer and normalizes them all to the canonical string <code>"Answer not found in Corpus"</code>:</p>
+      <div class="code">_NOT_FOUND_RE = re.compile(
+    r<span class="st">"(i cannot find|not (found|mentioned|provided|available|stated)"</span>
+    r<span class="st">"|answer not found|no information|cannot (determine|answer)|"</span>
+    r<span class="st">"not in (the |)(corpus|excerpts|context|filing))"</span>,
+    re.IGNORECASE,
+)
+
+<span class="kw">if</span> _NOT_FOUND_RE.search(raw_answer):
+    <span class="kw">return</span> <span class="st">"Answer not found in Corpus"</span>  <span class="cm"># canonical refusal</span></div>
+      <p>Without this normalization, downstream evaluation code would need to parse free-form refusals. The RAGAS <code>answer_correctness</code> metric compares the answer string to the ground truth — a hedged "I couldn't find any information..." scores higher than a crisp refusal even though both are correct non-answers, creating artificial score variation.</p>
+
+      <h3>Citation Extraction</h3>
+      <p>After generation, citations are extracted from the answer for the API response's <code>citations</code> field. The extraction converts inline <code>[N]</code> markers back to source document references using the ordered chunk list:</p>
+      <div class="code">cited_indices = sorted(set(
+    int(m) - <span class="num">1</span>  <span class="cm"># [1]-based → 0-based index</span>
+    <span class="kw">for</span> m <span class="kw">in</span> re.findall(r<span class="st">"\[(\d+)\]"</span>, raw_answer)
+    <span class="kw">if</span> <span class="num">1</span> <= int(m) <= len(top_chunks)
+))
+citations = [
+    {<span class="st">"index"</span>: i+<span class="num">1</span>, <span class="st">"doc_id"</span>: top_chunks[i].doc_id,
+     <span class="st">"company"</span>: top_chunks[i].company, <span class="st">"year"</span>: top_chunks[i].year,
+     <span class="st">"score"</span>: top_chunks[i].score}
+    <span class="kw">for</span> i <span class="kw">in</span> cited_indices
+]</div>
+
+      <h3>Ollama Fallback</h3>
+      <p>If Ollama is not running, the <code>ollama.generate()</code> call raises a <code>ConnectionError</code>. The generator catches this and returns the first 300 characters of the top-ranked chunk's text directly as the answer, prefixed with a warning. This degraded mode never produces a cited, structured answer — but it allows the server to respond to queries rather than returning a 500 error, which is preferable when Ollama is temporarily unavailable.</p>
+
+      <h3>End-to-End Latency</h3>
+      <table>
+        <thead><tr><th>Stage</th><th>Typical Time</th><th>Variance</th></tr></thead>
+        <tbody>
+          <tr><td>Query embedding (all-MiniLM)</td><td>20–40 ms</td><td>Low — single short string</td></tr>
+          <tr><td>Dense retrieval (HNSW)</td><td>50–80 ms</td><td>Low — O(log N)</td></tr>
+          <tr><td>BM25 retrieval (linear scan)</td><td>80–150 ms</td><td>Medium — O(N) but fast Python</td></tr>
+          <tr><td>Cross-encoder rerank (20 pairs)</td><td>150–250 ms</td><td>Low — fixed batch size</td></tr>
+          <tr><td>Ollama generation (llama3.2 3B)</td><td>1,000–3,000 ms</td><td>High — varies with output length and GPU memory pressure</td></tr>
+          <tr><td><strong>Total (Config D, warm)</strong></td><td><strong>1.5–3.5 s</strong></td><td>Dominated by generation</td></tr>
+        </tbody>
+      </table>
     </div>
 
     <!-- ══════ GUARDRAILS ══════ -->
@@ -583,16 +993,84 @@ pattern = r<span class="st">"\b"</span> + re.escape(alias) + r<span class="st">"
         <p>A generic financial question ("What are the key risk factors?") passes the topic filter and mentions no specific company, so the ticker-scope input guard lets it through. Without the post-retrieval filter, the hybrid retriever might return chunks from any company in the corpus — including companies outside the analyst's scope. The post-retrieval filter catches this case: even if retrieval returns MSFT chunks for an AAPL-scoped analyst, those chunks are removed before generation.</p>
       </div>
 
-      <h3>RBAC Key Structure</h3>
+      <h3>Layer 3 — Post-Retrieval Prompt Guard</h3>
+      <p>Even with layers 1 and 2, a fourth protection exists at the prompt level. The generator's prompt rule 5 explicitly instructs the LLM: "If the question asks about Company X but excerpts are from Company Y, respond EXACTLY: Answer not found in Corpus." This handles edge cases where layers 1 and 2 pass a generic question (e.g., "What were the risk factors related to supply chain?"), retrieval returns some off-scope chunks, and the post-retrieval filter misses them due to a metadata gap. The LLM itself acts as a final sanity check — effectively a fourth guard that cannot be bypassed by retrieval artifacts.</p>
+
+      <h3>RBAC Implementation: UserContext and require_user()</h3>
+      <p>Authentication is handled by a FastAPI dependency factory. Every protected endpoint declares a <code>ctx: UserContext = Depends(require_user("admin"))</code> parameter, and FastAPI calls the dependency before the endpoint handler runs.</p>
+      <div class="code"><span class="kw">@dataclass</span>
+<span class="kw">class</span> <span class="fn">UserContext</span>:
+    role:             str                <span class="cm"># "admin", "viewer", "analyst"</span>
+    allowed_tickers:  list[str] | <span class="kw">None</span>  <span class="cm"># None = unrestricted (admin/viewer)</span>
+    key_id:           str                <span class="cm"># e.g., "aapl-analyst-key" for audit logs</span>
+
+<span class="cm"># Role rank for minimum-role enforcement</span>
+_RANK = {<span class="st">"viewer"</span>: <span class="num">0</span>, <span class="st">"analyst"</span>: <span class="num">1</span>, <span class="st">"admin"</span>: <span class="num">2</span>}
+
+<span class="kw">def</span> <span class="fn">require_user</span>(minimum: str = <span class="st">"analyst"</span>):
+    min_rank = _RANK[minimum]
+    <span class="kw">def</span> <span class="fn">_dep</span>(creds = Depends(_bearer)) -> UserContext:
+        ctx = _key_to_context(creds.credentials <span class="kw">if</span> creds <span class="kw">else</span> <span class="kw">None</span>)
+        <span class="kw">if</span> ctx <span class="kw">is None</span>:
+            <span class="kw">raise</span> HTTPException(<span class="num">401</span>, detail=<span class="st">"Invalid or missing API key"</span>)
+        <span class="kw">if</span> _RANK[ctx.role] < min_rank:
+            <span class="kw">raise</span> HTTPException(<span class="num">403</span>, detail=f<span class="st">"Role '{ctx.role}' cannot access this endpoint"</span>)
+        <span class="kw">return</span> ctx
+    <span class="kw">return</span> _dep</div>
       <table>
-        <thead><tr><th>Role</th><th>Endpoints</th><th>Ticker Scope</th></tr></thead>
+        <thead><tr><th>HTTP Code</th><th>Condition</th><th>Meaning</th></tr></thead>
         <tbody>
-          <tr><td><strong>admin</strong></td><td>All — chat, evaluate, judge, ingest</td><td>All 10 companies</td></tr>
-          <tr><td><strong>viewer</strong></td><td>Chat, health</td><td>All 10 companies (read-only)</td></tr>
-          <tr><td><strong>analyst/{TICKER}</strong></td><td>Chat, health</td><td>One company only</td></tr>
+          <tr><td><code>401</code></td><td>No <code>Authorization</code> header, or key not found in the key→context map</td><td>Authentication failed — the caller is not recognized at all</td></tr>
+          <tr><td><code>403</code></td><td>Key is valid but role rank is below <code>minimum</code></td><td>Authorization failed — recognized, but not permitted for this operation (e.g., <code>viewer</code> calling <code>POST /judge</code> which requires <code>admin</code>)</td></tr>
         </tbody>
       </table>
-      <p>One analyst key exists per tracked ticker (10 keys total). Keys are set in <code>.env</code> and validated in <code>backend/models/auth.py</code> via a <code>require_user(min_role)</code> FastAPI dependency.</p>
+
+      <h3>Bearer Token Flow</h3>
+      <p>All API requests must include an <code>Authorization: Bearer &lt;key&gt;</code> header. FastAPI's <code>HTTPBearer</code> scheme extracts the token string. <code>_key_to_context()</code> looks it up in a dictionary pre-built from the <code>.env</code> file at server startup. The lookup is O(1) — no database query, no network call, no cryptographic verification. The "keys" are intentionally simple strings (not JWTs) because this is a local single-tenant system; in production, a JWT with expiry and refresh would be appropriate.</p>
+      <div class="code"><span class="cm"># Built once at module import from .env values</span>
+_KEY_MAP: dict[str, UserContext] = {
+    settings.admin_api_key: UserContext(<span class="st">"admin"</span>, <span class="kw">None</span>, <span class="st">"admin-key"</span>),
+    settings.viewer_api_key: UserContext(<span class="st">"viewer"</span>, <span class="kw">None</span>, <span class="st">"viewer-key"</span>),
+    settings.aapl_analyst_key: UserContext(<span class="st">"analyst"</span>, [<span class="st">"AAPL"</span>], <span class="st">"aapl-analyst-key"</span>),
+    settings.msft_analyst_key: UserContext(<span class="st">"analyst"</span>, [<span class="st">"MSFT"</span>], <span class="st">"msft-analyst-key"</span>),
+    <span class="cm"># ... one entry per tracked ticker (10 analyst keys total)</span>
+}</div>
+
+      <h3>RBAC Key Structure</h3>
+      <table>
+        <thead><tr><th>Role</th><th>Min Role Required</th><th>Endpoints</th><th>Ticker Scope</th></tr></thead>
+        <tbody>
+          <tr><td><strong>admin</strong></td><td>—</td><td>All: chat, evaluate, judge, ingest, health, history</td><td>All 10 companies</td></tr>
+          <tr><td><strong>viewer</strong></td><td>viewer</td><td>Chat, health, history (read-only)</td><td>All 10 companies</td></tr>
+          <tr><td><strong>analyst/{TICKER}</strong></td><td>analyst</td><td>Chat (<code>POST /judge/row</code> for spot-checking), health</td><td>One company only (from key mapping)</td></tr>
+        </tbody>
+      </table>
+      <p>Keys are set in <code>.env</code>. Defaults work out of the box for local development (<code>admin-key</code>, <code>viewer-key</code>, <code>aapl-analyst-key</code>, etc.). In production, keys would be randomly generated and stored in a secrets manager — only the format (plain string bearer token) would remain the same.</p>
+
+      <h3>End-to-End Guardrail Execution Order</h3>
+      <p>Every chat request passes through this exact sequence. Each step can abort the request before reaching the next:</p>
+      <div class="code"><span class="cm"># 1. FastAPI dependency: authenticate + authorize</span>
+ctx = require_user(<span class="st">"viewer"</span>)(creds)    <span class="cm"># 401/403 if invalid key or low role</span>
+
+<span class="cm"># 2. Topic filter — is this a financial question?</span>
+<span class="kw">if not</span> _FINANCE_RE.search(question):
+    <span class="kw">raise</span> HTTPException(<span class="num">400</span>, <span class="st">"Question is not financial in nature"</span>)
+
+<span class="cm"># 3. Ticker-scope input guard</span>
+mentioned = _detect_tickers(question)
+<span class="kw">if</span> ctx.allowed_tickers <span class="kw">is not None</span>:
+    out_of_scope = mentioned - set(ctx.allowed_tickers)
+    <span class="kw">if</span> out_of_scope:
+        <span class="kw">raise</span> HTTPException(<span class="num">403</span>, f<span class="st">"Not authorized for {out_of_scope}"</span>)
+
+<span class="cm"># 4. Retrieval (with ticker filter embedded in ChromaDB query)</span>
+chunks = retriever.retrieve(question, ticker_filter=ctx.allowed_tickers)
+
+<span class="cm"># 5. Post-retrieval filter</span>
+chunks = [c <span class="kw">for</span> c <span class="kw">in</span> chunks
+          <span class="kw">if</span> ctx.allowed_tickers <span class="kw">is None</span> <span class="kw">or</span> c.ticker <span class="kw">in</span> ctx.allowed_tickers]
+
+<span class="cm"># 6. Rerank → Generate (prompt rule 5 is the final LLM-level guard)</span></div>
     </div>
 
     <!-- ══════ EVALUATION ══════ -->
@@ -643,11 +1121,123 @@ pattern = r<span class="st">"\b"</span> + re.escape(alias) + r<span class="st">"
         </tbody>
       </table>
 
-      <h3>Heuristic Fallback</h3>
-      <p>When Ollama is unavailable or returns malformed JSON, a word-overlap heuristic replaces the LLM judge. Faithfulness and hallucination_free use answer/context token overlap; completeness uses question keyword presence in answer; citation_quality counts <code>[N]</code> markers in the response. Scores bin into 1–5 using fixed overlap thresholds. This ensures the evaluation pipeline always produces a result.</p>
+      <h3>Heuristic Fallback — Scoring Bins</h3>
+      <p>When Ollama is unavailable or returns malformed JSON, the heuristic fallback produces scores for all four dimensions using word-overlap metrics. All four methods bin their ratio into a 1–5 integer scale:</p>
+      <div class="code"><span class="cm"># Shared overlap-to-score bins (used by faithfulness, completeness, hallucination_free)</span>
+<span class="kw">def</span> <span class="fn">_overlap_score</span>(ratio: float) -> int:
+    <span class="kw">if</span> ratio >= <span class="num">0.70</span>: <span class="kw">return</span> <span class="num">5</span>   <span class="cm"># ≥70% overlap → excellent</span>
+    <span class="kw">if</span> ratio >= <span class="num">0.50</span>: <span class="kw">return</span> <span class="num">4</span>   <span class="cm"># ≥50%         → good</span>
+    <span class="kw">if</span> ratio >= <span class="num">0.30</span>: <span class="kw">return</span> <span class="num">3</span>   <span class="cm"># ≥30%         → acceptable</span>
+    <span class="kw">if</span> ratio >= <span class="num">0.10</span>: <span class="kw">return</span> <span class="num">2</span>   <span class="cm"># ≥10%         → poor</span>
+    <span class="kw">return</span> <span class="num">1</span>                       <span class="cm"># &lt;10%         → very poor</span>
 
-      <h3>A/B Test and Winner Selection</h3>
-      <p>All 7 configs run sequentially. Winner is determined by a composite score: <code>ragas_faithfulness + ragas_relevancy + judge_overall × 2</code> — the judge is weighted 2× because it is more interpretable and domain-specific than the automated RAGAS metrics.</p>
+<span class="cm"># faithfulness: what fraction of answer words appear in the contexts?</span>
+answer_tokens = set(answer.lower().split())
+context_tokens = set(<span class="st">" "</span>.join(contexts).lower().split())
+faithfulness_ratio = len(answer_tokens & context_tokens) / max(len(answer_tokens), <span class="num">1</span>)
+
+<span class="cm"># completeness: what fraction of question keywords appear in the answer?</span>
+question_tokens = set(question.lower().split()) - STOP_WORDS
+completeness_ratio = len(question_tokens & answer_tokens) / max(len(question_tokens), <span class="num">1</span>)
+
+<span class="cm"># citation_quality: count [N] markers (distinct reasoning: 0→1, 1→2, 2→3, 3→4, ≥4→5)</span>
+n_citations = len(re.findall(r<span class="st">"\[\d+\]"</span>, answer))
+citation_score = min(<span class="num">5</span>, n_citations + <span class="num">1</span>)
+
+<span class="cm"># hallucination_free: what fraction of answer tokens appear in contexts? (same as faithfulness)</span>
+hallucination_ratio = faithfulness_ratio  <span class="cm"># proxy — identical calculation</span></div>
+      <div class="note"><p>The heuristic fallback is not a meaningful replacement for LLM-based scoring — it measures surface-level token overlap, not semantic correctness. A well-cited but numerically wrong answer scores 5/5 on heuristic faithfulness because its words all appear in the context. The fallback exists to ensure the pipeline <em>always produces a result</em> for aggregate statistics, while <code>fallback_used=True</code> in the JudgeResult flags these rows for exclusion from comparative analysis.</p></div>
+
+      <h3>FinanceBench Dataset Structure</h3>
+      <p>The loader fetches the dataset from HuggingFace with <code>load_dataset("PatronusAI/financebench", split="train")</code>. The returned dataset has these columns used by the evaluation pipeline:</p>
+      <table>
+        <thead><tr><th>Column</th><th>Type</th><th>Example</th><th>Used For</th></tr></thead>
+        <tbody>
+          <tr><td><code>question</code></td><td>str</td><td>"What was Apple's total revenue in FY2023?"</td><td>RAG query input</td></tr>
+          <tr><td><code>answer</code></td><td>str</td><td>"$383.3 billion"</td><td><code>ground_truth</code> for RAGAS + judge comparison</td></tr>
+          <tr><td><code>company</code></td><td>str</td><td>"Apple Inc."</td><td>Ticker resolution for RBAC context</td></tr>
+          <tr><td><code>doc_name</code></td><td>str</td><td>"AAPL_FY2023_10K"</td><td>Source filing identification</td></tr>
+          <tr><td><code>evidence_text</code></td><td>str</td><td>"Revenue was $383.3B..."</td><td>Not used — provides oracle context for reference</td></tr>
+        </tbody>
+      </table>
+      <p>The loader uses flexible column detection (<code>row.get("answer") or row.get("ground_truth") or row.get("reference_answer", "")</code>) to handle schema drift across FinanceBench dataset versions without crashing. If fewer than 30 rows survive the company-ticker filter, the loader falls back to returning all available rows rather than erroring.</p>
+
+      <h3>RAGAS Dataset Format</h3>
+      <p>RAGAS 0.4.x expects a HuggingFace <code>Dataset</code> object (not a plain list) with exactly these column names. The evaluation pipeline builds this from the RAG pipeline outputs:</p>
+      <div class="code"><span class="kw">from</span> datasets <span class="kw">import</span> Dataset
+
+ragas_rows = []
+<span class="kw">for</span> row <span class="kw">in</span> sample:
+    answer, contexts, latency_ms = run_rag_pipeline(row[<span class="st">"question"</span>], config)
+    ragas_rows.append({
+        <span class="st">"question"</span>:    row[<span class="st">"question"</span>],
+        <span class="st">"answer"</span>:      answer,
+        <span class="st">"contexts"</span>:    contexts,          <span class="cm"># list[str] — the raw chunk texts</span>
+        <span class="st">"ground_truth"</span>: row[<span class="st">"answer"</span>],     <span class="cm"># singular string, not a list (0.4.x requirement)</span>
+    })
+
+ragas_dataset = Dataset.from_list(ragas_rows)
+result = evaluate(ragas_dataset, metrics=[faithfulness, answer_relevancy, ...])</div>
+      <div class="warn"><p><strong>RAGAS 0.4.x breaking changes fixed:</strong> (1) <code>ground_truth</code> must be a singular string — earlier 0.1.x API used <code>ground_truths: list[str]</code>. (2) <code>result["faithfulness"]</code> returns <code>List[float]</code> not a scalar — use <code>np.nanmean(result["faithfulness"])</code> to aggregate. (3) Set <code>RAGAS_DO_NOT_TRACK=1</code> before importing RAGAS on Windows to prevent the analytics module from spawning a recursive subprocess at import time.</p></div>
+
+      <h3>LLM-as-Judge Prompt</h3>
+      <p>The full prompt sent to Ollama for each evaluation row. Temperature=0 and a strict JSON-only instruction minimize format variance across 150 evaluation calls:</p>
+      <div class="code">JUDGE_PROMPT = <span class="st">"""You are an expert financial RAG evaluator.
+Score the Generated Answer on 4 dimensions.
+
+**Question:** {question}
+**Ground Truth:** {ground_truth}
+**Generated Answer:** {answer}
+**Retrieved Contexts (numbered):**
+{contexts}
+
+Score each dimension 1–5 (integer only):
+1. faithfulness — every claim traceable to retrieved contexts
+   (1=fabricates, 5=fully grounded)
+2. completeness — all question parts addressed
+   (1=major gaps, 5=thorough)
+3. citation_quality — [N] markers placed next to the facts they support
+   (1=none/wrong, 5=all correct)
+4. hallucination_free — no external knowledge beyond retrieved contexts
+   (1=hallucinates, 5=pure corpus)
+
+Return ONLY valid JSON, no other text:
+{{
+  "faithfulness":     {{"score": &lt;1-5&gt;, "reasoning": "&lt;one sentence&gt;"}},
+  "completeness":     {{"score": &lt;1-5&gt;, "reasoning": "&lt;one sentence&gt;"}},
+  "citation_quality": {{"score": &lt;1-5&gt;, "reasoning": "&lt;one sentence&gt;"}},
+  "hallucination_free":{{"score": &lt;1-5&gt;, "reasoning": "&lt;one sentence&gt;"}}
+}}"""</span></div>
+
+      <h3>JSON Parsing and Validation</h3>
+      <p>Even at temperature=0, llama3.2 occasionally wraps its JSON output in markdown fences (<code>```json ... ```</code>) or prepends a sentence before the JSON. The parser handles this:</p>
+      <div class="code"><span class="kw">def</span> <span class="fn">_parse_judge_response</span>(raw: str) -> dict | <span class="kw">None</span>:
+    match = re.search(r<span class="st">"\{.*\}"</span>, raw, re.DOTALL)    <span class="cm"># extract first {...} block</span>
+    <span class="kw">if not</span> match: <span class="kw">return None</span>
+    <span class="kw">try</span>:
+        parsed = json.loads(match.group())
+    <span class="kw">except</span> json.JSONDecodeError:
+        <span class="kw">return None</span>
+    required = {<span class="st">"faithfulness"</span>, <span class="st">"completeness"</span>, <span class="st">"citation_quality"</span>, <span class="st">"hallucination_free"</span>}
+    <span class="kw">if not</span> required.issubset(parsed):
+        <span class="kw">return None</span>
+    <span class="kw">for</span> key <span class="kw">in</span> required:
+        score = parsed[key].get(<span class="st">"score"</span>)
+        <span class="kw">if not</span> isinstance(score, int) <span class="kw">or not</span> (<span class="num">1</span> <= score <= <span class="num">5</span>):
+            <span class="kw">return None</span>   <span class="cm"># triggers heuristic fallback for this row</span>
+    <span class="kw">return</span> parsed</div>
+
+      <h3>A/B Test Reproducibility</h3>
+      <p>All 7 configs are evaluated against the <em>same</em> FinanceBench rows. The test runner samples N rows with a fixed seed (<code>random.seed(42)</code>) at the start of the A/B test run — before looping over configs. This ensures config A and config D answer identical questions, making head-to-head score comparison meaningful. Without a fixed seed, each config might answer different questions, and score differences could reflect dataset variance rather than config quality.</p>
+
+      <h3>A/B Test Composite Winner</h3>
+      <p>The composite score combines RAGAS and judge metrics, weighting the judge 2× because it provides interpretable, reasoning-backed scoring that RAGAS (a black-box automated metric) does not:</p>
+      <div class="code">ragas_composite = (faithfulness + answer_relevancy + context_precision
+                   + context_recall + answer_correctness) / <span class="num">5.0</span>
+
+composite = ragas_composite + judge_overall * <span class="num">2.0</span>
+<span class="cm"># Range: 0.0 (worst RAGAS + worst judge) to 3.0 (perfect RAGAS + perfect judge)</span>
+<span class="cm"># Winner = config with highest composite score across N identical QA pairs</span></div>
     </div>
 
     <!-- ══════ API ══════ -->
@@ -692,10 +1282,102 @@ pattern = r<span class="st">"\b"</span> + re.escape(alias) + r<span class="st">"
     passed: bool          <span class="cm"># True only if ALL four dimensions passed</span>
     fallback_used: bool   <span class="cm"># True if heuristics replaced LLM judge</span></div>
 
-      <h3>Why SQLite for Session History?</h3>
-      <div class="why"><div class="why-label">Design Rationale</div>
-        <p>Session history (chat turns, timestamps, config used) needs to persist across server restarts and support simple queries (fetch last N sessions for a user). SQLite satisfies this with zero infrastructure: no database server, no connection pool, no configuration. For a single-tenant local application with low concurrency, SQLite's write serialization is not a bottleneck. A production multi-tenant deployment would migrate to PostgreSQL, but that migration is trivial with SQLAlchemy.</p>
+      <h3>Complete Request–Response Lifecycle</h3>
+      <p>Tracing a single <code>POST /api/chat</code> call through every layer:</p>
+      <div class="code"><span class="cm"># 1. FastAPI receives HTTP request with Authorization: Bearer aapl-analyst-key</span>
+<span class="cm"># 2. HTTPBearer extracts "aapl-analyst-key"</span>
+<span class="cm"># 3. require_user("viewer") validates key → UserContext(role="analyst", tickers=["AAPL"])</span>
+<span class="cm"># 4. Pydantic validates request body → ChatRequest object</span>
+<span class="cm"># 5. chat.py calls pipeline.run(question, config, user_context)</span>
+<span class="cm"># 6. guardrails.check_topic(question) → passes (financial question)</span>
+<span class="cm"># 7. guardrails.check_scope(question, ["AAPL"]) → passes (no MSFT/AMZN mentioned)</span>
+<span class="cm"># 8. retriever.retrieve(question, ticker_filter=["AAPL"]) → 20 ScoredChunks</span>
+<span class="cm"># 9. guardrails.post_filter(chunks, ["AAPL"]) → 20 AAPL-only chunks (unchanged)</span>
+<span class="cm"># 10. reranker.rerank(question, chunks[:20]) → 5 ScoredChunks</span>
+<span class="cm"># 11. generator.generate(question, top5) → answer string + citations</span>
+<span class="cm"># 12. history.save(session_id, question, answer, config, latency_ms)</span>
+<span class="cm"># 13. Return ChatResponse(answer, citations, latency_ms, config)</span></div>
+
+      <h3>Request and Response Schemas</h3>
+      <div class="code"><span class="kw">class</span> <span class="fn">ChatRequest</span>(BaseModel):
+    question: str                   <span class="cm"># required — the user's question</span>
+    config: str = <span class="st">"config_d"</span>       <span class="cm"># which retrieval configuration to use</span>
+    session_id: str | <span class="kw">None</span> = <span class="kw">None</span>   <span class="cm"># for history grouping; auto-generated if omitted</span>
+    companies: list[str] | <span class="kw">None</span> = <span class="kw">None</span>  <span class="cm"># explicit ticker filter (overrides key scope)</span>
+
+<span class="kw">class</span> <span class="fn">ChatResponse</span>(BaseModel):
+    answer: str                     <span class="cm"># LLM-generated answer with [N] citations</span>
+    citations: list[dict]           <span class="cm"># [{index, doc_id, company, year, score}]</span>
+    latency_ms: int                 <span class="cm"># end-to-end pipeline time</span>
+    config: str                     <span class="cm"># which config was actually used</span>
+    not_found: bool                 <span class="cm"># True if "Answer not found in Corpus"</span>
+
+<span class="kw">class</span> <span class="fn">EvalRequest</span>(BaseModel):
+    config: str = <span class="st">"config_d"</span>
+    dataset: str = <span class="st">"financebench"</span>
+    sample_size: int = <span class="num">20</span>
+    run_judge: bool = <span class="kw">False</span>         <span class="cm"># also run LLM-as-Judge alongside RAGAS</span>
+
+<span class="kw">class</span> <span class="fn">ABTestRequest</span>(BaseModel):
+    configs: list[str] = [<span class="st">"config_a"</span>, ..., <span class="st">"config_g"</span>]
+    sample_size: int = <span class="num">20</span>
+    run_judge: bool = <span class="kw">False</span></div>
+
+      <h3>Session History: SQLite Schema</h3>
+      <p>Chat history is stored in <code>data/query_history.db</code>, a SQLite database with a single table initialized on startup by <code>init_db()</code>:</p>
+      <div class="code">CREATE TABLE IF NOT EXISTS query_history (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id  TEXT NOT NULL,     <span class="cm">-- UUID generated per chat session</span>
+    question    TEXT NOT NULL,
+    answer      TEXT NOT NULL,
+    config      TEXT NOT NULL,     <span class="cm">-- "config_d", etc.</span>
+    latency_ms  INTEGER,
+    not_found   INTEGER DEFAULT 0, <span class="cm">-- 1 if answer was "not found"</span>
+    created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
+);</div>
+      <div class="why"><div class="why-label">Why SQLite for session history?</div>
+        <p>Session history needs to persist across server restarts and support simple queries (fetch last N sessions, delete a session by ID). SQLite satisfies this with zero infrastructure: no database server, no connection pool, no configuration — it is a single file at <code>data/query_history.db</code>. For a single-tenant local application with low concurrency (one user at a time), SQLite's write serialization is not a bottleneck. A production multi-tenant deployment would migrate to PostgreSQL — the migration is trivial because all queries are simple <code>INSERT</code> / <code>SELECT</code> with no ORM dependency.</p>
       </div>
+
+      <h3>Server Startup Events</h3>
+      <p>Two operations run every time the server starts (both via <code>@app.on_event("startup")</code> in <code>main.py</code>):</p>
+      <div class="code"><span class="kw">@app.on_event</span>(<span class="st">"startup"</span>)
+<span class="kw">async def</span> <span class="fn">startup</span>():
+    init_db()          <span class="cm"># creates query_history.db + table if not exists</span>
+    <span class="kw">try</span>:
+        build_bm25_index()    <span class="cm"># reads all texts from ChromaDB → BM25Okapi in-memory</span>
+    <span class="kw">except</span> Exception <span class="kw">as</span> e:
+        logger.warning(f<span class="st">"BM25 index build failed: {e}"</span>)   <span class="cm"># empty collection OK</span></div>
+      <p>BM25 failures on startup are non-fatal — if the ChromaDB collection is empty (first run before indexing), the BM25 index is None and BM25-based retrieval falls back to dense-only. The warning is logged; the server still starts and serves queries via dense retrieval.</p>
+
+      <h3>CORS Configuration</h3>
+      <p>CORS is configured with <code>allow_origins=["*"]</code> — any origin is permitted. This is intentional for a local-first development system where the frontend at <code>localhost:8000/chat</code> and the API at <code>localhost:8000/api</code> are on the same origin anyway, but allowing <code>*</code> means the API can be called from any local tooling (Postman, curl, custom scripts) without configuration. In production, origins would be restricted to the specific deployment domain.</p>
+
+      <h3>Static File Serving</h3>
+      <p>Two routes serve the frontend without a separate web server:</p>
+      <div class="code"><span class="cm"># 1. Chat UI — full SPA with static mount</span>
+app.mount(<span class="st">"/chat"</span>, StaticFiles(directory=str(frontend_dir), html=<span class="kw">True</span>), name=<span class="st">"chat"</span>)
+<span class="cm"># Serves: frontend/chat.html, frontend/css/, frontend/js/</span>
+<span class="cm"># html=True: requests to /chat/ return chat.html (SPA routing)</span>
+
+<span class="cm"># 2. Documentation page — explicit FileResponse route</span>
+<span class="kw">@app</span>.get(<span class="st">"/documentation"</span>)
+<span class="kw">def</span> <span class="fn">serve_docs</span>():
+    <span class="kw">return</span> FileResponse(str(frontend_dir / <span class="st">"docs.html"</span>), media_type=<span class="st">"text/html"</span>)</div>
+      <div class="why"><div class="why-label">Why embed the frontend in FastAPI rather than a separate server?</div>
+        <p>A separate Nginx or Node static server would require an additional process, port management, and CORS configuration between the frontend and API domains. Serving both from FastAPI keeps the entire system as a single <code>uvicorn backend.main:app --reload</code> command with no orchestration layer. Hot-reload works for both Python backend changes and HTML/CSS/JS frontend changes — uvicorn watches the Python files; the browser caches nothing critical.</p>
+      </div>
+
+      <h3>API Documentation: Swagger and Redoc</h3>
+      <p>FastAPI generates OpenAPI 3.0 documentation automatically from Pydantic schemas and endpoint type hints. Two UIs are available without any configuration:</p>
+      <table>
+        <thead><tr><th>URL</th><th>Interface</th><th>Best For</th></tr></thead>
+        <tbody>
+          <tr><td><code>/docs</code></td><td>Swagger UI</td><td>Interactive testing — fill in JSON fields and execute requests from the browser; includes <code>Authorize</code> button for Bearer token</td></tr>
+          <tr><td><code>/redoc</code></td><td>ReDoc</td><td>Reference documentation — clean, nested schema rendering with request/response examples</td></tr>
+          <tr><td><code>/openapi.json</code></td><td>Raw JSON schema</td><td>Import into Postman, Insomnia, or generate client SDKs</td></tr>
+        </tbody>
+      </table>
     </div>
 
     <!-- ══════ AGENTIC ══════ -->
