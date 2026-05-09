@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from loguru import logger
 
-from backend.models.schemas import EvalResult, ABTestResponse
+from backend.models.schemas import EvalResult, ABTestResponse, JudgeAggregateResult
 from backend.evaluation.ragas_eval import run_evaluation
 
 ALL_CONFIGS = ["config_a", "config_b", "config_c", "config_d", "config_e", "config_f", "config_g"]
@@ -16,6 +16,7 @@ def run_ab_test(
     configs: list[str] | None = None,
     dataset: str = "financebench",
     sample_size: int = 20,
+    run_judge: bool = False,
 ) -> ABTestResponse:
     configs_to_run = configs or ALL_CONFIGS
     results: list[EvalResult] = []
@@ -35,10 +36,35 @@ def run_ab_test(
                 sample_size=0,
             ))
 
-    winner = max(results, key=lambda r: r.faithfulness + r.answer_relevancy).config if results else "config_d"
+    # Optional LLM-as-Judge pass
+    judge_results: dict[str, JudgeAggregateResult] = {}
+    if run_judge:
+        from backend.evaluation.llm_judge import run_judge_evaluation
+        for cfg in configs_to_run:
+            logger.info(f"Running LLM judge for {cfg}...")
+            try:
+                judge_results[cfg] = run_judge_evaluation(
+                    config=cfg, dataset=dataset, sample_size=sample_size
+                )
+            except Exception as e:
+                logger.error(f"Judge failed for {cfg}: {e}")
 
-    comparison_table = [
-        {
+    # Winner: composite score when judge available, RAGAS-only otherwise
+    if judge_results:
+        winner = max(
+            results,
+            key=lambda r: (
+                r.faithfulness + r.answer_relevancy
+                + judge_results[r.config].overall_mean * 2
+                if r.config in judge_results else r.faithfulness + r.answer_relevancy
+            ),
+        ).config if results else "config_d"
+    else:
+        winner = max(results, key=lambda r: r.faithfulness + r.answer_relevancy).config if results else "config_d"
+
+    comparison_table = []
+    for r in results:
+        row: dict = {
             "config": r.config,
             "faithfulness": round(r.faithfulness, 3),
             "answer_relevancy": round(r.answer_relevancy, 3),
@@ -48,8 +74,17 @@ def run_ab_test(
             "p95_latency_ms": round(r.response_latency_p95_ms, 0),
             "winner": r.config == winner,
         }
-        for r in results
-    ]
+        if r.config in judge_results:
+            jr = judge_results[r.config]
+            row.update({
+                "judge_faithfulness": round(jr.faithfulness_mean, 3),
+                "judge_completeness": round(jr.completeness_mean, 3),
+                "judge_citation_quality": round(jr.citation_quality_mean, 3),
+                "judge_hallucination_free": round(jr.hallucination_free_mean, 3),
+                "judge_overall": round(jr.overall_mean, 3),
+                "judge_pass_rate": round(jr.pass_rate, 3),
+            })
+        comparison_table.append(row)
 
     _print_table(comparison_table)
     return ABTestResponse(results=results, winner=winner, comparison_table=comparison_table)

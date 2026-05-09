@@ -22,7 +22,12 @@ def evaluate(req: EvalRequest, ctx: UserContext = Depends(require_user("admin"))
 def ab_test(req: ABTestRequest, ctx: UserContext = Depends(require_user("admin"))):
     try:
         from backend.evaluation.ab_test import run_ab_test
-        return run_ab_test(configs=req.configs, dataset=req.dataset, sample_size=req.sample_size)
+        return run_ab_test(
+            configs=req.configs,
+            dataset=req.dataset,
+            sample_size=req.sample_size,
+            run_judge=req.run_judge,
+        )
     except Exception as e:
         logger.error(f"A/B test error: {e}")
         raise HTTPException(status_code=500, detail=str(e))

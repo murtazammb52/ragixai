@@ -62,12 +62,63 @@ class ABTestRequest(BaseModel):
     configs: Optional[list[str]] = None  # None means all 7
     dataset: str = "financebench"
     sample_size: int = 20
+    run_judge: bool = False  # opt-in: also run LLM-as-Judge alongside RAGAS
 
 
 class ABTestResponse(BaseModel):
     results: list[EvalResult]
     winner: str
     comparison_table: list[dict]
+
+
+# ── LLM-as-Judge schemas ───────────────────────────────────────────────────
+
+class DimensionScore(BaseModel):
+    score_raw: int    # 1–5 as returned by the LLM
+    score_norm: float  # score_raw / 5.0, range [0.0, 1.0]
+    passed: bool      # score_norm >= 0.70
+    reasoning: str    # one-sentence LLM explanation
+
+
+class JudgeResult(BaseModel):
+    question: str
+    config: str
+    company: str
+    faithfulness: DimensionScore
+    completeness: DimensionScore
+    citation_quality: DimensionScore
+    hallucination_free: DimensionScore
+    overall_score: float  # mean of the four score_norms
+    passed: bool          # True only if ALL four dimensions passed
+    judge_model: str
+    fallback_used: bool   # True when heuristic fallback was used
+
+
+class JudgeAggregateResult(BaseModel):
+    config: str
+    faithfulness_mean: float
+    completeness_mean: float
+    citation_quality_mean: float
+    hallucination_free_mean: float
+    overall_mean: float
+    pass_rate: float    # fraction of rows where passed=True
+    sample_size: int
+    fallback_count: int  # rows that used heuristic fallback
+
+
+class JudgeRequest(BaseModel):
+    dataset: str = "financebench"
+    config: str = "config_d"
+    sample_size: int = 20
+
+
+class SingleRowJudgeRequest(BaseModel):
+    question: str
+    answer: str
+    contexts: list[str]
+    ground_truth: str
+    config: str = "manual"
+    company: str = ""
 
 
 class HealthResponse(BaseModel):

@@ -13,10 +13,13 @@ def main():
     parser.add_argument("--n", type=int, default=20, help="Samples per config (default: 20)")
     parser.add_argument("--configs", type=str, default=None, help="Comma-separated configs to test (default: all 7)")
     parser.add_argument("--dataset", default="financebench", choices=["financebench", "ragas_testset"])
+    parser.add_argument("--judge", action="store_true",
+                        help="Also run LLM-as-Judge alongside RAGAS (slower)")
     args = parser.parse_args()
 
     configs = [c.strip() for c in args.configs.split(",")] if args.configs else None
-    result = run_ab_test(configs=configs, dataset=args.dataset, sample_size=args.n)
+    result = run_ab_test(configs=configs, dataset=args.dataset, sample_size=args.n,
+                         run_judge=args.judge)
 
     print(f"\n\n★ Winner: {result.winner}")
     print(f"\nComparison table saved. Full results for {len(result.results)} configs.")

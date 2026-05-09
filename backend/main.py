@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from loguru import logger
 
-from backend.api import health, chat, ingest, evaluate, history
+from backend.api import health, chat, ingest, evaluate, history, judge
 from backend.config import settings
 from backend.models.db import build_bm25_index
 from backend.models.history import init_db
@@ -25,6 +25,7 @@ app.include_router(chat.router, prefix="/api", tags=["chat"])
 app.include_router(ingest.router, prefix="/api", tags=["ingest"])
 app.include_router(evaluate.router, prefix="/api", tags=["evaluate"])
 app.include_router(history.router, prefix="/api", tags=["history"])
+app.include_router(judge.router, prefix="/api", tags=["judge"])
 
 # Serve chat UI at /chat
 frontend_dir = Path(__file__).parent.parent / "frontend"
