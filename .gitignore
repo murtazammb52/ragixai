@@ -34,8 +34,10 @@ Thumbs.db
 ~$*
 *.tmp
 
-# Claude Code session data
-.claude/
+# Claude Code session data (keep commands/hooks/settings — those are shared config)
+.claude/projects/
+.claude/*.jsonl
+.claude/*.json.bak
 
 # Jupyter
 .ipynb_checkpoints/
