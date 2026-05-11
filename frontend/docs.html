@@ -11,9 +11,10 @@
       --bg-primary: #080C14; --bg-secondary: #0D1424; --bg-card: rgba(255,255,255,0.04);
       --purple: #7C3AED; --purple-light: #9D5CF6; --electric-blue: #3B82F6;
       --cyan: #06B6D4; --coral: #F43F5E; --emerald: #10B981; --amber: #F59E0B;
-      --lavender: #A78BFA; --white: #FFFFFF; --white-60: rgba(255,255,255,0.6);
-      --white-30: rgba(255,255,255,0.3); --white-10: rgba(255,255,255,0.1);
-      --glass-bg: rgba(255,255,255,0.05); --glass-border: rgba(255,255,255,0.1);
+      --lavender: #A78BFA; --white: #FFFFFF; --white-80: rgba(255,255,255,0.8);
+      --white-60: rgba(255,255,255,0.6); --white-30: rgba(255,255,255,0.3);
+      --white-10: rgba(255,255,255,0.1);
+      --glass-bg: rgba(255,255,255,0.04); --glass-border: rgba(255,255,255,0.09);
       --gradient-primary: linear-gradient(135deg,var(--purple),var(--electric-blue),var(--cyan));
       --br: 16px; --br-sm: 8px;
       --font: 'Inter',-apple-system,sans-serif; --mono: 'JetBrains Mono','Fira Code',monospace;
@@ -30,99 +31,165 @@
     .nav-links a { color: var(--white-60); text-decoration: none; font-size: 0.875rem; font-weight: 500; padding: 0.4rem 0.8rem; border-radius: var(--br-sm); transition: all 0.2s; }
     .nav-links a:hover { color: var(--white); background: var(--glass-bg); }
     .nav-links a.active { color: var(--lavender); background: rgba(124,58,237,0.15); }
-    .nav-badge { background: var(--gradient-primary); color: white; font-size: 0.75rem; font-weight: 700; padding: 0.3rem 0.9rem; border-radius: 20px; text-decoration: none; }
+    .nav-badge { background: var(--gradient-primary); color: white; font-size: 0.75rem; font-weight: 700; padding: 0.3rem 0.9rem; border-radius: 20px; text-decoration: none; transition: opacity 0.2s; }
+    .nav-badge:hover { opacity: 0.85; }
 
     /* Layout */
     .layout { display: flex; min-height: calc(100vh - var(--nav-h)); }
 
     /* Sidebar */
-    .toc { width: 250px; flex-shrink: 0; padding: 1.5rem 1rem; border-right: 1px solid var(--glass-border); position: sticky; top: var(--nav-h); height: calc(100vh - var(--nav-h)); overflow-y: auto; }
-    .toc::-webkit-scrollbar { width: 3px; } .toc::-webkit-scrollbar-thumb { background: var(--glass-border); }
-    .toc-section { font-size: 0.65rem; font-weight: 700; color: var(--white-30); text-transform: uppercase; letter-spacing: 1.5px; margin: 1.2rem 0 0.4rem; padding-left: 0.5rem; }
-    .toc a { display: block; font-size: 0.78rem; color: var(--white-60); text-decoration: none; padding: 0.28rem 0.5rem; border-radius: 5px; border-left: 2px solid transparent; transition: all 0.15s; }
-    .toc a:hover { color: var(--white); background: var(--glass-bg); }
-    .toc a.active { color: var(--lavender); border-left-color: var(--purple); background: rgba(124,58,237,0.08); }
+    .toc { width: 252px; flex-shrink: 0; padding: 1.5rem 1rem; border-right: 1px solid var(--glass-border); position: sticky; top: var(--nav-h); height: calc(100vh - var(--nav-h)); overflow-y: auto; }
+    .toc::-webkit-scrollbar { width: 3px; } .toc::-webkit-scrollbar-thumb { background: rgba(124,58,237,0.3); border-radius: 2px; }
+    .toc-section { font-size: 0.62rem; font-weight: 700; color: var(--white-30); text-transform: uppercase; letter-spacing: 1.8px; margin: 1.4rem 0 0.5rem; padding-left: 0.5rem; }
+    .toc a { display: block; font-size: 0.79rem; color: var(--white-60); text-decoration: none; padding: 0.3rem 0.5rem; border-radius: 5px; border-left: 2px solid transparent; transition: all 0.15s; }
+    .toc a:hover { color: var(--white); background: rgba(124,58,237,0.07); }
+    .toc a.active { color: var(--lavender); border-left-color: var(--purple); background: rgba(124,58,237,0.1); }
 
     /* Main */
     .main { flex: 1; padding: 3rem 4rem; max-width: 980px; }
 
     /* Stage tabs */
     .tabs { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--glass-border); }
-    .tab { padding: 0.38rem 0.9rem; border-radius: 20px; font-size: 0.76rem; font-weight: 600; cursor: pointer; border: 1px solid var(--glass-border); background: var(--glass-bg); color: var(--white-60); transition: all 0.2s; white-space: nowrap; }
-    .tab:hover { border-color: var(--purple); color: var(--lavender); }
-    .tab.active { background: rgba(124,58,237,0.2); border-color: var(--purple); color: var(--lavender); }
+    .tab { padding: 0.38rem 0.9rem; border-radius: 20px; font-size: 0.76rem; font-weight: 600; cursor: pointer; border: 1px solid var(--glass-border); background: transparent; color: var(--white-60); transition: all 0.2s; white-space: nowrap; }
+    .tab:hover { border-color: rgba(124,58,237,0.5); color: var(--lavender); background: rgba(124,58,237,0.06); }
+    .tab.active { background: rgba(124,58,237,0.18); border-color: var(--purple); color: var(--lavender); box-shadow: 0 0 12px rgba(124,58,237,0.2); }
 
     /* Panels */
-    .panel { display: none; animation: fadeIn 0.25s ease; }
+    .panel { display: none; animation: fadeIn 0.2s ease; }
     .panel.active { display: block; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
-    /* Typography */
-    h1 { font-size: 2.1rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.4rem; }
+    /* ── Typography ── */
+    h1 { font-size: 2.2rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.4rem; }
     h1 span { background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .subtitle { font-size: 1rem; color: var(--white-60); margin-bottom: 2rem; line-height: 1.65; }
-    h2 { font-size: 1.45rem; font-weight: 700; margin: 2.5rem 0 0.9rem; }
-    h3 { font-size: 1.05rem; font-weight: 700; margin: 1.75rem 0 0.6rem; color: var(--lavender); }
-    h4 { font-size: 0.82rem; font-weight: 700; margin: 1.2rem 0 0.4rem; color: var(--white-30); text-transform: uppercase; letter-spacing: 0.8px; }
-    p { color: var(--white-60); line-height: 1.8; margin-bottom: 0.9rem; font-size: 0.91rem; }
-    ul, ol { color: var(--white-60); line-height: 1.8; margin-bottom: 0.9rem; padding-left: 1.5rem; font-size: 0.91rem; }
-    li { margin-bottom: 0.25rem; }
-    strong { color: var(--white); font-weight: 600; }
-    code { font-family: var(--mono); font-size: 0.8em; background: rgba(124,58,237,0.15); color: var(--lavender); padding: 2px 6px; border-radius: 4px; }
-    a { color: var(--cyan); text-decoration: none; }
+    .subtitle { font-size: 0.97rem; color: var(--white-60); margin-bottom: 2.2rem; line-height: 1.75; }
 
-    /* Code block */
-    .code { background: rgba(0,0,0,0.45); border: 1px solid var(--glass-border); border-radius: var(--br-sm); padding: 1.2rem 1.4rem; font-family: var(--mono); font-size: 0.79rem; color: #e2e8f0; overflow-x: auto; margin: 0.9rem 0; white-space: pre; line-height: 1.65; }
-    .kw { color: #c084fc; } .st { color: #86efac; } .cm { color: #64748b; font-style: italic; } .fn { color: #60a5fa; } .num { color: #fb923c; }
+    h2 { font-size: 1.55rem; font-weight: 800; margin: 2.8rem 0 1.1rem; color: var(--white); letter-spacing: -0.02em; }
+    h2::after { content: ''; display: block; height: 2px; margin-top: 0.6rem;
+      background: linear-gradient(90deg, var(--purple) 0%, var(--electric-blue) 45%, transparent 100%);
+      border-radius: 2px; }
 
-    /* Callout boxes */
-    .why { border-left: 3px solid var(--emerald); background: rgba(16,185,129,0.06); padding: 1rem 1.25rem; border-radius: 0 var(--br-sm) var(--br-sm) 0; margin: 1.25rem 0; }
-    .why .why-label { font-size: 0.68rem; font-weight: 800; color: var(--emerald); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.4rem; }
-    .why p { margin: 0; color: var(--white-60); font-size: 0.88rem; }
-    .note { border-left: 3px solid var(--purple); background: rgba(124,58,237,0.06); padding: 1rem 1.25rem; border-radius: 0 var(--br-sm) var(--br-sm) 0; margin: 1.25rem 0; }
-    .note p { margin: 0; color: var(--white-60); font-size: 0.88rem; }
-    .warn { border-left: 3px solid var(--amber); background: rgba(245,158,11,0.06); padding: 1rem 1.25rem; border-radius: 0 var(--br-sm) var(--br-sm) 0; margin: 1.25rem 0; }
-    .warn p { margin: 0; color: var(--white-60); font-size: 0.88rem; }
+    h3 { font-size: 1.0rem; font-weight: 700; margin: 2rem 0 0.7rem; color: var(--lavender);
+      position: relative; padding-left: 0.95rem; }
+    h3::before { content: ''; position: absolute; left: 0; top: 0.15em; bottom: 0.1em; width: 3px;
+      background: linear-gradient(180deg, var(--purple), var(--cyan)); border-radius: 2px; }
 
-    /* File badges */
-    .files { margin: 0.5rem 0 1.2rem; display: flex; flex-wrap: wrap; gap: 5px; }
-    .fbadge { display: inline-flex; align-items: center; background: rgba(6,182,212,0.08); border: 1px solid rgba(6,182,212,0.2); color: var(--cyan); font-family: var(--mono); font-size: 0.72rem; padding: 2px 9px; border-radius: 20px; }
+    h4 { font-size: 0.8rem; font-weight: 700; margin: 1.4rem 0 0.5rem; color: rgba(167,139,250,0.7);
+      text-transform: uppercase; letter-spacing: 1px; }
 
-    /* Cards */
+    p { color: var(--white-60); line-height: 1.85; margin-bottom: 0.9rem; font-size: 0.92rem; }
+    ul, ol { color: var(--white-60); line-height: 1.85; margin-bottom: 0.9rem; padding-left: 1.5rem; font-size: 0.92rem; }
+    li { margin-bottom: 0.3rem; }
+    strong { color: var(--white-80); font-weight: 600; }
+    code { font-family: var(--mono); font-size: 0.79em; background: rgba(124,58,237,0.16);
+      color: var(--lavender); padding: 2px 7px; border-radius: 4px;
+      border: 1px solid rgba(124,58,237,0.22); }
+    a { color: var(--cyan); text-decoration: none; transition: color 0.15s; }
+    a:hover { color: #38d6f5; }
+    mark { background: rgba(245,158,11,0.18); color: var(--amber); padding: 1px 5px;
+      border-radius: 3px; font-weight: 600; font-style: normal; }
+
+    /* ── Code blocks ── */
+    .code { background: #050b15; border: 1px solid rgba(124,58,237,0.22);
+      border-left: 3px solid rgba(124,58,237,0.55); border-radius: var(--br-sm);
+      padding: 1.25rem 1.5rem; font-family: var(--mono); font-size: 0.78rem;
+      color: #c8d3e6; overflow-x: auto; margin: 1rem 0; white-space: pre; line-height: 1.72; }
+    pre { background: #050b15; border: 1px solid rgba(124,58,237,0.18);
+      border-left: 3px solid rgba(6,182,212,0.4); border-radius: var(--br-sm);
+      padding: 1.1rem 1.4rem; font-family: var(--mono); overflow-x: auto;
+      white-space: pre; line-height: 1.65; margin: 1rem 0; }
+    .kw { color: #c084fc; font-weight: 600; }
+    .st { color: #86efac; }
+    .cm { color: #4a5568; font-style: italic; }
+    .fn { color: #60a5fa; }
+    .num { color: #fb923c; }
+
+    /* ── Callout boxes ── */
+    .why { border-left: 4px solid var(--emerald); background: rgba(16,185,129,0.05);
+      padding: 1.1rem 1.4rem; border-radius: 0 var(--br-sm) var(--br-sm) 0; margin: 1.4rem 0;
+      box-shadow: inset 0 0 40px rgba(16,185,129,0.03); }
+    .why .why-label { font-size: 0.61rem; font-weight: 800; color: var(--emerald);
+      text-transform: uppercase; letter-spacing: 1.6px; margin-bottom: 0.55rem;
+      display: flex; align-items: center; gap: 5px; }
+    .why .why-label::before { content: '✦'; opacity: 0.8; }
+    .why p { margin: 0; color: rgba(255,255,255,0.58); font-size: 0.875rem; line-height: 1.8; }
+
+    .note { border-left: 4px solid var(--purple); background: rgba(124,58,237,0.06);
+      padding: 1.1rem 1.4rem; border-radius: 0 var(--br-sm) var(--br-sm) 0; margin: 1.4rem 0;
+      box-shadow: inset 0 0 40px rgba(124,58,237,0.03); }
+    .note p { margin: 0; color: rgba(255,255,255,0.58); font-size: 0.875rem; line-height: 1.8; }
+
+    .warn { border-left: 4px solid var(--amber); background: rgba(245,158,11,0.06);
+      padding: 1.1rem 1.4rem; border-radius: 0 var(--br-sm) var(--br-sm) 0; margin: 1.4rem 0;
+      box-shadow: inset 0 0 40px rgba(245,158,11,0.03); }
+    .warn p { margin: 0; color: rgba(255,255,255,0.58); font-size: 0.875rem; line-height: 1.8; }
+
+    .insight { border-left: 4px solid var(--cyan); background: rgba(6,182,212,0.05);
+      padding: 1.1rem 1.4rem; border-radius: 0 var(--br-sm) var(--br-sm) 0; margin: 1.4rem 0;
+      box-shadow: inset 0 0 40px rgba(6,182,212,0.03); }
+    .insight .insight-label { font-size: 0.61rem; font-weight: 800; color: var(--cyan);
+      text-transform: uppercase; letter-spacing: 1.6px; margin-bottom: 0.55rem;
+      display: flex; align-items: center; gap: 5px; }
+    .insight .insight-label::before { content: '◆'; opacity: 0.8; }
+    .insight p { margin: 0; color: rgba(255,255,255,0.58); font-size: 0.875rem; line-height: 1.8; }
+
+    /* ── File badges ── */
+    .files { margin: 0.5rem 0 1.4rem; display: flex; flex-wrap: wrap; gap: 6px; }
+    .fbadge { display: inline-flex; align-items: center; gap: 4px;
+      background: rgba(6,182,212,0.07); border: 1px solid rgba(6,182,212,0.2);
+      color: var(--cyan); font-family: var(--mono); font-size: 0.71rem;
+      padding: 3px 10px; border-radius: 20px; }
+    .fbadge::before { content: '▸'; font-size: 0.75em; opacity: 0.7; }
+
+    /* ── Cards ── */
     .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); gap: 1rem; margin: 1.2rem 0; }
-    .card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--br); padding: 1.1rem; }
-    .card-title { font-size: 0.87rem; font-weight: 700; color: var(--white); margin-bottom: 0.35rem; }
-    .card-body { font-size: 0.8rem; color: var(--white-60); line-height: 1.6; }
-    .card.purple { border-color: rgba(124,58,237,0.35); background: rgba(124,58,237,0.05); }
-    .card.cyan { border-color: rgba(6,182,212,0.35); background: rgba(6,182,212,0.05); }
-    .card.emerald { border-color: rgba(16,185,129,0.35); background: rgba(16,185,129,0.05); }
-    .card.amber { border-color: rgba(245,158,11,0.35); background: rgba(245,158,11,0.05); }
-    .card.coral { border-color: rgba(244,63,94,0.35); background: rgba(244,63,94,0.05); }
+    .card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--br); padding: 1.1rem; transition: border-color 0.2s; }
+    .card:hover { border-color: rgba(124,58,237,0.3); }
+    .card-title { font-size: 0.88rem; font-weight: 700; color: var(--white); margin-bottom: 0.4rem; }
+    .card-body { font-size: 0.8rem; color: var(--white-60); line-height: 1.65; }
+    .card.purple { border-color: rgba(124,58,237,0.3); background: rgba(124,58,237,0.05); }
+    .card.cyan { border-color: rgba(6,182,212,0.3); background: rgba(6,182,212,0.05); }
+    .card.emerald { border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.05); }
+    .card.amber { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.05); }
+    .card.coral { border-color: rgba(244,63,94,0.3); background: rgba(244,63,94,0.05); }
 
-    /* Tables */
-    table { width: 100%; border-collapse: collapse; margin: 0.9rem 0; font-size: 0.84rem; }
-    th { text-align: left; color: var(--white-30); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1px; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--glass-border); font-weight: 700; }
-    td { color: var(--white-60); padding: 0.6rem 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: top; font-size: 0.84rem; }
-    td strong { color: var(--white); }
-    tr:hover td { background: var(--glass-bg); }
+    /* ── Tables ── */
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.845rem; }
+    th { text-align: left; color: var(--lavender); font-size: 0.67rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.9px; padding: 0.65rem 0.85rem;
+      border-bottom: 1px solid rgba(124,58,237,0.3);
+      background: rgba(124,58,237,0.1); }
+    td { color: var(--white-60); padding: 0.65rem 0.85rem;
+      border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: top; font-size: 0.845rem; }
+    td strong { color: var(--white-80); }
+    tr:nth-child(even) td { background: rgba(255,255,255,0.016); }
+    tr:hover td { background: rgba(124,58,237,0.07); transition: background 0.12s; }
 
-    /* Metric grid */
-    .metrics { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); gap: 0.7rem; margin: 1rem 0; }
-    .metric { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--br-sm); padding: 0.9rem; text-align: center; }
-    .metric-val { font-size: 1.5rem; font-weight: 800; font-family: var(--mono); background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .metric-label { font-size: 0.68rem; color: var(--white-30); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px; }
+    /* ── Metric grid ── */
+    .metrics { display: grid; grid-template-columns: repeat(auto-fill, minmax(135px,1fr)); gap: 0.75rem; margin: 1.1rem 0; }
+    .metric { background: linear-gradient(145deg, rgba(124,58,237,0.1), rgba(59,130,246,0.05));
+      border: 1px solid rgba(124,58,237,0.22); border-radius: var(--br-sm);
+      padding: 1rem 0.9rem; text-align: center;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; }
+    .metric:hover { transform: translateY(-3px); border-color: rgba(124,58,237,0.45);
+      box-shadow: 0 8px 24px rgba(124,58,237,0.15); }
+    .metric-val { font-size: 1.55rem; font-weight: 800; font-family: var(--mono);
+      background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .metric-label { font-size: 0.65rem; color: var(--white-30); text-transform: uppercase;
+      letter-spacing: 0.6px; margin-top: 5px; font-weight: 600; }
 
-    /* Pipeline flow */
+    /* ── Pipeline flow ── */
     .flow { display: flex; align-items: center; gap: 0; flex-wrap: wrap; margin: 1.2rem 0; }
-    .pipe { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--br-sm); padding: 0.45rem 0.9rem; font-size: 0.76rem; font-weight: 600; white-space: nowrap; }
+    .pipe { background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);
+      border-radius: var(--br-sm); padding: 0.45rem 0.9rem; font-size: 0.76rem; font-weight: 600; white-space: nowrap; }
     .arrow { color: var(--white-30); padding: 0 5px; }
-    .pipe.p { border-color: rgba(124,58,237,0.5); color: var(--lavender); }
-    .pipe.c { border-color: rgba(6,182,212,0.5); color: var(--cyan); }
-    .pipe.e { border-color: rgba(16,185,129,0.5); color: var(--emerald); }
-    .pipe.a { border-color: rgba(245,158,11,0.5); color: var(--amber); }
-    .pipe.r { border-color: rgba(244,63,94,0.5); color: var(--coral); }
+    .pipe.p { border-color: rgba(124,58,237,0.5); color: var(--lavender); background: rgba(124,58,237,0.07); }
+    .pipe.c { border-color: rgba(6,182,212,0.5); color: var(--cyan); background: rgba(6,182,212,0.07); }
+    .pipe.e { border-color: rgba(16,185,129,0.5); color: var(--emerald); background: rgba(16,185,129,0.07); }
+    .pipe.a { border-color: rgba(245,158,11,0.5); color: var(--amber); background: rgba(245,158,11,0.07); }
+    .pipe.r { border-color: rgba(244,63,94,0.5); color: var(--coral); background: rgba(244,63,94,0.07); }
 
-    hr { border: none; border-top: 1px solid var(--glass-border); margin: 2rem 0; }
+    hr { border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 2rem 0; }
 
     @media (max-width: 900px) { .toc { display: none; } .main { padding: 2rem 1.5rem; } }
   </style>
@@ -831,7 +898,7 @@ where={<span class="st">"ticker"</span>: {<span class="st">"$in"</span>: [<span 
 
       <h3>Why 250 token output limit?</h3>
       <div class="why"><div class="why-label">Parameter Rationale</div>
-        <p>A complete financial answer — dollar figure + year + metric definition + one citation — is typically 40–120 tokens. 250 tokens allows for multi-part questions (e.g., "revenue and operating income") without letting the model ramble. Longer limits increase per-query latency linearly: each additional 50 tokens adds ~200ms on the MX450.</p>
+        <p>A complete financial answer — dollar figure + year + metric definition + one citation — is typically 40–120 tokens. 250 tokens allows for multi-part questions (e.g., "revenue and operating income") without letting the model ramble. Longer limits increase per-query latency linearly: at ~25 tok/s on the MX450, each additional 50 tokens adds ~2,000ms. A 100-token answer costs ~4 s of generation alone — so keeping the limit at 250 rather than 500 cuts worst-case latency in half.</p>
       </div>
 
       <h3>Prompt Design</h3>
@@ -1967,7 +2034,7 @@ sys.exit(0)               # informational only, never blocks</pre>
             <td><span style="color:var(--emerald);font-weight:600;">0.87 ✓</span></td>
             <td><span style="color:var(--emerald);font-weight:600;">0.85 ✓</span></td>
             <td><span style="color:var(--emerald);font-weight:600;">0.84 ✓</span></td>
-            <td><span style="color:var(--emerald);font-weight:600;">2,847ms ✓</span></td>
+            <td><span style="color:var(--amber);font-weight:600;">3,421ms ✗</span></td>
           </tr>
           <tr>
             <td><strong>E</strong></td>
@@ -1977,7 +2044,7 @@ sys.exit(0)               # informational only, never blocks</pre>
             <td><span style="color:var(--emerald);font-weight:600;">0.85 ✓</span></td>
             <td><span style="color:var(--amber);">0.83</span></td>
             <td><span style="color:var(--amber);">0.81</span></td>
-            <td><span style="color:var(--emerald);font-weight:600;">2,914ms ✓</span></td>
+            <td><span style="color:var(--coral);">4,187ms ✗</span></td>
           </tr>
           <tr>
             <td><strong>F</strong></td>
@@ -1987,7 +2054,7 @@ sys.exit(0)               # informational only, never blocks</pre>
             <td><span style="color:var(--amber);">0.83</span></td>
             <td><span style="color:var(--amber);">0.81</span></td>
             <td><span style="color:var(--amber);">0.79</span></td>
-            <td><span style="color:var(--emerald);font-weight:600;">2,743ms ✓</span></td>
+            <td><span style="color:var(--amber);font-weight:600;">3,284ms ✗</span></td>
           </tr>
           <tr>
             <td><strong>G</strong></td>
@@ -1997,7 +2064,7 @@ sys.exit(0)               # informational only, never blocks</pre>
             <td><span style="color:var(--amber);">0.80</span></td>
             <td><span style="color:var(--coral);">0.77</span></td>
             <td><span style="color:var(--coral);">0.77</span></td>
-            <td><span style="color:var(--emerald);font-weight:600;">2,521ms ✓</span></td>
+            <td><span style="color:var(--amber);font-weight:600;">3,102ms ✗</span></td>
           </tr>
           <tr>
             <td><strong>C</strong></td>
@@ -2032,7 +2099,7 @@ sys.exit(0)               # informational only, never blocks</pre>
         </tbody>
       </table>
       </div>
-      <p style="font-size:0.8rem;color:var(--white-30);">Green = at or above target threshold. Amber = within 3 points of target. Red = below threshold. All configs meet the p95 latency target. Config D is the only configuration passing all five RAGAS thresholds.</p>
+      <p style="font-size:0.8rem;color:var(--white-30);">Green = at or above target threshold. Amber = within 3 points / within 500 ms of target. Red = below threshold. <strong style="color:var(--white-60);">Reranker configs (D, E, F, G) exceed the 3 s p95 target on MX450 hardware</strong> — generation at ~25 tok/s dominates latency, and p95 captures complex multi-part answers (~120 tokens ≈ 4.8 s generation alone). Config E adds further latency from the Cohere API network round-trip. Configs A, B, C (no reranker) remain within target. Config D is the only configuration passing all five RAGAS thresholds.</p>
 
       <!-- Judge table -->
       <h3>LLM-as-Judge Scores — All 7 Configurations (n = 150)</h3>
@@ -2170,7 +2237,7 @@ sys.exit(0)               # informational only, never blocks</pre>
       <!-- Key findings -->
       <h3>Key Findings</h3>
       <ul>
-        <li><strong>Reranking is the single highest-ROI improvement:</strong> Config D vs C (reranker on/off, same hybrid retrieval) — +0.10 answer correctness, +0.09 faithfulness, +14 percentage points judge pass rate. The 700ms latency cost is justified.</li>
+        <li><strong>Reranking is the single highest-ROI improvement:</strong> Config D vs C (reranker on/off, same hybrid retrieval) — +0.10 answer correctness, +0.09 faithfulness, +14 percentage points judge pass rate. The ~1,300ms p95 latency overhead (CrossEncoder inference + slightly longer, more complete answers) is justified for offline evaluation; interactive chat targets can lower <code>num_predict</code> to cap generation length.</li>
         <li><strong>Hybrid retrieval dominates pure modes:</strong> Config C (hybrid, no reranker) beats Config A (dense only) on every metric and beats Config B (BM25 only) on faithfulness and precision. Dense and BM25 are genuinely complementary for financial text.</li>
         <li><strong>BM25-only (Config B) has the highest context recall of the non-hybrid configs:</strong> 0.72 vs Config A's 0.70 — because BM25 exact-matches specific financial terms (accession numbers, exact line item names) that embeddings smooth over.</li>
         <li><strong>Cohere embeddings (Config E) don't exceed local embeddings (Config D) on this corpus:</strong> Config E is 2 points below D on faithfulness and 1 point below on relevancy. The Cohere embed API adds latency (network round-trip) and cost without a measurable benefit over all-MiniLM on this financial domain.</li>
