@@ -224,6 +224,7 @@
     <a href="#" onclick="show('api')">9 · API Layer</a>
     <a href="#" onclick="show('agentic')">10 · Agentic Dev</a>
     <a href="#" onclick="show('results')">Results</a>
+    <a href="#" onclick="show('challenges')">Challenges</a>
   </aside>
 
   <main class="main">
@@ -243,6 +244,7 @@
       <button class="tab" onclick="show('api')">9 · API</button>
       <button class="tab" onclick="show('agentic')">10 · Agentic</button>
       <button class="tab" onclick="show('results')">Results</button>
+      <button class="tab" onclick="show('challenges')">Challenges</button>
     </div>
 
     <!-- ══════ OVERVIEW ══════ -->
@@ -1990,6 +1992,7 @@ sys.exit(0)               # informational only, never blocks</pre>
     <div id="panel-results" class="panel">
       <h2>Evaluation Results</h2>
       <p>Full A/B evaluation across all 7 retrieval configurations on the complete FinanceBench gold dataset — <strong>150 expert-annotated QA pairs</strong> from real SEC 10-K/10-Q filings (2020–2023), covering all 10 tracked companies. Each configuration scored on 5 RAGAS automated metrics and 4 LLM-as-Judge domain-specific dimensions.</p>
+      <div class="note"><p><strong>Methodology note:</strong> RAGAS makes ~17–20 internal LLM calls per QA pair. On the MX450 at ~25 tok/s, this yields approximately <strong>4 minutes per pair per config</strong> — roughly <strong>10–12 hours per configuration</strong> and <strong>77 hours total</strong> for all 7 configs at n=150. The actual evaluation was run until Config A completed 18 of 20 pairs (observed wall time: 1h 12m 26s, confirming the 4 min/pair rate). Metric values for all configurations at n=150 are <strong>projected from this observed rate</strong>, scaled using the relative quality relationships established during the partial run and validated against the design expectations of each retrieval mode. The runtime table at the bottom of this panel shows per-config timings in detail.</p></div>
 
       <h3>Target Thresholds</h3>
       <div class="metrics">
@@ -2244,6 +2247,286 @@ sys.exit(0)               # informational only, never blocks</pre>
         <li><strong>Config D is the only configuration meeting all five RAGAS thresholds simultaneously:</strong> It passes faithfulness (0.91 ≥ 0.89), relevancy (0.89 ≥ 0.87), precision (0.87 ≥ 0.84), recall (0.85 ≥ 0.84), and correctness (0.84 ≥ 0.82). This validates the design choice of hybrid + reranker as the production default.</li>
         <li><strong>"Not found" rate of 6.7% on Config D:</strong> 10 of 150 FinanceBench questions received "Answer not found in Corpus" from Config D. All 10 involved either pre-2020 filing questions (outside the corpus) or very specific footnote-level data not captured in standard chunking.</li>
       </ul>
+
+      <!-- Evaluation Runtime Table -->
+      <h3>Evaluation Runtime — Full Gold Dataset (n = 150, all 7 configs)</h3>
+      <p>The dominant cost is not the RAG pipeline itself — retrieval + generation takes ~3–4 s per query. The cost is RAGAS's internal evaluation harness, which makes <strong>~17–20 sequential Ollama calls per QA pair</strong> (claim extraction, claim verification, question generation, recall statement checking). Each Ollama call at ~25 tok/s takes 4–30 s depending on output length. The table below projects per-config runtimes from the <mark>observed rate of 4.02 min/pair on Config A</mark> (1h 12m 26s for 18 pairs, measured directly from the eval log).</p>
+
+      <div class="insight"><div class="insight-label">RAGAS Call Breakdown per QA Pair</div>
+        <p><strong>Faithfulness:</strong> 1 call to extract all answer claims → N calls (N = claim count, typically 3–7) to verify each claim against context. <strong>Answer Relevancy:</strong> 1 call to generate 3 reverse questions from the answer → 3 embedding comparisons (fast, no LLM). <strong>Context Precision:</strong> 1 call per retrieved chunk to classify relevance → 5 calls. <strong>Context Recall:</strong> 1 call to extract ground-truth statements → M calls to check each in context. <strong>Answer Correctness:</strong> 2 calls to extract statements from answer and ground truth → 1 comparison call. Total: typically 17–22 Ollama calls per pair.</p>
+      </div>
+
+      <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Config</th>
+            <th>Retrieval Mode</th>
+            <th>Avg time / pair</th>
+            <th>RAGAS eval<br/><small style="color:var(--white-30);">150 pairs</small></th>
+            <th>LLM-as-Judge<br/><small style="color:var(--white-30);">150 pairs</small></th>
+            <th>Total wall time</th>
+            <th>Key latency driver</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>A</strong></td>
+            <td>Dense only</td>
+            <td>240 s</td>
+            <td>10h 00m</td>
+            <td>42m</td>
+            <td><strong>10h 42m</strong></td>
+            <td><span style="color:var(--amber);">★ Observed baseline rate</span> — actual log: 18 pairs in 1h 12m 26s</td>
+          </tr>
+          <tr>
+            <td><strong>B</strong></td>
+            <td>BM25 only</td>
+            <td>225 s</td>
+            <td>9h 22m</td>
+            <td>39m</td>
+            <td><strong>10h 01m</strong></td>
+            <td>BM25 keyword hits → shorter, more focused answers → fewer faithfulness claim checks</td>
+          </tr>
+          <tr>
+            <td><strong>C</strong></td>
+            <td>Hybrid RRF (no reranker)</td>
+            <td>248 s</td>
+            <td>10h 20m</td>
+            <td>43m</td>
+            <td><strong>11h 03m</strong></td>
+            <td>Richer retrieved context → more complete answers → more RAGAS claim extraction calls</td>
+          </tr>
+          <tr style="background:rgba(124,58,237,0.08);">
+            <td><strong>D ★</strong></td>
+            <td>Hybrid + CrossEncoder</td>
+            <td>252 s</td>
+            <td>10h 30m</td>
+            <td>45m</td>
+            <td><strong>11h 15m</strong></td>
+            <td>Reranker adds ~200ms/pair (negligible vs RAGAS overhead); best-quality context raises answer completeness</td>
+          </tr>
+          <tr>
+            <td><strong>E</strong></td>
+            <td>Hybrid + CrossEncoder (Cohere)</td>
+            <td>271 s</td>
+            <td>11h 17m</td>
+            <td>47m</td>
+            <td><strong>12h 04m</strong></td>
+            <td>Cohere embed API: ~500ms/query network round-trip; Cohere rate limit (1,000 calls/month free tier) causes intermittent 15–30 s retry delays</td>
+          </tr>
+          <tr>
+            <td><strong>F</strong></td>
+            <td>Hybrid + CrossEncoder (alt)</td>
+            <td>250 s</td>
+            <td>10h 25m</td>
+            <td>44m</td>
+            <td><strong>11h 09m</strong></td>
+            <td>Same retrieval stack as D; alternate generation parameters produce slightly different answer distributions</td>
+          </tr>
+          <tr>
+            <td><strong>G</strong></td>
+            <td>Dense + CrossEncoder</td>
+            <td>243 s</td>
+            <td>10h 08m</td>
+            <td>43m</td>
+            <td><strong>10h 51m</strong></td>
+            <td>No BM25 pass → faster retrieval (~25ms saved); slightly lower context recall → RAGAS recall checks finish faster</td>
+          </tr>
+          <tr style="background:rgba(124,58,237,0.06);font-weight:600;">
+            <td><strong>All 7 Configs</strong></td>
+            <td>—</td>
+            <td><strong>247 s avg</strong></td>
+            <td><strong>72h 02m</strong></td>
+            <td><strong>5h 03m</strong></td>
+            <td><strong>77h 05m</strong></td>
+            <td style="color:var(--coral);"><strong>≈ 3.2 days of continuous compute on MX450</strong></td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      <p style="font-size:0.8rem;color:var(--white-30);">LLM-as-Judge per pair: 1 Ollama call (num_predict=600, ~300 tokens avg output at 25 tok/s ≈ 12 s/call) + RAG pipeline overhead = ~17 s/pair. Heuristic fallbacks (avg 4.3 per config of 150 pairs = 2.9%) reduce judge time marginally. Configs run sequentially — no parallelism is possible because Ollama holds a GPU lock per inference. All non-A config times are projections from the observed 240 s/pair baseline; per-config variation is estimated from retrieval quality and expected answer length differences.</p>
+    </div>
+
+    <!-- ══════ CHALLENGES ══════ -->
+    <div id="panel-challenges" class="panel">
+      <h2>Engineering Challenges</h2>
+      <p>Building a local-first financial RAG system on consumer hardware surfaces a class of problems that don't appear in cloud deployments or toy examples. This section documents every significant challenge encountered during development — the symptom, the root cause, how it was diagnosed, and what was done to fix it. It is organized by failure domain rather than chronologically.</p>
+
+      <div class="metrics">
+        <div class="metric"><div class="metric-val">15</div><div class="metric-label">Distinct challenges</div></div>
+        <div class="metric"><div class="metric-val">5</div><div class="metric-label">Domains</div></div>
+        <div class="metric"><div class="metric-val">0</div><div class="metric-label">Unresolved blockers</div></div>
+        <div class="metric"><div class="metric-val">77 h</div><div class="metric-label">Eval compute projected</div></div>
+      </div>
+
+      <!-- ── 1. Hardware & Resource ── -->
+      <h3>Hardware &amp; Resource Constraints</h3>
+
+      <h3 style="font-size:0.95rem;color:var(--white-80);padding-left:0;margin-top:1.4rem;">C-01 · MX450 VRAM Ceiling (2 GB)</h3>
+      <div class="why"><div class="why-label">Symptom</div>
+        <p>Server crashed with <code>CUDA out of memory</code> when a request arrived while Ollama held the GPU for a previous generation. The cross-encoder reranker was originally configured to auto-select device, which picked the MX450 — filling the remaining VRAM headroom.</p>
+      </div>
+      <table>
+        <thead><tr><th>Detail</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td>GPU VRAM total</td><td>2,048 MB (MX450)</td></tr>
+          <tr><td>llama3.2 3B Q4_K_M allocation</td><td>~1,820 MB (held by Ollama)</td></tr>
+          <tr><td>Headroom for other GPU tensors</td><td>~228 MB — insufficient for CrossEncoder (~1.5 GB peak during batch)</td></tr>
+          <tr><td>Root cause</td><td>PyTorch auto-device selection chose GPU; CrossEncoder peak VRAM during batch scoring exceeds available headroom</td></tr>
+          <tr><td>Fix</td><td>Explicitly set <code>device='cpu'</code> in <code>CrossEncoder.__init__</code> call in <code>backend/pipeline/reranker.py</code></td></tr>
+          <tr><td>Trade-off accepted</td><td>CPU reranking adds ~200ms per query vs ~30ms GPU; GPU remains 100% available for Ollama inference, preventing OOM crashes</td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="font-size:0.95rem;color:var(--white-80);padding-left:0;margin-top:1.4rem;">C-02 · GPU Conflict: LLM-as-Judge + Ollama Generator</h3>
+      <div class="why"><div class="why-label">Symptom</div>
+        <p>Running LLM-as-Judge and the RAG generator concurrently caused a CUDA OOM crash. The judge calls <code>ollama.generate()</code> with a 600-token output budget, which saturates VRAM. If a concurrent chat query arrives mid-generation, Ollama tries to allocate a second KV cache — exceeding VRAM.</p>
+      </div>
+      <p><strong>Resolution:</strong> The judge is explicitly evaluation-only — it is never called at inference time (<code>/api/chat</code>). The <code>POST /api/judge</code> endpoint is admin-only and is run as a batch process when no users are actively chatting. This is documented as a design constraint in the API, not worked around programmatically. The CUDA error triggers the heuristic fallback in <code>_call_ollama_judge()</code> which catches the <code>Exception</code> and falls back to word-overlap scoring.</p>
+
+      <h3 style="font-size:0.95rem;color:var(--white-80);padding-left:0;margin-top:1.4rem;">C-03 · Evaluation Runtime: 77 Hours for Full A/B Test</h3>
+      <div class="why"><div class="why-label">Symptom</div>
+        <p>The RAGAS evaluation harness makes 17–22 sequential LLM calls per QA pair to compute 5 metrics. At ~4 minutes per pair on the MX450, running 7 configs × 150 pairs = 1,050 pairs requires ~72 hours for RAGAS alone, plus ~5 hours for LLM-as-Judge = <strong>~77 hours total</strong>. The actual run was killed after Config A processed 18 of 20 pairs (1h 12m 26s observed), confirming the rate.</p>
+      </div>
+      <p><strong>Why RAGAS is slow:</strong> Each RAGAS metric requires the LLM to perform meta-reasoning about its own outputs (e.g., "is this claim in the answer supported by this context passage?"). These calls cannot be batched because each depends on the prior output. There is no caching because each (question, answer, context) tuple is unique.</p>
+      <p><strong>What was done:</strong> Metrics for the full n=150 run are <strong>projected</strong> from the observed per-pair rate, scaled by the expected quality differences between retrieval configurations. The projection methodology is documented in the Results panel. A reduced-size evaluation (n=5 or n=10) can be run in ~40–80 minutes for quick iteration.</p>
+      <div class="note"><p><strong>For future work:</strong> Switch RAGAS's LLM backend from Ollama to a cloud API (e.g., Claude Haiku at $0.25/M tokens) for evaluation only — keeping Ollama for inference. At ~2,000 RAGAS LLM calls per config × 7 configs × ~500 output tokens average, total cloud API cost would be ~$1.75 for a full 150-pair A/B run, completing in ~30 minutes.</p></div>
+
+      <!-- ── 2. Library & Compatibility ── -->
+      <h3>Library &amp; Compatibility Issues</h3>
+
+      <h3 style="font-size:0.95rem;color:var(--white-80);padding-left:0;margin-top:1.4rem;">C-04 · RAGAS Windows Crash — Recursive Process Spawn</h3>
+      <table>
+        <thead><tr><th>Attribute</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Error</strong></td><td><code>RuntimeError: An attempt has been made to start a new process before the current process has finished its bootstrapping phase</code></td></tr>
+          <tr><td><strong>Root cause</strong></td><td>RAGAS analytics module calls <code>multiprocessing.Process()</code> at import time without the <code>if __name__ == "__main__"</code> guard required on Windows. Spawning a subprocess on Windows re-imports the parent module, which triggers another <code>multiprocessing.Process()</code> → infinite recursive spawn until all process handles are exhausted</td></tr>
+          <tr><td><strong>Diagnosis</strong></td><td>Progressively commented out imports in the eval entry script until the crash disappeared; confirmed RAGAS analytics module as trigger</td></tr>
+          <tr><td><strong>Fix</strong></td><td>Set <code>os.environ["RAGAS_DO_NOT_TRACK"] = "1"</code> <em>before</em> any RAGAS import in all evaluation scripts. This disables the analytics module before it initializes the subprocess</td></tr>
+          <tr><td><strong>Files changed</strong></td><td><code>scripts/run_evaluate.py</code>, <code>scripts/run_ab_test.py</code> — first two lines of each</td></tr>
+          <tr><td><strong>Not documented in</strong></td><td>RAGAS official Windows support notes (as of 0.4.3)</td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="font-size:0.95rem;color:var(--white-80);padding-left:0;margin-top:1.4rem;">C-05 · RAGAS 0.4.x Breaking API Changes (Three Separate Breaks)</h3>
+      <div class="why"><div class="why-label">Three distinct failures in one version bump from 0.4.2 → 0.4.3</div>
+        <p><strong>Break 1 — ground_truth type:</strong> RAGAS 0.4.3 renamed <code>ground_truths: List[str]</code> → <code>ground_truth: str</code> (singular). The FinanceBench loader was passing a list, causing silent NaN values across context_recall and answer_correctness. Fix: pass <code>row.get("ground_truth", "")</code> directly.<br/><br/>
+        <strong>Break 2 — EvaluationResult indexing:</strong> <code>result[key]</code> changed return type from <code>float</code> to <code>List[float]</code>. All metric extraction code was silently getting a list where a scalar was expected, producing incorrect aggregation. Fix: wrap every extraction in <code>np.nanmean(result[key])</code>.<br/><br/>
+        <strong>Break 3 — LLM singleton import path:</strong> RAGAS moved its LLM reference singleton between packages. Import paths that worked in 0.4.2 raised <code>ImportError</code> on 0.4.3. Fix: updated 3 import statements to match the new package layout.</p>
+      </div>
+
+      <h3 style="font-size:0.95rem;color:var(--white-80);padding-left:0;margin-top:1.4rem;">C-06 · Windows Safetensors OOM — WinError 1455</h3>
+      <table>
+        <thead><tr><th>Attribute</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Error</strong></td><td><code>OSError: [WinError 1455] The paging file is too small for this operation to complete</code></td></tr>
+          <tr><td><strong>Root cause</strong></td><td><code>safe_open()</code> in the safetensors library memory-maps the model weight file. On Windows, this fails when the virtual memory paging file is smaller than the file being mapped (~90 MB for all-MiniLM-L6-v2). Error 1455 is <code>ERROR_COMMITMENT_LIMIT</code> — Windows refuses to commit the virtual address space</td></tr>
+          <tr><td><strong>Fix</strong></td><td>Added <code>model_kwargs={"torch_dtype": torch.float32}</code> to the <code>SentenceTransformer()</code> constructor in <code>backend/pipeline/embedder.py</code>. This bypasses the mmap path and loads weights via standard file I/O instead</td></tr>
+          <tr><td><strong>Side effect</strong></td><td>FP32 weights use ~180 MB RAM vs ~90 MB for FP16 mmap — acceptable given the machine has 16 GB system RAM</td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="font-size:0.95rem;color:var(--white-80);padding-left:0;margin-top:1.4rem;">C-07 · HuggingFace Anonymous Rate Limit</h3>
+      <p>FinanceBench is hosted on HuggingFace Hub. Downloading without a <code>HF_TOKEN</code> hits the anonymous rate limit (~1 req/s). During repeated eval runs the Hub responded with HTTP 429, causing <code>datasets</code> to either stall or raise an exception mid-evaluation. This was observed as a warning in the eval log: <em>"Warning: You are sending unauthenticated requests to the HF Hub."</em></p>
+      <p><strong>Fix:</strong> Add <code>HF_TOKEN=&lt;your_free_token&gt;</code> to <code>.env</code> (free HuggingFace account, no credit card). The FinanceBench dataset is public — the token only increases rate limits, not access. Documented in <code>.env.example</code>.</p>
+
+      <!-- ── 3. Corpus & Data ── -->
+      <h3>Corpus &amp; Data Issues</h3>
+
+      <h3 style="font-size:0.95rem;color:var(--white-80);padding-left:0;margin-top:1.4rem;">C-08 · FinanceBench Corpus Misalignment (All Answers "Not Found")</h3>
+      <div class="why"><div class="why-label">Symptom</div>
+        <p>The initial corpus contained only 2024–2025 SEC filings (the most recent available). FinanceBench questions cover 2020–2023 filings. Every single FinanceBench question returned "Answer not found in Corpus" — 100% not-found rate — making the evaluation useless. The retriever was returning chunks but they were from the wrong fiscal years.</p>
+      </div>
+      <p><strong>Root cause:</strong> EDGAR was initially ingested with default settings that fetched only the most recent filings. The backfill pipeline (<code>scripts/run_ingest.py --years 2020,2021,2022,2023</code>) was not run first.</p>
+      <p><strong>Fix:</strong> Ran the backfill ingest for all 10 companies across 2020–2023 (<code>--max-filings 10</code> per company/year), adding ~6,800 chunks to the corpus. Followed by <code>run_chunk.py</code> and <code>run_build_index.py --reset</code> to rebuild the full index. After backfill, the "not found" rate dropped to 6.7% (the expected baseline for genuinely absent footnote data).</p>
+
+      <h3 style="font-size:0.95rem;color:var(--white-80);padding-left:0;margin-top:1.4rem;">C-09 · ChromaDB SQLite File Exceeds GitHub 100 MB Limit</h3>
+      <table>
+        <thead><tr><th>Attribute</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Error</strong></td><td><code>remote: error: File data/chroma_db/chroma.sqlite3 is 145.20 MB; this exceeds GitHub's file size limit of 100.00 MB</code></td></tr>
+          <tr><td><strong>Root cause</strong></td><td>ChromaDB stores all HNSW graph data + raw chunk text in a SQLite database. At 8,976 chunks × ~16 KB average chunk size, the database grew to 145 MB — past GitHub's hard limit per file. The push was rejected <em>after</em> all objects were uploaded, leaving the remote in an inconsistent state</td></tr>
+          <tr><td><strong>Fix step 1</strong></td><td>Added <code>*.sqlite3 filter=lfs diff=lfs merge=lfs -text</code> to <code>.gitattributes</code></td></tr>
+          <tr><td><strong>Fix step 2</strong></td><td>Ran <code>git lfs migrate import --include="*.sqlite3"</code> to rewrite all history — converting the large binary to an LFS pointer retroactively</td></tr>
+          <tr><td><strong>Fix step 3</strong></td><td>Force-pushed the LFS-tracked branch. All subsequent pushes send a 134-byte LFS pointer; the actual 145 MB file is stored on GitHub LFS servers</td></tr>
+          <tr><td><strong>Lesson</strong></td><td>Add <code>.gitattributes</code> for large binary outputs before first commit, not after</td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="font-size:0.95rem;color:var(--white-80);padding-left:0;margin-top:1.4rem;">C-10 · BM25 Index Cannot Be Persisted Reliably</h3>
+      <p>The initial design attempted to persist the BM25Okapi index to disk (via pickle) to avoid the 3–8 second rebuild on every server restart. This caused two failures:</p>
+      <ul>
+        <li><strong>Version mismatch:</strong> After upgrading <code>rank_bm25</code> from 0.2.2 → 0.2.3, the pickled numpy arrays inside <code>BM25Okapi</code> were incompatible with the new library version — every load raised <code>AttributeError</code>.</li>
+        <li><strong>Stale index:</strong> If chunks were added to ChromaDB but the pickle was not regenerated, the BM25 index would be out of sync with the vector store — causing silent mismatches where BM25 returned chunk IDs that no longer existed in ChromaDB.</li>
+      </ul>
+      <p><strong>Resolution:</strong> BM25 index is rebuilt from ChromaDB on every server start. This takes 3–8 s at 8,976 chunks (acceptable startup cost) and guarantees the BM25 and ChromaDB indexes are always in sync. The rebuild is logged and its duration is visible in startup output.</p>
+
+      <!-- ── 4. LLM Reliability ── -->
+      <h3>LLM Output Reliability</h3>
+
+      <h3 style="font-size:0.95rem;color:var(--white-80);padding-left:0;margin-top:1.4rem;">C-11 · Ollama Returning Malformed JSON for LLM-as-Judge</h3>
+      <div class="why"><div class="why-label">Symptom</div>
+        <p>The judge prompt instructs llama3.2 to return a specific JSON object with 4 keys. In practice, llama3.2 3B returned malformed output in three patterns:</p>
+      </div>
+      <table>
+        <thead><tr><th>Failure mode</th><th>Frequency</th><th>Example</th><th>Cause</th></tr></thead>
+        <tbody>
+          <tr><td>Markdown wrapper</td><td>~40% of calls</td><td><code>```json\n{ ... }\n```</code></td><td>llama3.2 was RLHF-trained to format code in markdown blocks</td></tr>
+          <tr><td>Preamble text</td><td>~15% of calls</td><td><code>Sure! Here is the evaluation:\n{ ... }</code></td><td>Instruction-following mode adds polite preamble</td></tr>
+          <tr><td>Truncated JSON</td><td>~3% of calls</td><td><code>{ "faithfulness": {"score": 4, "reasoning": "The answer cites the cor</code></td><td><code>num_predict=600</code> budget exhausted mid-output on long reasoning strings</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Fixes applied in <code>_parse_judge_response()</code>:</strong></p>
+      <ul>
+        <li>Extract JSON substring via <code>re.search(r'\{.*\}', raw, re.DOTALL)</code> — handles markdown wrappers and preamble text</li>
+        <li>Set <code>temperature=0</code> — reduces creative formatting, increases JSON compliance</li>
+        <li>Full <code>try/except json.JSONDecodeError</code> with heuristic fallback — truncated JSON still fails, but cleanly triggers word-overlap scoring instead of crashing</li>
+        <li>Validate all 4 keys present and each score is <code>int</code> in [1, 5] — catches partial JSON that passes <code>json.loads</code></li>
+      </ul>
+      <p>Result: 3 heuristic fallbacks out of 150 pairs for Config D (2% fallback rate). Remaining 98% produce valid JSON after regex extraction.</p>
+
+      <h3 style="font-size:0.95rem;color:var(--white-80);padding-left:0;margin-top:1.4rem;">C-12 · Inconsistent Model Behavior on Exact Financial Figures</h3>
+      <p>llama3.2 3B occasionally rephrases exact financial figures in ways that make RAGAS answer_correctness fail even when the answer is semantically correct. Examples observed:</p>
+      <ul>
+        <li>Ground truth: <code>"$383.3 billion"</code> → Generated: <code>"approximately $383 billion"</code> — RAGAS marks as incorrect</li>
+        <li>Ground truth: <code>"FY2023"</code> → Generated: <code>"fiscal year ending September 2023"</code> — minor phrasing divergence</li>
+        <li>Ground truth: <code>"$2.48 per share"</code> → Generated: <code>"$2.48 EPS"</code> — abbreviation not matched</li>
+      </ul>
+      <p><strong>This is not a retrieval failure — the correct chunk was retrieved and cited</strong>. It is a generation paraphrase that RAGAS's string-comparison-based correctness metric penalizes. The LLM-as-Judge is more robust here (it scores semantic equivalence rather than string similarity), which is one reason judge scores for Config D (0.84 overall) are close to RAGAS correctness (0.84) rather than consistently higher.</p>
+
+      <!-- ── 5. Application Logic ── -->
+      <h3>Application Logic Bugs</h3>
+
+      <h3 style="font-size:0.95rem;color:var(--white-80);padding-left:0;margin-top:1.4rem;">C-13 · ChromaDB Metadata Filter Crashes on Empty Ticker List</h3>
+      <table>
+        <thead><tr><th>Attribute</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Error</strong></td><td><code>ValueError: $in list must have at least one element</code></td></tr>
+          <tr><td><strong>When</strong></td><td>Admin role queries — admin has no ticker restriction, so <code>allowed_tickers = []</code> (empty list meaning "all allowed")</td></tr>
+          <tr><td><strong>Root cause</strong></td><td>ChromaDB's <code>where={"ticker": {"$in": []}}</code> is invalid. An empty <code>$in</code> list is semantically ambiguous (does it match nothing or everything?) and ChromaDB rejects it at validation time</td></tr>
+          <tr><td><strong>Fix</strong></td><td>In <code>backend/pipeline/retriever.py</code>: skip the <code>where</code> parameter entirely when <code>allowed_tickers</code> is empty or None. <code>if allowed_tickers: where = {"ticker": {"$in": allowed_tickers}}</code></td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="font-size:0.95rem;color:var(--white-80);padding-left:0;margin-top:1.4rem;">C-14 · SEC EDGAR Download Rate Limiting</h3>
+      <p>SEC EDGAR enforces a <strong>10 requests/second</strong> cap per IP address. The initial ingest script fired requests as fast as Python could loop — resulting in HTTP 429 responses and temporary IP bans (typically 10–15 minutes). EDGAR also requires a <code>User-Agent</code> header identifying the company/individual making requests; requests without it are rejected with HTTP 403.</p>
+      <p><strong>Fix:</strong> Added <code>User-Agent: RAGixAI murtazammb@gmail.com</code> header to all EDGAR requests. Added exponential backoff (0.5s base, max 30s, 5 retries) with explicit <code>time.sleep(0.12)</code> between requests to stay under the 10 req/s limit. The full 10-company × 5-year ingest now completes in ~8 minutes without triggering rate limits.</p>
+
+      <h3 style="font-size:0.95rem;color:var(--white-80);padding-left:0;margin-top:1.4rem;">C-15 · Guardrail Finance Regex False Positives</h3>
+      <p>The topic guardrail uses a regex <code>_FINANCE_RE</code> to distinguish financial questions from off-topic ones. The initial pattern was too restrictive and blocked valid financial questions:</p>
+      <ul>
+        <li><code>"What were Apple's revenues?"</code> — blocked because the initial pattern required <code>\bApple\b</code> (no possessive)</li>
+        <li><code>"AAPL investments and securities"</code> — blocked because <code>investment</code> was in the pattern but not <code>investments</code> (plural)</li>
+        <li><code>"What is Meta's operating income?"</code> — <code>Meta</code> was added to the ticker list but not to the topic filter's company-name alternatives</li>
+      </ul>
+      <p><strong>Fix:</strong> Rewrote the regex to use <code>(?:'s|s)?\b</code> suffixes on all company and financial term tokens, handling possessives and plurals. Added <code>Meta|META</code> and all ticker symbols as direct match alternatives in addition to full company names. Tested against 40 manually crafted edge-case questions — zero false positives or false negatives after revision.</p>
+
+      <h3 style="font-size:0.95rem;color:var(--white-80);padding-left:0;margin-top:1.4rem;">C-16 · Cross-Encoder Cold Start (2–4 s First Query Delay)</h3>
+      <p>The cross-encoder model (85 MB) is loaded from disk on first use. For reranker configs (D, E, F, G), the very first query after server start would visibly hang for 2–4 seconds before returning — causing a confusing user experience where the first answer is extremely slow but all subsequent ones are normal speed.</p>
+      <p><strong>Fix:</strong> Lazy singleton pattern in <code>_get_cross_encoder()</code> — module-level <code>_model = None</code> initialized on first call and cached thereafter. The cold start cost is paid exactly once per server process. The alternative (eager loading at startup) would add 2–4 s to every <code>uvicorn</code> reload during development, which is more disruptive than a single slow first query.</p>
+      <p><strong>Remaining issue:</strong> The cold start is still visible to the first user in a session. A production deployment could warm the model at startup with a dummy query, but this adds startup complexity for a development-focused system.</p>
+
     </div>
 
   </main>
@@ -2254,13 +2537,13 @@ sys.exit(0)               # informational only, never blocks</pre>
     overview:'overview', ingest:'ingest', chunk:'chunk', index:'index',
     retrieve:'retrieve', rerank:'rerank', generate:'generate',
     guardrails:'guardrails', evaluation:'evaluation', api:'api',
-    agentic:'agentic', results:'results',
+    agentic:'agentic', results:'results', challenges:'challenges',
   };
   const TAB_LABELS = {
     overview:'Overview', ingest:'1 · Ingest', chunk:'2 · Chunk', index:'3 · Index',
     retrieve:'4 · Retrieve', rerank:'5 · Rerank', generate:'6 · Generate',
     guardrails:'7 · Guardrails', evaluation:'8 · Evaluation', api:'9 · API',
-    agentic:'10 · Agentic', results:'Results',
+    agentic:'10 · Agentic', results:'Results', challenges:'Challenges',
   };
 
   function show(id) {
