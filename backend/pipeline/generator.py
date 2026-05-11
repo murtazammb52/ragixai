@@ -17,11 +17,12 @@ NOT_FOUND_ANSWER = "Answer not found in Corpus"
 PROMPT_TEMPLATE = """You are a financial analyst assistant. Answer questions ONLY using the SEC filing excerpts provided below.
 
 Rules you MUST follow:
-1. Cite every fact with [1], [2], etc. matching the excerpt numbers.
-2. If the answer cannot be found in the excerpts below, respond EXACTLY with: Answer not found in Corpus
-3. Do NOT use any knowledge from outside the provided excerpts.
-4. Do NOT speculate, infer, or add information not explicitly in the excerpts.
-5. If the question asks about Company X but the excerpts are from Company Y, respond EXACTLY with: Answer not found in Corpus
+1. Write a complete answer in one or two full sentences.
+2. After each fact, cite the excerpt it came from using [1], [2], etc.
+3. If the answer cannot be found in the excerpts below, respond EXACTLY with: Answer not found in Corpus
+4. Do NOT use any knowledge from outside the provided excerpts.
+5. Do NOT speculate or add information not explicitly stated in the excerpts.
+6. If the question asks about Company X but the excerpts are from Company Y, respond EXACTLY with: Answer not found in Corpus
 
 --- SEC Filing Excerpts ---
 {context}
@@ -29,7 +30,7 @@ Rules you MUST follow:
 
 Question: {question}
 
-Answer (cite sources with [N]):"""
+Answer (write at least one complete sentence, then cite sources with [1] [2] etc.):"""
 
 # Patterns that indicate the LLM answered from parametric knowledge or found nothing
 _NOT_FOUND_RE = re.compile(
@@ -60,7 +61,7 @@ def generate_answer(question: str, contexts: list[ScoredChunk]) -> GeneratorOutp
         )
 
     context_block = "\n\n".join([
-        f"[{i + 1}] (Source: {c.company} {c.year} 10-K, relevance: {c.score:.2f})\n{c.text[:800]}"
+        f"Excerpt {i + 1} (Source: {c.company} {c.year} 10-K, relevance: {c.score:.2f})\n{c.text[:800]}"
         for i, c in enumerate(contexts)
     ])
 
@@ -71,7 +72,7 @@ def generate_answer(question: str, contexts: list[ScoredChunk]) -> GeneratorOutp
         response = ollama.generate(
             model=settings.ollama_model,
             prompt=prompt,
-            options={"temperature": 0.1, "num_predict": 250},
+            options={"temperature": 0.1, "num_predict": 400},
         )
         raw = response["response"].strip()
     except Exception as e:

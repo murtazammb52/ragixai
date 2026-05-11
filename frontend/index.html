@@ -74,12 +74,17 @@
     .key-modal h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
     .key-modal p { font-size: 0.82rem; color: var(--white-60); margin-bottom: 1.25rem; line-height: 1.6; }
     .key-modal label { font-size: 0.75rem; font-weight: 600; color: var(--white-30); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 0.4rem; }
-    .key-modal input {
-      width: 100%; background: var(--glass-bg); border: 1px solid var(--glass-border);
+    .key-modal input, .key-modal select {
+      width: 100%; background: var(--bg-secondary); border: 1px solid var(--glass-border);
       color: var(--white); font-family: var(--font-mono); font-size: 0.88rem;
       padding: 0.65rem 0.9rem; border-radius: var(--border-radius-sm); outline: none; margin-bottom: 0.5rem;
+      appearance: none; cursor: pointer;
     }
-    .key-modal input:focus { border-color: var(--purple); box-shadow: 0 0 0 2px rgba(124,58,237,0.15); }
+    .key-modal input:focus, .key-modal select:focus { border-color: var(--purple); box-shadow: 0 0 0 2px rgba(124,58,237,0.15); }
+    .key-modal select option { background: var(--bg-secondary); color: var(--white); }
+    .key-modal select option[value=""] { color: var(--white-30); }
+    .key-custom-input { display: none; }
+    .key-custom-input.visible { display: block; }
     .key-modal-error { font-size: 0.78rem; color: var(--coral); margin-bottom: 0.75rem; min-height: 1.2em; }
     .key-modal-hint { font-size: 0.75rem; color: var(--white-30); margin-bottom: 1rem; }
     .key-modal-hint code { background: var(--glass-bg); padding: 1px 5px; border-radius: 4px; font-family: var(--font-mono); }
@@ -98,8 +103,9 @@
     /* ── Sidebar ─────────────────────────────────────────────────── */
     .sidebar { width: 260px; flex-shrink: 0; background: var(--bg-secondary); border-right: 1px solid var(--glass-border); display: flex; flex-direction: column; padding: 1rem; gap: 0.75rem; overflow-y: auto; }
     .sidebar-section-label { font-size: 0.7rem; font-weight: 700; color: var(--white-30); text-transform: uppercase; letter-spacing: 1.5px; padding: 0 0.5rem; margin-top: 0.5rem; }
-    .config-select { width: 100%; background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--white); border-radius: var(--border-radius-sm); padding: 0.5rem 0.75rem; font-size: 0.85rem; font-family: var(--font-primary); appearance: none; cursor: pointer; }
+    .config-select { width: 100%; background: var(--bg-secondary); border: 1px solid var(--glass-border); color: var(--white); border-radius: var(--border-radius-sm); padding: 0.5rem 0.75rem; font-size: 0.85rem; font-family: var(--font-primary); appearance: none; cursor: pointer; }
     .config-select:focus { outline: none; border-color: var(--purple); }
+    .config-select option { background: var(--bg-secondary); color: var(--white); }
     .config-info { background: rgba(124,58,237,0.08); border: 1px solid rgba(124,58,237,0.2); border-radius: var(--border-radius-sm); padding: 0.6rem 0.75rem; font-size: 0.75rem; color: var(--lavender); line-height: 1.5; }
     .new-chat-btn { background: linear-gradient(135deg,var(--purple),var(--electric-blue)); border: none; color: white; font-size: 0.85rem; font-weight: 600; padding: 0.6rem 0.75rem; border-radius: var(--border-radius-sm); cursor: pointer; display: flex; align-items: center; gap: 6px; transition: opacity 0.2s; width: 100%; justify-content: center; }
     .new-chat-btn:hover { opacity: 0.85; }
@@ -410,14 +416,32 @@
 <div class="modal-overlay" id="keyModalOverlay" onclick="if(event.target===this)hideKeyModal()">
   <div class="key-modal">
     <h3>API Key Authentication</h3>
-    <p>Enter your API key to access the system. Keys control your access level — contact your admin if you don't have one.</p>
-    <label for="keyInput">API Key</label>
-    <input type="password" id="keyInput" placeholder="Enter your API key…" onkeydown="if(event.key==='Enter')saveKey()" />
+    <p>Select a role to authenticate. Keys control your access level and which companies you can query.</p>
+    <label for="keySelect">Select Role / Key</label>
+    <select id="keySelect" onchange="onKeySelectChange()">
+      <option value="">— Choose a key —</option>
+      <optgroup label="Full Access">
+        <option value="admin-key">admin-key — Admin (all endpoints)</option>
+        <option value="viewer-key">viewer-key — Viewer (read-only)</option>
+      </optgroup>
+      <optgroup label="Analyst (company-scoped)">
+        <option value="aapl-analyst-key">aapl-analyst-key — AAPL only</option>
+        <option value="msft-analyst-key">msft-analyst-key — MSFT only</option>
+        <option value="amzn-analyst-key">amzn-analyst-key — AMZN only</option>
+        <option value="googl-analyst-key">googl-analyst-key — GOOGL only</option>
+        <option value="meta-analyst-key">meta-analyst-key — META only</option>
+        <option value="nvda-analyst-key">nvda-analyst-key — NVDA only</option>
+        <option value="tsla-analyst-key">tsla-analyst-key — TSLA only</option>
+        <option value="jpm-analyst-key">jpm-analyst-key — JPM only</option>
+        <option value="bac-analyst-key">bac-analyst-key — BAC only</option>
+        <option value="wmt-analyst-key">wmt-analyst-key — WMT only</option>
+      </optgroup>
+      <optgroup label="Other">
+        <option value="__custom__">Custom key…</option>
+      </optgroup>
+    </select>
+    <input type="password" id="keyCustom" class="key-custom-input" placeholder="Enter custom API key…" onkeydown="if(event.key==='Enter')saveKey()" />
     <div class="key-modal-error" id="keyError"></div>
-    <div class="key-modal-hint">
-      Full access: <code>admin-key</code> / <code>analyst-key</code><br>
-      Scoped analysts: <code>apple-analyst-key</code> / <code>msft-analyst-key</code> / <code>amzn-analyst-key</code> / <code>googl-analyst-key</code> / <code>meta-analyst-key</code> / <code>nvda-analyst-key</code> / <code>tsla-analyst-key</code> / <code>jpm-analyst-key</code> / <code>bac-analyst-key</code> / <code>wmt-analyst-key</code>
-    </div>
     <div class="key-modal-actions">
       <button class="btn-danger" onclick="clearKey()" style="margin-right:auto;">Clear Key</button>
       <button class="btn-secondary" onclick="hideKeyModal()">Cancel</button>
@@ -445,10 +469,37 @@ function getAuthHeaders(includeContentType = true) {
 }
 
 function showKeyModal() {
-  document.getElementById('keyInput').value = apiKey;
+  const sel = document.getElementById('keySelect');
+  const custom = document.getElementById('keyCustom');
+  // Try to pre-select the stored key in the dropdown
+  const opt = [...sel.options].find(o => o.value === apiKey);
+  if (opt) {
+    sel.value = apiKey;
+    custom.classList.remove('visible');
+  } else if (apiKey) {
+    sel.value = '__custom__';
+    custom.value = apiKey;
+    custom.classList.add('visible');
+  } else {
+    sel.value = '';
+    custom.value = '';
+    custom.classList.remove('visible');
+  }
   document.getElementById('keyError').textContent = '';
   document.getElementById('keyModalOverlay').classList.add('open');
-  setTimeout(() => document.getElementById('keyInput').focus(), 50);
+  setTimeout(() => sel.focus(), 50);
+}
+
+function onKeySelectChange() {
+  const sel = document.getElementById('keySelect');
+  const custom = document.getElementById('keyCustom');
+  if (sel.value === '__custom__') {
+    custom.classList.add('visible');
+    setTimeout(() => custom.focus(), 50);
+  } else {
+    custom.classList.remove('visible');
+    custom.value = '';
+  }
 }
 
 function hideKeyModal() {
@@ -456,7 +507,11 @@ function hideKeyModal() {
 }
 
 async function saveKey() {
-  const key = document.getElementById('keyInput').value.trim();
+  const sel = document.getElementById('keySelect');
+  const raw = sel.value === '__custom__'
+    ? document.getElementById('keyCustom').value.trim()
+    : sel.value;
+  const key = raw.trim();
   if (!key) {
     document.getElementById('keyError').textContent = 'Key cannot be empty.';
     return;

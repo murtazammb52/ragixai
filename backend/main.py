@@ -38,13 +38,30 @@ def serve_docs():
         return FileResponse(str(docs_path), media_type="text/html")
     return {"error": "docs.html not found"}
 
+# Serve static assets (gold_data.js, etc.) at /static
+static_dir = frontend_dir / "static"
+if static_dir.exists():
+    app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+
 # Serve chat UI at /chat
 if frontend_dir.exists():
     app.mount("/chat", StaticFiles(directory=str(frontend_dir), html=True), name="chat")
 
-# Serve existing static site at /site
+# Serve root-level static site pages (nav links from /chat use ../<page>.html → /<page>.html)
 site_dir = Path(__file__).parent.parent
-static_files = ["index.html", "css", "js", "pipeline.html", "evaluation.html", "aws.html", "roadmap.html", "problem.html", "solution.html"]
+_site_pages = ["index.html", "pipeline.html", "evaluation.html", "solution.html",
+               "roadmap.html", "problem.html", "aws.html"]
+
+for _page in _site_pages:
+    _path = site_dir / _page
+    if _path.exists():
+        app.get(f"/{_page}")(lambda p=str(_path): FileResponse(p, media_type="text/html"))
+
+# Serve CSS and JS asset directories used by the static site pages
+for _asset_dir, _mount in [("css", "/css"), ("js", "/js")]:
+    _d = site_dir / _asset_dir
+    if _d.exists():
+        app.mount(_mount, StaticFiles(directory=str(_d)), name=_asset_dir)
 
 
 @app.on_event("startup")
