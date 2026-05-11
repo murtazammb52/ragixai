@@ -2005,7 +2005,7 @@ sys.exit(0)               # informational only, never blocks</pre>
       <!-- Winner banner -->
       <h3>Winner: Config D ★</h3>
       <div class="why"><div class="why-label">Result Summary</div>
-        <p><strong>Config D (Hybrid RRF + CrossEncoder reranker, local all-MiniLM embeddings)</strong> is the only configuration that clears all five RAGAS target thresholds simultaneously. It achieves the highest composite score (2.512) across all 7 configs, combining strong RAGAS automated metrics (RAGAS mean: 0.872) with the best LLM-as-Judge overall score (0.82) and a 72% judge pass rate. The 2,847ms p95 latency stays within the 3,000ms budget despite the added reranker inference cost.<br/><br/>
+        <p><strong>Config D (Hybrid RRF + CrossEncoder reranker, local all-MiniLM embeddings)</strong> is the only configuration that clears all five RAGAS target thresholds simultaneously. It achieves the highest composite score (2.512) across all 7 configs, combining strong RAGAS automated metrics (RAGAS mean: 0.872) with the best LLM-as-Judge overall score (0.82) and a 72% judge pass rate. The p95 latency of 3,421ms on MX450 hardware exceeds the 3 s target — driven by generation speed (~25 tok/s) on complex multi-part questions — but remains the best among all reranker configs and the trade-off is accepted given the quality gains.<br/><br/>
         <strong>Key takeaway:</strong> Adding the CrossEncoder reranker to hybrid retrieval (D vs C) delivers a 0.10 lift in answer correctness and a 0.09 lift in faithfulness — the largest single design choice payoff. The hybrid retrieval itself (C vs A) adds a further 0.06 lift over dense-only baseline, confirming that BM25 and dense embeddings complement each other on financial vocabulary.</p>
       </div>
 
