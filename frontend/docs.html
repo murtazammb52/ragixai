@@ -220,9 +220,10 @@
     <a href="#" onclick="show('generate')">6 · Generation</a>
     <a href="#" onclick="show('guardrails')">7 · Guardrails &amp; RBAC</a>
     <div class="toc-section">Quality &amp; API</div>
-    <a href="#" onclick="show('evaluation')">8 · Evaluation</a>
-    <a href="#" onclick="show('api')">9 · API Layer</a>
-    <a href="#" onclick="show('agentic')">10 · Agentic Dev</a>
+    <a href="#" onclick="show('evaluation')">8 · RAGAS Evaluation</a>
+    <a href="#" onclick="show('judge')">9 · LLM-as-Judge</a>
+    <a href="#" onclick="show('api')">10 · API Layer</a>
+    <a href="#" onclick="show('agentic')">11 · Agentic Dev</a>
     <a href="#" onclick="show('results')">Results</a>
     <a href="#" onclick="show('challenges')">Challenges</a>
     <a href="#" onclick="show('goldset')">Gold Dataset</a>
@@ -242,8 +243,9 @@
       <button class="tab" onclick="show('generate')">6 · Generate</button>
       <button class="tab" onclick="show('guardrails')">7 · Guardrails</button>
       <button class="tab" onclick="show('evaluation')">8 · Evaluation</button>
-      <button class="tab" onclick="show('api')">9 · API</button>
-      <button class="tab" onclick="show('agentic')">10 · Agentic</button>
+      <button class="tab" onclick="show('judge')">9 · LLM Judge</button>
+      <button class="tab" onclick="show('api')">10 · API</button>
+      <button class="tab" onclick="show('agentic')">11 · Agentic</button>
       <button class="tab" onclick="show('results')">Results</button>
       <button class="tab" onclick="show('challenges')">Challenges</button>
       <button class="tab" onclick="show('goldset')">Gold Dataset</button>
@@ -1178,47 +1180,7 @@ chunks = [c <span class="kw">for</span> c <span class="kw">in</span> chunks
       (2) <code>ground_truth</code> field must be a singular string, not a list — changed between 0.1.x and 0.4.x.<br/>
       (3) <code>EvaluationResult[key]</code> returns <code>List[float]</code>, not a scalar — use <code>np.nanmean()</code> to aggregate.</p></div>
 
-      <h3>Track 2 — LLM-as-Judge (4 Domain-Specific Dimensions)</h3>
-      <p><strong>What it is:</strong> The local Ollama model scores each generated answer at temperature=0 on four dimensions, returning both a numeric score (1–5) and a one-sentence reasoning string per dimension. Scores are normalized to [0, 1]. Pass threshold is 0.70 (≥ 4/5 raw score).</p>
-      <div class="why"><div class="why-label">Why LLM-as-Judge alongside RAGAS?</div>
-        <p>RAGAS is a black box — it reports a number but no explanation of why a score is low. When debugging, you need to know: did the answer fail because it cited the wrong context? Because it missed a key fact? Because it added hallucinated data? LLM-as-Judge returns a reasoning sentence per dimension, giving actionable diagnostic information. The four dimensions also cover aspects not directly measured by RAGAS: citation placement quality (citation_quality) and absence of external knowledge (hallucination_free) specifically. Together, RAGAS (reference-based, statistical) and LLM-as-Judge (reference-aware, interpretable) provide a more complete picture than either alone.</p>
-      </div>
-      <table>
-        <thead><tr><th>Dimension</th><th>Definition</th><th>Why Financial RAG Specifically Needs This</th></tr></thead>
-        <tbody>
-          <tr><td><strong>faithfulness</strong></td><td>Every factual claim traceable to retrieved contexts</td><td>Financial numbers cannot be approximated — a hallucinated revenue figure is wrong by definition even if close</td></tr>
-          <tr><td><strong>completeness</strong></td><td>All parts of the question fully addressed</td><td>Multi-part financial questions ("revenue and operating margin") often get partial answers</td></tr>
-          <tr><td><strong>citation_quality</strong></td><td>[N] markers placed next to the specific fact they support</td><td>A citation after the paragraph rather than next to the number makes verification impossible for analysts</td></tr>
-          <tr><td><strong>hallucination_free</strong></td><td>No external knowledge beyond retrieved contexts</td><td>LLMs have memorized financial data from training — they can produce correct-looking but corpus-external numbers</td></tr>
-        </tbody>
-      </table>
-
-      <h3>Heuristic Fallback — Scoring Bins</h3>
-      <p>When Ollama is unavailable or returns malformed JSON, the heuristic fallback produces scores for all four dimensions using word-overlap metrics. All four methods bin their ratio into a 1–5 integer scale:</p>
-      <div class="code"><span class="cm"># Shared overlap-to-score bins (used by faithfulness, completeness, hallucination_free)</span>
-<span class="kw">def</span> <span class="fn">_overlap_score</span>(ratio: float) -> int:
-    <span class="kw">if</span> ratio >= <span class="num">0.70</span>: <span class="kw">return</span> <span class="num">5</span>   <span class="cm"># ≥70% overlap → excellent</span>
-    <span class="kw">if</span> ratio >= <span class="num">0.50</span>: <span class="kw">return</span> <span class="num">4</span>   <span class="cm"># ≥50%         → good</span>
-    <span class="kw">if</span> ratio >= <span class="num">0.30</span>: <span class="kw">return</span> <span class="num">3</span>   <span class="cm"># ≥30%         → acceptable</span>
-    <span class="kw">if</span> ratio >= <span class="num">0.10</span>: <span class="kw">return</span> <span class="num">2</span>   <span class="cm"># ≥10%         → poor</span>
-    <span class="kw">return</span> <span class="num">1</span>                       <span class="cm"># &lt;10%         → very poor</span>
-
-<span class="cm"># faithfulness: what fraction of answer words appear in the contexts?</span>
-answer_tokens = set(answer.lower().split())
-context_tokens = set(<span class="st">" "</span>.join(contexts).lower().split())
-faithfulness_ratio = len(answer_tokens & context_tokens) / max(len(answer_tokens), <span class="num">1</span>)
-
-<span class="cm"># completeness: what fraction of question keywords appear in the answer?</span>
-question_tokens = set(question.lower().split()) - STOP_WORDS
-completeness_ratio = len(question_tokens & answer_tokens) / max(len(question_tokens), <span class="num">1</span>)
-
-<span class="cm"># citation_quality: count [N] markers (distinct reasoning: 0→1, 1→2, 2→3, 3→4, ≥4→5)</span>
-n_citations = len(re.findall(r<span class="st">"\[\d+\]"</span>, answer))
-citation_score = min(<span class="num">5</span>, n_citations + <span class="num">1</span>)
-
-<span class="cm"># hallucination_free: what fraction of answer tokens appear in contexts? (same as faithfulness)</span>
-hallucination_ratio = faithfulness_ratio  <span class="cm"># proxy — identical calculation</span></div>
-      <div class="note"><p>The heuristic fallback is not a meaningful replacement for LLM-based scoring — it measures surface-level token overlap, not semantic correctness. A well-cited but numerically wrong answer scores 5/5 on heuristic faithfulness because its words all appear in the context. The fallback exists to ensure the pipeline <em>always produces a result</em> for aggregate statistics, while <code>fallback_used=True</code> in the JudgeResult flags these rows for exclusion from comparative analysis.</p></div>
+      <div class="note"><p><strong>LLM-as-Judge</strong> runs as a separate evaluation track with 4 interpretable dimensions (faithfulness, completeness, citation_quality, hallucination_free). See the <a href="#" onclick="show('judge')" style="color:var(--lavender)">9 · LLM Judge</a> tab for the full prompt, scoring logic, heuristic fallback, and A/B composite formula.</p></div>
 
       <h3>FinanceBench Dataset Structure</h3>
       <p>The loader fetches the dataset from HuggingFace with <code>load_dataset("PatronusAI/financebench", split="train")</code>. The returned dataset has these columns used by the evaluation pipeline:</p>
@@ -1252,8 +1214,46 @@ ragas_dataset = Dataset.from_list(ragas_rows)
 result = evaluate(ragas_dataset, metrics=[faithfulness, answer_relevancy, ...])</div>
       <div class="warn"><p><strong>RAGAS 0.4.x breaking changes fixed:</strong> (1) <code>ground_truth</code> must be a singular string — earlier 0.1.x API used <code>ground_truths: list[str]</code>. (2) <code>result["faithfulness"]</code> returns <code>List[float]</code> not a scalar — use <code>np.nanmean(result["faithfulness"])</code> to aggregate. (3) Set <code>RAGAS_DO_NOT_TRACK=1</code> before importing RAGAS on Windows to prevent the analytics module from spawning a recursive subprocess at import time.</p></div>
 
+    </div>
+
+    <!-- ══════ LLM-AS-JUDGE ══════ -->
+    <div id="panel-judge" class="panel">
+      <h2>Stage 9 — LLM-as-Judge Evaluation</h2>
+      <div class="files"><span class="fbadge">backend/evaluation/llm_judge.py</span><span class="fbadge">backend/api/judge.py</span><span class="fbadge">scripts/run_judge.py</span></div>
+      <p>LLM-as-Judge is the second evaluation track — a complementary approach to RAGAS that uses the local Ollama model to score each generated answer on four financial-domain dimensions, returning both a numeric score and a one-sentence reasoning string per dimension. Unlike RAGAS, it tells you <em>why</em> an answer failed.</p>
+
+      <div class="why"><div class="why-label">Why LLM-as-Judge alongside RAGAS?</div>
+        <p>RAGAS is a black box — it reports a number but no explanation of why a score is low. When debugging, you need to know: did the answer fail because it cited the wrong context? Because it missed a key fact? Because it added hallucinated data? LLM-as-Judge returns a reasoning sentence per dimension, giving actionable diagnostic information. The four dimensions also cover aspects not directly measured by RAGAS: citation placement quality (<code>citation_quality</code>) and absence of external knowledge (<code>hallucination_free</code>) specifically. Together, RAGAS (reference-based, statistical) and LLM-as-Judge (reference-aware, interpretable) provide a more complete picture than either alone.</p>
+      </div>
+
+      <h3>Four Evaluation Dimensions</h3>
+      <p>Each answer is scored 1–5 on each dimension. Scores are normalized to [0, 1]. Pass threshold: ≥ 0.70 (raw ≥ 4/5). The judge runs at <code>temperature=0</code> for deterministic output.</p>
+      <table>
+        <thead><tr><th>Dimension</th><th>Definition</th><th>Why Financial RAG Specifically Needs This</th></tr></thead>
+        <tbody>
+          <tr><td><strong>faithfulness</strong></td><td>Every factual claim is traceable to a retrieved context chunk</td><td>Financial numbers cannot be approximated — a hallucinated revenue figure is wrong by definition, even if close to the true value</td></tr>
+          <tr><td><strong>completeness</strong></td><td>All parts of the question are fully addressed in the answer</td><td>Multi-part financial questions ("revenue and operating margin for FY2022") often get partial answers from 3B models that stop after the first fact</td></tr>
+          <tr><td><strong>citation_quality</strong></td><td>[N] markers placed immediately next to the specific fact they support</td><td>A citation placed after a paragraph rather than next to the number makes independent verification impossible for analysts reviewing the answer</td></tr>
+          <tr><td><strong>hallucination_free</strong></td><td>No external knowledge beyond what was retrieved — answer stays within corpus boundaries</td><td>LLMs have memorized financial data from training — they can produce correct-looking but corpus-external numbers that pass faithfulness but fail this dimension</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Judge Results per Config (20-sample run)</h3>
+      <table>
+        <thead><tr><th>Config</th><th>Overall</th><th>Faithfulness</th><th>Completeness</th><th>Citation Quality</th><th>Hallucination Free</th><th>Pass (≥0.70)</th></tr></thead>
+        <tbody>
+          <tr><td><strong>D — Hybrid + Rerank</strong></td><td><strong>0.76</strong></td><td>0.81</td><td>0.72</td><td>0.74</td><td>0.77</td><td>✅</td></tr>
+          <tr><td>E — Cohere + Rerank</td><td>0.73</td><td>0.78</td><td>0.70</td><td>0.71</td><td>0.73</td><td>✅</td></tr>
+          <tr><td>F — Hybrid + Rerank (Alt)</td><td>0.70</td><td>0.76</td><td>0.67</td><td>0.69</td><td>0.68</td><td>✅</td></tr>
+          <tr><td>G — Dense + Rerank</td><td>0.65</td><td>0.72</td><td>0.61</td><td>0.63</td><td>0.64</td><td>❌</td></tr>
+          <tr><td>C — Hybrid, No Rerank</td><td>0.61</td><td>0.68</td><td>0.58</td><td>0.59</td><td>0.59</td><td>❌</td></tr>
+          <tr><td>A — Dense, No Rerank</td><td>0.57</td><td>0.64</td><td>0.53</td><td>0.55</td><td>0.56</td><td>❌</td></tr>
+          <tr><td>B — BM25, No Rerank</td><td>0.52</td><td>0.59</td><td>0.48</td><td>0.50</td><td>0.51</td><td>❌</td></tr>
+        </tbody>
+      </table>
+
       <h3>LLM-as-Judge Prompt</h3>
-      <p>The full prompt sent to Ollama for each evaluation row. Temperature=0 and a strict JSON-only instruction minimize format variance across 150 evaluation calls:</p>
+      <p>The full prompt sent to Ollama for each evaluation row. <code>temperature=0</code> and a strict JSON-only instruction minimize format variance across 150 evaluation calls:</p>
       <div class="code">JUDGE_PROMPT = <span class="st">"""You are an expert financial RAG evaluator.
 Score the Generated Answer on 4 dimensions.
 
@@ -1282,7 +1282,7 @@ Return ONLY valid JSON, no other text:
 }}"""</span></div>
 
       <h3>JSON Parsing and Validation</h3>
-      <p>Even at temperature=0, llama3.2 occasionally wraps its JSON output in markdown fences (<code>```json ... ```</code>) or prepends a sentence before the JSON. The parser handles this:</p>
+      <p>Even at <code>temperature=0</code>, llama3.2 occasionally wraps its JSON output in markdown fences (<code>```json ... ```</code>) or prepends a sentence before the JSON object. The parser strips any wrapper and validates all four keys before accepting the result:</p>
       <div class="code"><span class="kw">def</span> <span class="fn">_parse_judge_response</span>(raw: str) -> dict | <span class="kw">None</span>:
     match = re.search(r<span class="st">"\{.*\}"</span>, raw, re.DOTALL)    <span class="cm"># extract first {...} block</span>
     <span class="kw">if not</span> match: <span class="kw">return None</span>
@@ -1299,22 +1299,61 @@ Return ONLY valid JSON, no other text:
             <span class="kw">return None</span>   <span class="cm"># triggers heuristic fallback for this row</span>
     <span class="kw">return</span> parsed</div>
 
-      <h3>A/B Test Reproducibility</h3>
-      <p>All 7 configs are evaluated against the <em>same</em> FinanceBench rows. The test runner samples N rows with a fixed seed (<code>random.seed(42)</code>) at the start of the A/B test run — before looping over configs. This ensures config A and config D answer identical questions, making head-to-head score comparison meaningful. Without a fixed seed, each config might answer different questions, and score differences could reflect dataset variance rather than config quality.</p>
+      <h3>Heuristic Fallback — Scoring Bins</h3>
+      <p>When Ollama is unavailable (GPU conflict with the generator) or returns malformed JSON, the heuristic fallback scores all four dimensions using word-overlap metrics, binned into 1–5 integers:</p>
+      <div class="code"><span class="cm"># Shared overlap-to-score bins (faithfulness, completeness, hallucination_free)</span>
+<span class="kw">def</span> <span class="fn">_overlap_score</span>(ratio: float) -> int:
+    <span class="kw">if</span> ratio >= <span class="num">0.70</span>: <span class="kw">return</span> <span class="num">5</span>   <span class="cm"># ≥70% overlap → excellent</span>
+    <span class="kw">if</span> ratio >= <span class="num">0.50</span>: <span class="kw">return</span> <span class="num">4</span>   <span class="cm"># ≥50%         → good</span>
+    <span class="kw">if</span> ratio >= <span class="num">0.30</span>: <span class="kw">return</span> <span class="num">3</span>   <span class="cm"># ≥30%         → acceptable</span>
+    <span class="kw">if</span> ratio >= <span class="num">0.10</span>: <span class="kw">return</span> <span class="num">2</span>   <span class="cm"># ≥10%         → poor</span>
+    <span class="kw">return</span> <span class="num">1</span>                       <span class="cm"># &lt;10%         → very poor</span>
 
-      <h3>A/B Test Composite Winner</h3>
-      <p>The composite score combines RAGAS and judge metrics, weighting the judge 2× because it provides interpretable, reasoning-backed scoring that RAGAS (a black-box automated metric) does not:</p>
+<span class="cm"># faithfulness: fraction of answer words present in retrieved contexts</span>
+answer_tokens = set(answer.lower().split())
+context_tokens = set(<span class="st">" "</span>.join(contexts).lower().split())
+faithfulness_ratio = len(answer_tokens &amp; context_tokens) / max(len(answer_tokens), <span class="num">1</span>)
+
+<span class="cm"># completeness: fraction of question keywords present in the answer</span>
+question_tokens = set(question.lower().split()) - STOP_WORDS
+completeness_ratio = len(question_tokens &amp; answer_tokens) / max(len(question_tokens), <span class="num">1</span>)
+
+<span class="cm"># citation_quality: count of [N] markers (0→1, 1→2, 2→3, 3→4, ≥4→5)</span>
+citation_score = min(<span class="num">5</span>, len(re.findall(r<span class="st">"\[\d+\]"</span>, answer)) + <span class="num">1</span>)
+
+<span class="cm"># hallucination_free: same calculation as faithfulness (proxy)</span>
+hallucination_ratio = faithfulness_ratio</div>
+      <div class="note"><p>The heuristic fallback measures surface-level token overlap, not semantic correctness — a numerically wrong but well-worded answer scores 5/5 on heuristic faithfulness if its words appear in the context. The fallback exists to ensure the pipeline always produces a result; <code>fallback_used=True</code> in the <code>JudgeResult</code> flags these rows for exclusion from comparative analysis.</p></div>
+
+      <h3>A/B Test Composite Score</h3>
+      <p>The A/B test combines RAGAS and judge into a single composite, weighting judge 2× because its interpretable, reasoning-backed scoring captures quality dimensions that RAGAS's black-box metrics do not:</p>
       <div class="code">ragas_composite = (faithfulness + answer_relevancy + context_precision
                    + context_recall + answer_correctness) / <span class="num">5.0</span>
 
 composite = ragas_composite + judge_overall * <span class="num">2.0</span>
-<span class="cm"># Range: 0.0 (worst RAGAS + worst judge) to 3.0 (perfect RAGAS + perfect judge)</span>
-<span class="cm"># Winner = config with highest composite score across N identical QA pairs</span></div>
+<span class="cm"># Range: 0.0 (worst) to 3.0 (perfect) — winner = config with highest composite</span></div>
+
+      <h3>Running LLM-as-Judge</h3>
+      <p>The judge is evaluation-only and does not run at inference time (GPU is shared with the generator). Run it separately after RAGAS:</p>
+      <div class="code"><span class="cm"># Single config, 20 samples (recommended for interactive demo)</span>
+C:\Users\murta\anaconda3\python.exe scripts/run_judge.py --config config_d --n 20
+
+<span class="cm"># A/B test — all 7 configs with composite winner</span>
+C:\Users\murta\anaconda3\python.exe scripts/run_ab_test.py --n 20 --judge
+
+<span class="cm"># Spot-check one answer via API</span>
+POST /api/judge/row
+{
+  "question": "What was Apple's revenue in FY2023?",
+  "answer":   "Apple's total net sales were $383.3 billion in FY2023. [1]",
+  "contexts": ["Apple reported total net sales of $383.3 billion..."],
+  "ground_truth": "$383.3 billion"
+}</div>
     </div>
 
     <!-- ══════ API ══════ -->
     <div id="panel-api" class="panel">
-      <h2>Stage 9 — API Layer &amp; Data Models</h2>
+      <h2>Stage 10 — API Layer &amp; Data Models</h2>
       <div class="files"><span class="fbadge">backend/main.py</span><span class="fbadge">backend/api/chat.py</span><span class="fbadge">backend/api/evaluate.py</span><span class="fbadge">backend/api/judge.py</span><span class="fbadge">backend/api/ingest.py</span><span class="fbadge">backend/api/health.py</span><span class="fbadge">backend/api/history.py</span><span class="fbadge">backend/models/schemas.py</span></div>
 
       <h3>Why FastAPI?</h3>
