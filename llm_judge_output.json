@@ -1,0 +1,2852 @@
+[
+  {
+    "id": 1,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Core revenue and YoY figures directly match filing data"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing 'driven by iPhone and Services' context from ground truth"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] placed correctly after the key facts"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge introduced"
+    }
+  },
+  {
+    "id": 2,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "All three data points ($205.5B, 52%, 6.6%) are accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Question fully addressed including revenue, share, and growth rate"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly anchors the financial fact"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "Answer stays within retrieved corpus"
+    }
+  },
+  {
+    "id": 3,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Revenue and growth rate are accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing the ~19.8% share of total net sales from ground truth"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] placed correctly"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 4,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "43.3% and 41.8% comparison are accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing driver explanation about Services mix and pricing"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 5,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Net income figures are accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing diluted EPS of $6.15 from ground truth"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] placed correctly"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 6,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "R&D figure of $26.3B is accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing percentage of net sales (6.7%) and prior year ($21.9B)"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] placed correctly"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge introduced"
+    }
+  },
+  {
+    "id": 7,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Mac revenue $40.2B is accurate"
+    },
+    "completeness": {
+      "score": 2,
+      "reasoning": "Missing growth rate, prior year comparison, and M1 driver context"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] placed correctly"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 8,
+    "faithfulness": {
+      "score": 2,
+      "reasoning": "Answer truncated to just 'Apple's Wearables' — no actual data provided"
+    },
+    "completeness": {
+      "score": 1,
+      "reasoning": "Question completely unanswered; no revenue figure given"
+    },
+    "citation_quality": {
+      "score": 2,
+      "reasoning": "[1] present but answer is effectively empty"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No fabricated numbers, but answer is useless"
+    }
+  },
+  {
+    "id": 9,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Total net sales and decline percentage are accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing explanation of which segments drove the decline"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 10,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "iPhone revenue and YoY decline are accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing macro headwinds context from ground truth"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] placed correctly"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 11,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Services revenue and growth rate are accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing 'all-time record' designation and App Store/TV+ drivers"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 12,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Gross margin expansion figures are accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing Services mix-shift driver explanation"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] placed correctly"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 13,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "FY2021 net sales and growth rate are accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing 'broad-based recovery' context"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 14,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Americas revenue, share, and YoY growth all accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "All three components of the question fully addressed"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 15,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Long-term debt figure is accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing debt financing strategy and capital returns context"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] placed correctly"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 16,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Employee count is accurate (minor formatting comma in '164, 000')"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Core answer complete; missing investment context"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 17,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Correctly states Apple does not report segment operating income"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing the consolidated operating income figure of $108.9B"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] placed correctly"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 18,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Correctly identifies answer as not found in corpus"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Appropriate response for an unavailable data point"
+    },
+    "citation_quality": {
+      "score": 3,
+      "reasoning": "No citation needed for not-found response"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination — correctly declined"
+    }
+  },
+  {
+    "id": 19,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Total revenue figure and growth rate are accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing 'significant deceleration' context and prior year absolute"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 20,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Search revenue and YoY growth are accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing 'largest component of advertising' context"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 21,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "YouTube revenue and comparison are accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing brand advertising softening context"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 22,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Cloud revenue and growth rate are accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing prior year absolute ($19.2B) and driver context"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 23,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Net income and prior year both accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Both current and prior year figures fully addressed"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 24,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Operating income figure is accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing operating margin of ~30.6%"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 25,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "CapEx figure is accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing prior year ($24.3B) and infrastructure purpose context"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 26,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Employee count accurate (minor formatting comma)"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing January 2023 layoff announcement context"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 27,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "US revenue and percentage share both accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Both the dollar figure and the percentage share fully addressed"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 28,
+    "faithfulness": {
+      "score": 2,
+      "reasoning": "Answer truncated to 'Alphabet's Europe, Middle East' — no data provided"
+    },
+    "completeness": {
+      "score": 1,
+      "reasoning": "Question completely unanswered; no revenue figure given"
+    },
+    "citation_quality": {
+      "score": 2,
+      "reasoning": "[1] present but answer is useless"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No fabricated numbers"
+    }
+  },
+  {
+    "id": 29,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Growth rate, absolute figures, and context all accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Full answer including rate, base, and advertising recovery narrative"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 30,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Operating income and margin both accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Both components of the question fully addressed"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 31,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Net income figure is accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing decline from $76.0B and primary reasons"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 32,
+    "faithfulness": {
+      "score": 4,
+      "reasoning": "Search revenue is correct but YouTube and Cloud are missing"
+    },
+    "completeness": {
+      "score": 1,
+      "reasoning": "Only one of three requested segments answered"
+    },
+    "citation_quality": {
+      "score": 3,
+      "reasoning": "Partial citation — fact given has [1] but answer is severely incomplete"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No incorrect facts, but critically incomplete"
+    }
+  },
+  {
+    "id": 33,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Effective tax rate is accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing the two primary drivers (stock comp, foreign earnings)"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 34,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Correctly identifies quarterly breakdown as not in corpus"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Appropriate not-found response"
+    },
+    "citation_quality": {
+      "score": 3,
+      "reasoning": "No citation needed for not-found"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 35,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Correctly identifies holding-level gains as not in corpus"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Appropriate not-found response"
+    },
+    "citation_quality": {
+      "score": 3,
+      "reasoning": "No citation needed for not-found"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 36,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Revenue and growth rate are accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing drivers (commercial cloud, LinkedIn, gaming)"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 37,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Intelligent Cloud revenue and growth rate accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing the Azure ~40% sub-segment detail"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 38,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Productivity segment revenue and growth accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing specific drivers (Office 365, LinkedIn)"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 39,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Gross margin and drivers both accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Complete answer matching ground truth"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 40,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Operating income and margin both accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Both figures fully addressed"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 41,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Net income and diluted EPS both accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Complete answer"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 42,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "R&D spend and percentage of revenue accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing 'supporting cloud infrastructure and AI' context"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 43,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Revenue and growth rate accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing commercial cloud >$70B detail"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 44,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Net income and diluted EPS both accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Complete answer"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 45,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Total revenue figure accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing growth rate, prior year, and Azure detail"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 46,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Gross margin and prior year comparison accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing driver context (IC mix shift and Azure)"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 47,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Operating income and margin both accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Complete answer"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 48,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "CapEx figure and trend accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing specific Azure/AI data center buildout context"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 49,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Employee count accurate (comma formatting issue)"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Core answer present; missing year '2022' from the date"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 50,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Correctly notes Azure not disclosed standalone"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing the $60.1B IC figure and +50% Azure growth"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 51,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Correctly identifies country-level data as not in corpus"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Appropriate not-found response"
+    },
+    "citation_quality": {
+      "score": 3,
+      "reasoning": "No citation needed for not-found"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 52,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Managed net revenue figure accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing prior year and NII driver context"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 53,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "NII and prior year comparison accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Mentions prior year; missing Fed rate hike context"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 54,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Provision figure accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing 2021 comparison and economic uncertainty context"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 55,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Net income and diluted EPS accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing decline context versus 2021"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 56,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "CET1 ratio and regulatory context both accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Complete answer"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 57,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Total assets figure accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing largest-US-bank context and prior year $3.39T"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 58,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Loan balance and growth context both accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Complete answer"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 59,
+    "faithfulness": {
+      "score": 2,
+      "reasoning": "States deposits increased from $2.46T to $2.39T — direction is wrong; it was a decrease"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Key numbers present but directional error undermines reliability"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] placed correctly"
+    },
+    "hallucination_free": {
+      "score": 3,
+      "reasoning": "Incorrect direction likely from training memory bias — external knowledge error"
+    }
+  },
+  {
+    "id": 60,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Net income figure accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing diluted EPS $15.36 and reserve release context"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 61,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Revenue and business drivers both accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Complete answer including IB fees and C&CB context"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 62,
+    "faithfulness": {
+      "score": 2,
+      "reasoning": "Answer truncated to 'approximately 293' — number cut off"
+    },
+    "completeness": {
+      "score": 1,
+      "reasoning": "Question unanswered; no full headcount given"
+    },
+    "citation_quality": {
+      "score": 2,
+      "reasoning": "[1] present but answer is unusable"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No fabricated data, just truncated"
+    }
+  },
+  {
+    "id": 63,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Provision figures for 2020 and 2019 both accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Complete answer with comparison"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 64,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "IB fees figure accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing decline from $14.5B and IPO/M&A volume context"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 65,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Honest not-found response even though corpus has relevant tech risk disclosures"
+    },
+    "completeness": {
+      "score": 1,
+      "reasoning": "Retrieval failure — ground truth shows relevant content exists in 2021 10-K"
+    },
+    "citation_quality": {
+      "score": 2,
+      "reasoning": "Not applicable for not-found response"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 66,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Correctly identifies charge-off breakdown as not in corpus"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Appropriate not-found response"
+    },
+    "citation_quality": {
+      "score": 3,
+      "reasoning": "No citation needed for not-found"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 67,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Correctly identifies loan-level impairment data as not in corpus"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Appropriate not-found response"
+    },
+    "citation_quality": {
+      "score": 3,
+      "reasoning": "No citation needed for not-found"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 68,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Total net sales and growth rate both accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Complete answer with current and prior year"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 69,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "AWS revenue and growth rate accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing operating income $18.5B and 29.8% margin"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 70,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "North America revenue and growth rate accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing segment operating income $7.3B"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 71,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Advertising revenue and growth rate accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing prior year absolute figure ($19.8B)"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 72,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Net income figure accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing material Rivian valuation gain context ($11.8B)"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 73,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Total operating income accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing segment breakdown (AWS, NA, International) which was the question's intent"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 74,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Total net sales accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing growth rate and prior year comparison"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 75,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "AWS revenue and growth rate accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing prior year absolute ($62.2B)"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 76,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Advertising revenue and growth rate accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing prior year absolute ($31.2B)"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 77,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Net loss figure correct"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing Rivian -$12.7B valuation context and prior year comparison"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 78,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Operating income and prior year comparison accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing segment contribution breakdown"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 79,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Employee count and context accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Complete answer"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 80,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Total revenue figure accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing growth rate (+37.6%) and prior year ($280.5B)"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 81,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Correctly notes per-unit metric not disclosed"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing the $84.3B total fulfillment cost figure"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 82,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Correctly identifies Prime subscriber/ARPU data as not in corpus"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Appropriate not-found response"
+    },
+    "citation_quality": {
+      "score": 3,
+      "reasoning": "No citation needed for not-found"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 83,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Net revenue and prior year comparison accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing rate hike driver context"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 84,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "NII and prior year comparison accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing Fed rate hike attribution"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 85,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Consumer Banking NII accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing deposit rate mechanism context"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 86,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Net income and EPS accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing decline from $31.9B context"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 87,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "CET1 ratio accurate (minor: missing year)"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing year '2022' and 'above regulatory minimum' qualifier"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 88,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Loan balance and growth context accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Complete answer including growth drivers"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 89,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Deposit figure and direction (decrease) both accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Complete answer correctly noting pandemic liquidity normalization"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 90,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Employee count accurate (minor comma formatting)"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Complete answer"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 91,
+    "faithfulness": {
+      "score": 2,
+      "reasoning": "Answer truncated to 'Bank of America operated 4' — number cut off"
+    },
+    "completeness": {
+      "score": 1,
+      "reasoning": "Question unanswered; no financial center count given"
+    },
+    "citation_quality": {
+      "score": 2,
+      "reasoning": "[1] present but answer is unusable"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No fabricated data"
+    }
+  },
+  {
+    "id": 92,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Global Markets revenue and market context accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Complete answer"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 93,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Net income figure accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing diluted EPS and credit reserve release context"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 94,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Revenue, context, and constraints all accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Complete answer matching ground truth narrative"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 95,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Net income and prior year comparison accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing $11.3B provision and COVID attribution"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 96,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Charge-off rate and historical context accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing 2021 trough comparison (1.0%)"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 97,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Correctly identifies branch-level data as not in corpus"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Appropriate not-found response"
+    },
+    "citation_quality": {
+      "score": 3,
+      "reasoning": "No citation needed for not-found"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 98,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Revenue and prior year comparison accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Complete answer"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 99,
+    "faithfulness": {
+      "score": 4,
+      "reasoning": "Revenue figure correct but operating loss entirely omitted"
+    },
+    "completeness": {
+      "score": 2,
+      "reasoning": "Missing the -$13.7B operating loss which was half the question"
+    },
+    "citation_quality": {
+      "score": 4,
+      "reasoning": "[1] present but answer critically incomplete"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination — just truncated"
+    }
+  },
+  {
+    "id": 100,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Operating income and prior year comparison accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Complete answer"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 101,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Net income and prior year comparison accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Complete answer"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 102,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "MAU figure and prior period comparison accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Complete answer"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 103,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Revenue figure accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing growth rate (+37.2%), prior year ($86.0B), and drivers"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 104,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Operating income and margin accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Complete answer"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 105,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Net income and diluted EPS accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Complete answer"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 106,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Worldwide ARPU and regional breakdown all accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Complete answer with all geographic segments"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 107,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "CapEx figure accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing purpose breakdown (data centers, network, VR/AR hardware)"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 108,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "CapEx figure accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing prior year comparison and investment purpose"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 109,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Revenue and growth rate accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing prior year absolute ($70.7B)"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 110,
+    "faithfulness": {
+      "score": 3,
+      "reasoning": "Headcount present but '11' truncated — cannot confirm 11,000 vs other"
+    },
+    "completeness": {
+      "score": 2,
+      "reasoning": "Key layoff quantity '11,000' cut off; missing 13% and November 2022 details"
+    },
+    "citation_quality": {
+      "score": 4,
+      "reasoning": "[1] present but answer is incomplete"
+    },
+    "hallucination_free": {
+      "score": 4,
+      "reasoning": "Partial answer — truncation creates ambiguity"
+    }
+  },
+  {
+    "id": 111,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Correctly identifies engagement time data as not in corpus"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Appropriate not-found response"
+    },
+    "citation_quality": {
+      "score": 3,
+      "reasoning": "No citation needed for not-found"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 112,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Total net sales accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing growth rate (+2.4%) and prior year ($555.2B)"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 113,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Comp sales growth and primary driver accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Complete answer"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 114,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Operating income and prior year comparison accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing supply chain and wage cost headwind context"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 115,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Net income and EPS accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing supply chain inflation context"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 116,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Sam's Club net sales accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing growth from $58.8B and membership driver context"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 117,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Total assets and date accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Complete answer"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 118,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Employee count and date accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Complete answer"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 119,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Total net sales accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing growth rate (+6.7%) and prior year ($519.9B)"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 120,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Comp sales growth and pandemic driver context accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Complete answer"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 121,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Operating income accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Mentions comparable sales but misses favorable mix and cost discipline"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 122,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Gross margin and headwind context accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Complete answer"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 123,
+    "faithfulness": {
+      "score": 2,
+      "reasoning": "Answer truncated to 'Walmart's advertising business, Walmart Connect' — no figure"
+    },
+    "completeness": {
+      "score": 1,
+      "reasoning": "Question completely unanswered; no revenue figure given"
+    },
+    "citation_quality": {
+      "score": 2,
+      "reasoning": "[1] present but answer is useless"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No fabricated numbers"
+    }
+  },
+  {
+    "id": 124,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "CapEx figure accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing e-commerce fulfillment and tech modernization priorities"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 125,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Correctly identifies store-level labor data as not in corpus"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Appropriate not-found response"
+    },
+    "citation_quality": {
+      "score": 3,
+      "reasoning": "No citation needed for not-found"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 126,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Total revenue figure accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing growth rate (+61.4%) and prior year ($16.7B)"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 127,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Data Center revenue and growth rate accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing A100 GPU adoption context"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 128,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Gaming revenue accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing growth rate (+61.3%) and RTX/mining demand context"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 129,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Gross margin and product mix context accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Complete answer"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 130,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Net income and adjusted EPS accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Complete answer"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 131,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Revenue, comparison, and segment narrative accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Complete answer"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 132,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Data Center revenue and growth rate accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing H100 GPU context"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 133,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Gaming revenue accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing decline rate and demand normalization context"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 134,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Gross margin and prior year comparison accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing inventory provision ($1.4B) context"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 135,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "R&D figure and growth rate accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing Hopper GPU architecture investment context"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 136,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Operating income accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing decline from $10.04B in FY2022"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 137,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Correctly notes Mellanox not separately disclosed"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing the $10.6B total and segment structure note"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 138,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Correctly identifies hyperscaler concentration data as not in corpus"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Appropriate not-found response"
+    },
+    "citation_quality": {
+      "score": 3,
+      "reasoning": "No citation needed for not-found"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 139,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Revenue and growth rate accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing prior year absolute ($31.5B) and deliveries/energy context"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 140,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Automotive revenue accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing +72% growth rate and factory ramp context"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 141,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Net income and profitability milestone accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing prior year $721M for 2020 comparison"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 142,
+    "faithfulness": {
+      "score": 2,
+      "reasoning": "Answer truncated to 'Tesla delivered 936' — number cut off"
+    },
+    "completeness": {
+      "score": 1,
+      "reasoning": "Question completely unanswered; no delivery count given"
+    },
+    "citation_quality": {
+      "score": 2,
+      "reasoning": "[1] present but answer is useless"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No fabricated data"
+    }
+  },
+  {
+    "id": 143,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Total revenue accurate"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Missing growth rate (+51.4%) and deliveries milestone"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 144,
+    "faithfulness": {
+      "score": 1,
+      "reasoning": "States margin was 'a 29.3% increase from 2021' — factually wrong; it decreased from 29.3% to 28.5%"
+    },
+    "completeness": {
+      "score": 3,
+      "reasoning": "Current figure present but directional claim is incorrect"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 2,
+      "reasoning": "Incorrect directional relationship likely from training memory"
+    }
+  },
+  {
+    "id": 145,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Operating income and margin both accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Complete answer"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No external knowledge"
+    }
+  },
+  {
+    "id": 146,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Net income and profitability milestone accurate"
+    },
+    "completeness": {
+      "score": 4,
+      "reasoning": "Missing diluted EPS $3.62"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 147,
+    "faithfulness": {
+      "score": 2,
+      "reasoning": "Answer truncated to 'Tesla delivered 1, 313' — number cut off"
+    },
+    "completeness": {
+      "score": 1,
+      "reasoning": "Question completely unanswered; full delivery count unavailable"
+    },
+    "citation_quality": {
+      "score": 2,
+      "reasoning": "[1] present but answer is useless"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No fabricated data"
+    }
+  },
+  {
+    "id": 148,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Cash balance and date accurate"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Complete answer"
+    },
+    "citation_quality": {
+      "score": 5,
+      "reasoning": "[1] correctly placed"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 149,
+    "faithfulness": {
+      "score": 4,
+      "reasoning": "Honest about limited disclosure, but misses qualitative negative-margin context"
+    },
+    "completeness": {
+      "score": 2,
+      "reasoning": "Ground truth notes near-zero margins from Megapack ramp; answer omits this"
+    },
+    "citation_quality": {
+      "score": 2,
+      "reasoning": "Not applicable — should have cited corpus context about Megapack costs"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  },
+  {
+    "id": 150,
+    "faithfulness": {
+      "score": 5,
+      "reasoning": "Correctly identifies battery cost data as not in corpus"
+    },
+    "completeness": {
+      "score": 5,
+      "reasoning": "Appropriate not-found response"
+    },
+    "citation_quality": {
+      "score": 3,
+      "reasoning": "No citation needed for not-found"
+    },
+    "hallucination_free": {
+      "score": 5,
+      "reasoning": "No hallucination"
+    }
+  }
+]

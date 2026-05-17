@@ -37,7 +37,7 @@ def main():
         return "PASS" if score >= THRESHOLD else "FAIL"
 
     print(f"\n{'=' * 58}")
-    print(f"  LLM-as-Judge Results — {result.config}")
+    print(f"  LLM-as-Judge Results -- {result.config}")
     print(f"{'=' * 58}")
     print(f"  Faithfulness:        {result.faithfulness_mean:.3f}  "
           f"{verdict(result.faithfulness_mean):<4}  (threshold >= {THRESHOLD})")
@@ -47,7 +47,7 @@ def main():
           f"{verdict(result.citation_quality_mean):<4}  (threshold >= {THRESHOLD})")
     print(f"  Hallucination-Free:  {result.hallucination_free_mean:.3f}  "
           f"{verdict(result.hallucination_free_mean):<4}  (threshold >= {THRESHOLD})")
-    print(f"  ─────────────────────────────────────────────────")
+    print(f"  {'-' * 45}")
     print(f"  Overall Mean:        {result.overall_mean:.3f}")
     print(f"  Pass Rate:           {result.pass_rate:.1%}")
     print(f"  Sample Size:         {result.sample_size}")
